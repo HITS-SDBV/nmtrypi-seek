@@ -5,7 +5,43 @@ require 'uuidtools'
 require 'colorize'
 
 namespace :seek_dev do
-  desc 'A simple task for quickly setting up a project and institution, and assigned the first user to it. This is useful for quickly setting up the database when testing. Need to create a default user before running this task'
+desc "populate datafile"
+  task :populate_datafile => :environment do
+    data_file_list = YAML.load(File.read(File.join(Rails.root, "config/default_data", "data_file_list.yml")))
+
+    data_file_list.each_value do |data_file_info|
+      if ContentBlob.where("url=?", data_file_info['item_link']).first.nil?
+        puts data_file_info['item_link']
+        df = DataFile.new()
+        df.title = data_file_info['item_title']
+
+        person = Person.where("web_page=?", data_file_info['person_page_link']).first
+        if person.nil?
+          puts "check datafile #{df.title}, no person link found"
+          break
+        else
+          df.contributor = person.user
+        end
+
+        project = Project.where("title=?", data_file_info['group_name']).first
+        if project.nil?
+          project = Project.where("title=?", "NMTrypI").first
+        end
+        df.projects = [project]
+
+        cb= ContentBlob.new(:url => data_file_info['item_link'])
+        df.content_blob = cb
+
+        policy = Policy.new(:sharing_scope => Policy::ALL_SYSMO_USERS, :access_type => Policy::ACCESSIBLE)
+        df.policy = policy
+
+        disable_authorization_checks {df.save}
+      end
+    end
+  end
+
+  
+desc 'A simple task for quickly setting up a project and institution, and assigned the first user to it. This is useful for quickly setting up the database when testing. Need to create a default user before running this task'
   task(:initial_membership=>:environment) do
     p=Person.first
     raise Exception.new "Need to register a person first" if p.nil? || p.user.nil?
