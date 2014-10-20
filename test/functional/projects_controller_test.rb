@@ -53,6 +53,15 @@ class ProjectsControllerTest < ActionController::TestCase
 		assert_redirected_to project_path(assigns(:project))
 	end
 
+  def test_should_create_project
+    parent_id = Factory(:project,:title=>"Test Parent").id
+		assert_difference('Project.count') do
+			post :create, :project => {:title=>"test",:parent_id=>parent_id}
+		end
+
+		assert_redirected_to project_path(assigns(:project))
+	end
+
 	def test_should_show_project
 
     proj = Factory(:project)
@@ -73,8 +82,8 @@ class ProjectsControllerTest < ActionController::TestCase
 	end
 
 	def test_should_update_project
-		put :update, :id => Factory(:project,:description=>"ffffff"), :project => {:title=>"pppp"}
-		assert_redirected_to project_path(assigns(:project))
+    put :update, :id => Factory(:project,:description=>"ffffff"), :project => {:title=>"pppp"}
+    assert_redirected_to project_path(assigns(:project))
     proj = assigns(:project)
     assert_equal "pppp",proj.title
     assert_equal "ffffff",proj.description
@@ -90,7 +99,12 @@ class ProjectsControllerTest < ActionController::TestCase
 		end
 
 		assert_redirected_to projects_path
-	end
+  end
+
+  def test_admin_can_manage
+    get :manage, :id=> Factory(:project)
+    assert_response :success
+  end
 
 	def test_non_admin_should_not_destroy_project
 		login_as(:aaron)
@@ -116,7 +130,13 @@ class ProjectsControllerTest < ActionController::TestCase
     assert_redirected_to project_path(project)
     assert_not_nil flash[:error]
   end
-
+  
+ def test_non_admin_should_not_manage_projects
+		login_as(:aaron)
+		get :manage,:id=> Factory(:project)
+    assert_not_nil flash[:error]
+  end
+  
   test "asset report visible to project member" do
     person = Factory :person
     project = person.projects.first
@@ -307,7 +327,10 @@ class ProjectsControllerTest < ActionController::TestCase
     login_as(user)
     sop = Factory :sop,:description=>"http://news.bbc.co.uk",:project_ids=>[project.id],:contributor=>user
     get :show,:id=>project
-    assert_select "div.list_item div.list_item_desc" do
+    assert_response :success
+
+
+    assert_select "div.list_item  div.list_item_desc" do
       assert_select "a[rel=?]","nofollow",:text=>/news\.bbc\.co\.uk/,:count=>1
     end
 	end
@@ -318,6 +341,8 @@ class ProjectsControllerTest < ActionController::TestCase
     login_as(user)
     df = Factory :data_file,:description=>"http://news.bbc.co.uk",:project_ids=>[project.id],:contributor=>user
     get :show,:id=>project
+    assert_response :success
+
     assert_select "div.list_item div.list_item_desc" do
       assert_select "a[rel=?]","nofollow",:text=>/news\.bbc\.co\.uk/,:count=>1
     end
@@ -329,7 +354,8 @@ class ProjectsControllerTest < ActionController::TestCase
     login_as(user)
     model = Factory :model,:description=>"http://news.bbc.co.uk",:project_ids=>[project.id],:contributor=>user
     get :show,:id=>project
-    assert_select "div.list_item div.list_item_desc" do
+
+    assert_select "div.list_item  div.list_item_desc" do
       assert_select "a[rel=?]","nofollow",:text=>/news\.bbc\.co\.uk/,:count=>1
     end
 	end
@@ -595,7 +621,7 @@ class ProjectsControllerTest < ActionController::TestCase
     get :admin, :id => project
     assert_response :success
     Institution.all.each do |institution|
-      assert_select "input[type='checkbox'][value='#{institution.id}']", :count => 1
+      assert_select "input[type='checkbox'][id='institution_#{institution.id}'][value='#{institution.id}']", :count => 1
     end
   end
 
@@ -650,7 +676,35 @@ class ProjectsControllerTest < ActionController::TestCase
     end
   end
 
+  test "unassign institution out of project" do
+    project = Factory(:project)
+    project.institutions << Factory(:institution)
 
+    login_as(:quentin)
+
+    put :update, :id => project, :project => {:institution_ids => []}
+    assert_redirected_to project
+    assert_nil flash[:error]
+    project.reload
+    assert project.institutions.empty?
+  end
+
+  test "should not unassign institution out of project if there are people in this workgroup" do
+    wg=WorkGroup.find(1)
+    assert !wg.people.empty?
+    project = wg.project
+
+    login_as(:quentin)
+    #exception is rescued
+    assert_no_difference('WorkGroup.count') do
+        post :update, :id => project, :project => {:institution_ids => []}
+        assert_redirected_to project
+        assert_not_nil flash[:error]
+    end
+    project.reload
+    assert !project.institutions.empty?
+  end
+  
 
   test "can not remove workgroup if it contains people" do
     project = Factory(:project)
@@ -829,6 +883,14 @@ class ProjectsControllerTest < ActionController::TestCase
     assert_response :success
   end
 
+  test "admin_members available to project manager" do
+    person = Factory(:project_manager)
+    login_as(person)
+    project = person.projects.first
+    get :admin_members,:id=>project
+    assert_response :success
+  end
+
   test "admin members not available to normal person" do
     login_as(Factory(:person))
     p=Factory(:project)
@@ -839,6 +901,45 @@ class ProjectsControllerTest < ActionController::TestCase
   test "update members" do
     login_as(Factory(:admin))
     project = Factory(:project)
+    wg = Factory(:work_group, :project => project)
+    group_membership = Factory(:group_membership, :work_group => wg)
+    person = Factory(:person, :group_memberships => [group_membership])
+    group_membership2 = Factory(:group_membership, :work_group => wg)
+    person2 = Factory(:person, :group_memberships => [group_membership2])
+    new_institution = Factory(:institution)
+    new_person = Factory(:person)
+    new_person2 = Factory(:person)
+    assert_no_difference("GroupMembership.count") do #2 deleted, 2 added
+      assert_difference("WorkGroup.count",1) do
+        post :update_members,
+             :id=>project,
+             :group_memberships_to_remove=>[group_membership.id,group_membership2.id],
+             :people_and_institutions_to_add=>[{"person_id"=>new_person.id,"institution_id"=>new_institution.id}.to_json,{"person_id"=>new_person2.id,"institution_id"=>new_institution.id}.to_json]
+        assert_redirected_to project_path(project)
+        assert_nil flash[:error]
+        refute_nil flash[:notice]
+      end
+    end
+
+    person.reload
+    new_person.reload
+    new_person2.reload
+
+    refute_includes person.projects,project
+    refute_includes person2.projects,project
+    assert_includes new_person.projects,project
+    assert_includes new_person2.projects,project
+    assert_includes new_person.institutions,new_institution
+    assert_includes new_person2.institutions,new_institution
+    assert_includes project.work_groups,wg
+
+  end
+
+  test "update members as project manager" do
+    person = Factory(:project_manager)
+    project = person.projects.first
+    login_as(person)
+
     wg = Factory(:work_group, :project => project)
     group_membership = Factory(:group_membership, :work_group => wg)
     person = Factory(:person, :group_memberships => [group_membership])

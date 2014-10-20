@@ -9,17 +9,20 @@ require 'colorize'
 namespace :seek do
 
   #these are the tasks required for this version upgrade
-  task :upgrade_version_tasks=>[
-            :environment,
-            :resynchronise_assay_types,
-            :resynchronise_technology_types,
-            :remove_invalid_group_memberships,
-            :clear_filestore_tmp,
-            :repopulate_auth_lookup_tables,
+  task :upgrade_version_tasks => [
+      :environment,
+      :update_admin_assigned_roles,
+      :repopulate_missing_publication_book_titles,
+      :resynchronise_assay_types,
+      :resynchronise_technology_types,
+      :remove_invalid_group_memberships,
+      :convert_publication_authors,
+      :clear_filestore_tmp,
+      :repopulate_auth_lookup_tables,
   ]
 
   desc("upgrades SEEK from the last released version to the latest released version")
-  task(:upgrade=>[:environment,"db:migrate","db:sessions:clear","tmp:clear"]) do
+  task(:upgrade => [:environment, "db:migrate", "db:sessions:clear", "tmp:clear"]) do
 
     solr=Seek::Config.solr_enabled
 
@@ -38,12 +41,40 @@ namespace :seek do
 
   desc("Cleans out group memberships where the person no longer exists")
   task(:remove_invalid_group_memberships => :environment) do
-    invalid = GroupMembership.select{|gm| gm.person.nil? || gm.work_group.nil?}
+    invalid = GroupMembership.select { |gm| gm.person.nil? || gm.work_group.nil? }
     invalid.each do |inv|
       inv.destroy
     end
   end
 
+  task(:convert_publication_authors => :environment) do
+    Publication.all.each do |publication|
+      if publication.publication_authors.first
+        unless publication.publication_authors.first.author_index
+          disable_authorization_checks do
+            convert_publication_authors(publication)
+            Publication.record_timestamps = false
+            publication.update_creators_from_publication_authors
+            publication.save!
+            Publication.record_timestamps = true
+          end
+        end
+      end
+    end
+  end
+
+  def convert_publication_authors(publication)
+    puts "publication #{publication.id} needs updating"
+    PublicationAuthorOrder.where(:publication_id => publication.id).each do |publication_author_order|
+      publication_author = publication_author_order.author
+      if publication_author.is_a?(Person)
+        publication_author = PublicationAuthor.new(:publication => publication, :person => publication_author, :author_index => publication_author_order.order)
+      else
+        publication_author.author_index=publication_author_order.order
+      end
+      publication_author.save!
+    end
+  end
 
 
   desc("Synchronised the assay types assigned to assays according to the current ontology")
@@ -84,7 +115,7 @@ namespace :seek do
       end
 
       unless assay.suggested_assay_type_label.nil?
-         puts "The Assay #{assay.id} has a suggested assay type label of #{assay.assay_type_label.inspect}, currently attached to the parent URI #{assay.assay_type_uri.inspect}".yellow
+        puts "The Assay #{assay.id} has a suggested assay type label of #{assay.assay_type_label.inspect}, currently attached to the parent URI #{assay.assay_type_uri.inspect}".yellow
       end
 
       disable_authorization_checks do
@@ -142,60 +173,50 @@ namespace :seek do
     Assay.record_timestamps = true
   end
 
-  desc("Some publication authors are associated with seek_authors, but the original authors are still in non_seek_authors")
-  task(:remove_non_seek_authors=>:environment) do
-    #get the publications where the seek_authors are associated but still full non_seek_authors
-    p1 = Publication.all.select{|p| !p.seek_authors.empty?}
-    p2 = Publication.all.select{|p| p.publication_author_orders.size == p.non_seek_authors.size}
-
-    #Improve the matching algorithm to solve the remaining unmatched names
-    (p1&p2).each do |publication|
-      non_seek_authors = publication.non_seek_authors
-      seek_authors = publication.seek_authors
-      non_seek_authors.each do |author|
-
-        #Get author by last name
-        matches = seek_authors.select{|seek_author| seek_author.last_name == author.last_name}
-
-        #If more than one result, filter by first initial
-        if matches.size > 1
-          first_and_last_name_matches = matches.select{|p| p.first_name.at(0).upcase == author.first_name.at(0).upcase}
-
-          if first_and_last_name_matches.size >= 1  #use this result unless it resulted in no matches
-            matches = first_and_last_name_matches
+  desc "repopulate missing book titles for publications"
+  task(:repopulate_missing_publication_book_titles => :environment) do
+    disable_authorization_checks do
+      Publication.all.select { |p| p.publication_type ==3 && p.journal.blank? }.each do |pub|
+        if pub.doi
+          query = DoiQuery.new(Seek::Config.crossref_api_email)
+          result = query.fetch(pub.doi)
+          unless result.nil? || !result.error.nil?
+            pub.extract_doi_metadata(result)
+            pub.save
           end
         end
+      end
+    end
+  end
 
-        #If no results, match by normalised name, taken from grouped_pagination.rb
-        if matches.empty?
-          seek_authors.each do |seek_author|
-            ascii1 = normalize_name(author.last_name)
-            ascii2 = normalize_name(seek_author.last_name)
-            matches << seek_author if (ascii1 == ascii2)
+
+  task(:update_admin_assigned_roles => :environment) do
+    Person.where("roles_mask > 0").each do |p|
+      if p.admin_defined_role_projects.empty?
+        roles = []
+        (p.role_names & Person::PROJECT_DEPENDENT_ROLES).each do |role|
+          projects = Seek::Config.project_hierarchy_enabled ? p.direct_projects : p.projects
+          #update admin defined roles only if person has any project role in his project
+          projects = projects.select { |proj| p.project_roles.map(&:group_memberships).flatten.map(&:project).include? proj }
+          msg = "Updating #{p.name} for - '#{role}' - adding to #{projects.count} projects"
+          msg += " and #{projects.map(&:descendants).flatten.count} sub projects" if  Seek::Config.project_hierarchy_enabled
+          puts msg
+
+          roles << [role, projects]
+        end
+        roles << ["admin"] if p.is_admin?
+        unless roles.empty?
+          Person.record_timestamps = false
+          begin
+            p.roles = roles
+            disable_authorization_checks do
+              p.save!
+            end
+          rescue Exception => e
+            puts "Error saving #{p.name} - #{p.id}: #{e.message}"
+          ensure
+            Person.record_timestamps = true
           end
-        end
-
-        #special normalization case for umlaut: e.g. ü match ue
-        if matches.empty?
-          seek_authors.each do |seek_author|
-            ascii1 = normalize_name(author.last_name, false, true)
-            ascii2 = normalize_name(seek_author.last_name, false, true)
-            matches << seek_author if (ascii1 == ascii2)
-          end
-        end
-
-        #if no results, match by parts of last name
-        if matches.empty?
-          matches = seek_authors.select{|seek_author| Regexp.new(seek_author.last_name, Regexp::IGNORECASE).match(author.last_name) ||
-                                                      Regexp.new(author.last_name, Regexp::IGNORECASE).match(seek_author.last_name)}
-        end
-
-        match = matches.first
-        unless match.nil?
-          updating_publication_author_order = PublicationAuthorOrder.where(["publication_id=? AND author_id=? AND author_type=?", publication.id, author.id, 'PublicationAuthor' ]).first
-          updating_publication_author_order.author = match
-          updating_publication_author_order.save
-          author.delete
         end
       end
     end
@@ -205,7 +226,7 @@ namespace :seek do
 
   def read_label_map type
     file = "#{type.to_s}_label_mappings.yml"
-    file = File.join(Rails.root,"config","default_data",file)
+    file = File.join(Rails.root, "config", "default_data", file)
     YAML::load_file(file)
   end
 
@@ -217,10 +238,10 @@ namespace :seek do
 
     codepoints = name.mb_chars.normalize(:d).split(//u)
     if remove_special_character
-      ascii=codepoints.map(&:to_s).reject{|e| e.bytesize > 1}.join
+      ascii=codepoints.map(&:to_s).reject { |e| e.bytesize > 1 }.join
     end
     if replace_umlaut
-      ascii=codepoints.map(&:to_s).collect {|e| e == '̈' ? 'e' : e}.join
+      ascii=codepoints.map(&:to_s).collect { |e| e == '̈' ? 'e' : e }.join
     end
     ascii
   end

@@ -8,6 +8,7 @@ SEEK::Application.configure do
   # Full error reports are disabled and caching is turned on
   config.consider_all_requests_local       = false
   config.action_controller.perform_caching = true
+#config.cache_store = :mem_cache_store, {:timeout => 30}
 
   config.action_controller.cache_store = [:file_store, "#{Rails.root}/tmp/cache"]
   config.cache_store = [:file_store, "#{Rails.root}/tmp/cache"]
@@ -77,7 +78,7 @@ SEEK::Application.configure do
 
   # add time to lograge
   config.lograge.custom_options = lambda do |event|
-    {:time => event.time}
+    {:time => event.time, :user_agent => event.payload[:user_agent]}
   end
 
 end

@@ -2,6 +2,7 @@
 class Study < ActiveRecord::Base
 
   include Seek::Rdf::RdfGeneration
+  include Seek::ProjectHierarchies::ItemsProjectsExtension if Seek::Config.project_hierarchy_enabled
 
   #FIXME: needs to be declared before acts_as_isa, else ProjectCompat module gets pulled in
   def projects
@@ -15,12 +16,12 @@ class Study < ActiveRecord::Base
   belongs_to :investigation
   has_many :assays
   belongs_to :person_responsible, :class_name => "Person"
-  validates_presence_of :investigation
+  validates :investigation, :presence => true
 
-  searchable(:ignore_attribute_changes_of=>[:updated_at]) do
-    text :description,:title, :experimentalists
-    text :contributor do
-      [contributor.try(:person).try(:name),person_responsible.try(:name)]
+  searchable(:auto_index => false) do
+    text :experimentalists
+    text :person_responsible do
+      person_responsible.try(:name)
     end
   end if Seek::Config.solr_enabled
 
