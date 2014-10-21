@@ -5,42 +5,36 @@ require 'uuidtools'
 require 'colorize'
 
 namespace :seek_dev do
-desc "populate datafile"
+  desc "populate datafile"
   task :populate_datafile => :environment do
     data_file_list = YAML.load(File.read(File.join(Rails.root, "config/default_data", "data_file_list.yml")))
 
     data_file_list.each_value do |data_file_info|
-      if ContentBlob.where("url=?", data_file_info['item_link']).first.nil?
-        puts data_file_info['item_link']
-        df = DataFile.new()
-        df.title = data_file_info['item_title']
+      puts data_file_info['item_title']
+      cb = ContentBlob.where(url: data_file_info['item_link']).first_or_initialize
+      found_df = DataFile.all.detect { |data_file| data_file.content_blob == cb }
+      df = found_df || DataFile.new(title: data_file_info['item_title'])
+      project = Project.where(title: data_file_info['group_name']).first || Project.where(title: "NMTrypI").first
+      related_projects_members_policy = Policy.new(:sharing_scope => Policy::ALL_SYSMO_USERS, :access_type => Policy::ACCESSIBLE)
 
-        person = Person.where("web_page=?", data_file_info['person_page_link']).first
-        if person.nil?
-          puts "check datafile #{df.title}, no person link found"
-          break
-        else
-          df.contributor = person.user
-        end
+      person = Person.where(web_page: data_file_info['person_page_link']).first
+      person ||= Person.all.detect { |p| p.name.downcase == data_file_info['person_name'].downcase }
+      person ||= Person.all.detect { |p| p.email.downcase.include? data_file_info['person_name'].split(" ").first.downcase }
+      person ||= Person.all.detect { |p| p.skype_name && p.skype_name.downcase.include?(data_file_info['person_name'].split(" ").first.downcase) }
+      break if person.nil?
 
-        project = Project.where("title=?", data_file_info['group_name']).first
-        if project.nil?
-          project = Project.where("title=?", "NMTrypI").first
-        end
-        df.projects = [project]
+      df.content_blob = cb if df.content_blob.nil?
+      df.policy = related_projects_members_policy if df.policy.nil?
+      df.contributor = person.user if df.contributor.nil?
+      df.creators = [person] if df.creators.empty?
+      df.projects = [project] if df.projects.empty?
 
-        cb= ContentBlob.new(:url => data_file_info['item_link'])
-        df.content_blob = cb
-
-        policy = Policy.new(:sharing_scope => Policy::ALL_SYSMO_USERS, :access_type => Policy::ACCESSIBLE)
-        df.policy = policy
-
-        disable_authorization_checks {df.save}
-      end
+      puts "#{df.title}, creators: #{df.creators.map(&:name)}, contributor: #{df.contributor.person.name} ".green
+      disable_authorization_checks { df.save }
     end
   end
 
-  
+
 desc 'A simple task for quickly setting up a project and institution, and assigned the first user to it. This is useful for quickly setting up the database when testing. Need to create a default user before running this task'
   task(:initial_membership=>:environment) do
     p=Person.first
@@ -62,8 +56,8 @@ desc 'A simple task for quickly setting up a project and institution, and assign
     if duplicates.length>0
       puts "Found #{duplicates.length} duplicated entries:"
       duplicates.each do |duplicate|
-        matches = ActivityLog.where({:activity_loggable_id=>duplicate.activity_loggable_id,:activity_loggable_type=>duplicate.activity_loggable_type,:action=>"create"},:order=>"created_at ASC")
-        puts "ID:#{duplicate.id}\tLoggable ID:#{duplicate.activity_loggable_id}\tLoggable Type:#{duplicate.activity_loggable_type}\tCount:#{matches.count}\tCreated ats:#{matches.collect{|m| m.created_at}.join(", ")}"
+        matches = ActivityLog.where({:activity_loggable_id => duplicate.activity_loggable_id, :activity_loggable_type => duplicate.activity_loggable_type, :action => "create"}, :order => "created_at ASC")
+        puts "ID:#{duplicate.id}\tLoggable ID:#{duplicate.activity_loggable_id}\tLoggable Type:#{duplicate.activity_loggable_type}\tCount:#{matches.count}\tCreated ats:#{matches.collect { |m| m.created_at }.join(", ")}"
       end
     else
       puts "No duplicates found"
@@ -78,7 +72,7 @@ desc 'A simple task for quickly setting up a project and institution, and assign
       p.save!
     end
   end
-  
+
   desc "Lists all publicly available assets"
   task :list_public_assets => :environment do
     [Investigation, Study, Assay, DataFile, Model, Sop, Publication].each do |assets|
@@ -99,7 +93,7 @@ desc 'A simple task for quickly setting up a project and institution, and assign
         file_format = filename.split('.').last.try(:strip)
         possible_mime_types = cb.mime_types_for_extension file_format
         type = possible_mime_types.sort.first || "application/octet-stream"
-        type = type.gsub("image/jpg","image/jpeg") unless type.nil?
+        type = type.gsub("image/jpg", "image/jpeg") unless type.nil?
 
         cb.content_type = type
         cb.save
@@ -109,7 +103,7 @@ desc 'A simple task for quickly setting up a project and institution, and assign
   end
 
   desc "display contributor types"
-  task(:contributor_types=>:environment) do
+  task(:contributor_types => :environment) do
     types = Seek::Util.user_creatable_types.collect do |type|
       type.all.collect do |thing|
         if thing.respond_to?(:contributor)
@@ -126,7 +120,7 @@ desc 'A simple task for quickly setting up a project and institution, and assign
   end
 
   desc "display user contributors without people"
-  task(:contributors_without_people=>:environment) do
+  task(:contributors_without_people => :environment) do
     matches = Seek::Util.user_creatable_types.collect do |type|
       type.all.select do |thing|
         thing.respond_to?(:contributor_type) && thing.contributor.is_a?(User) && thing.contributor.person.nil?
@@ -149,18 +143,18 @@ desc 'A simple task for quickly setting up a project and institution, and assign
   end
 
   desc 'removes any data this is not authorized to viewed by the first User'
-  task(:remove_private_data=>:environment) do
-    sops        =Sop.find(:all)
+  task(:remove_private_data => :environment) do
+    sops =Sop.find(:all)
     private_sops=sops.select { |s| !s.can_view? User.first }
     puts "#{private_sops.size} private Sops being removed"
     private_sops.each { |s| s.destroy }
 
-    models        =Model.find(:all)
-    private_models=models.select { |m| ! m.can_view? User.first }
+    models =Model.find(:all)
+    private_models=models.select { |m| !m.can_view? User.first }
     puts "#{private_models.size} private Models being removed"
     private_models.each { |m| m.destroy }
 
-    data        =DataFile.find(:all)
+    data =DataFile.find(:all)
     private_data=data.select { |d| !d.can_view? User.first }
     puts "#{private_data.size} private Data files being removed"
     private_data.each { |d| d.destroy }
@@ -170,25 +164,25 @@ desc 'A simple task for quickly setting up a project and institution, and assign
   task :dump_help_docs => :environment do
     format_class = "YamlDb::Helper"
     dir = 'help_dump_tmp'
-      #Clear path
+    #Clear path
     puts "Clearing existing backup directories"
     FileUtils.rm_r('config/default_data/help', :force => true)
     FileUtils.rm_r('config/default_data/help_images', :force => true)
     FileUtils.rm_r('db/help_dump_tmp/', :force => true)
-      #Dump DB
+    #Dump DB
     puts "Dumping database"
     SerializationHelper::Base.new(format_class.constantize).dump_to_dir dump_dir("/#{dir}")
-      #Copy relevant yaml files
+    #Copy relevant yaml files
     puts "Copying files"
     FileUtils.mkdir('config/default_data/help') rescue ()
     FileUtils.copy('db/help_dump_tmp/help_documents.yml', 'config/default_data/help/')
     FileUtils.copy('db/help_dump_tmp/help_attachments.yml', 'config/default_data/help/')
     FileUtils.copy('db/help_dump_tmp/help_images.yml', 'config/default_data/help/')
     FileUtils.copy('db/help_dump_tmp/db_files.yml', 'config/default_data/help/')
-      #Delete everything else
+    #Delete everything else
     puts "Cleaning up"
     FileUtils.rm_r('db/help_dump_tmp/')
-      #Copy image folder
+    #Copy image folder
     puts "Copying images"
     FileUtils.mkdir('public/help_images') rescue ()
     FileUtils.cp_r('public/help_images', 'config/default_data/') rescue ()
@@ -210,24 +204,23 @@ desc 'A simple task for quickly setting up a project and institution, and assign
 
   desc "Gives project pals manage rights to their projects Investigation, Studies and Assays - this was a particular SysMO need"
   task :pals_manage_isa => :environment do
-    Project.all.select{|p| !p.pals.empty?}.each do |project|
+    Project.all.select { |p| !p.pals.empty? }.each do |project|
       pals = project.pals
-      puts "Updating ISA for project #{project.title} for PALs #{pals.collect{|p|p.name}.join(", ")}"
+      puts "Updating ISA for project #{project.title} for PALs #{pals.collect { |p| p.name }.join(", ")}"
       investigations = project.investigations
       studies = project.studies
       assays = project.assays
       (investigations | studies | assays).each do |isa|
         policy = isa.policy
         pals.each do |pal|
-          if policy.permissions.select{|p| p.contributor==pal && p.access_type==Policy::MANAGING}.empty?
-            policy.permissions << Permission.new(:contributor=>pal,:access_type=>Policy::MANAGING)
+          if policy.permissions.select { |p| p.contributor==pal && p.access_type==Policy::MANAGING }.empty?
+            policy.permissions << Permission.new(:contributor => pal, :access_type => Policy::MANAGING)
           end
         end
       end
       puts "\t#{assays.count} Assays updated, #{studies.count} Studies updated, #{investigations.count} Investigations updated"
     end
   end
-
 
 
 end
