@@ -17,7 +17,7 @@ namespace :seek_dev do
       project = Project.where(title: data_file_info['group_name']).first || Project.where(title: "NMTrypI").first
       related_projects_members_policy = Policy.new(:sharing_scope => Policy::ALL_SYSMO_USERS, :access_type => Policy::ACCESSIBLE)
 
-      uploader = Person.where(email: "wolfgang.mueller@h-its.org").first || Person.where(first_name: "wolfgang", last_name: "müller").first
+      uploader = Person.where(email: "wolfgang.mueller@h-its.org").first || Person.first
       person = Person.where(web_page: data_file_info['person_page_link']).first
       person ||= Person.all.detect { |p| p.name.downcase == data_file_info['person_name'].downcase }
       person ||= Person.all.detect { |p| p.email.downcase.include? data_file_info['person_name'].split(" ").first.downcase }
