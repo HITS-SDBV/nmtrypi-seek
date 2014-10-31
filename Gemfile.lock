@@ -342,6 +342,7 @@ GEM
       open_uri_redirections (~> 0.1.4)
     method_source (0.8.2)
     mime-types (1.25.1)
+    mimemagic (0.2.1)
     mini_portile (0.6.0)
     minitest (4.7.5)
     minitest-reporters (0.14.24)
@@ -674,6 +675,7 @@ DEPENDENCIES
   lograge
   mechanize
   metainspector
+  mimemagic
   minitest-reporters (~> 0.14)
   modporter-plugin
   my_annotations!

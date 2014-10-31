@@ -86,7 +86,7 @@ gem 'jquery-rails', '~> 3'
 gem "recaptcha", '0.3.1'
 gem 'metainspector'
 gem 'mechanize'
-
+gem 'mimemagic'
 
 group :assets do
   gem 'turbo-sprockets-rails3'
