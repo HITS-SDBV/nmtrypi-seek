@@ -1,4 +1,4 @@
-require 'acts_as_asset'
+
 require 'explicit_versioning'
 require 'title_trimmer'
 require 'acts_as_versioned_resource'
@@ -13,6 +13,8 @@ class Sop < ActiveRecord::Base
   end if Seek::Config.solr_enabled
 
   acts_as_asset
+
+  include Seek::Dois::DoiGeneration
 
   scope :default_order, order("title")
 

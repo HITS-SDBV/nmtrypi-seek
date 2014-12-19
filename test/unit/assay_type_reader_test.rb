@@ -28,6 +28,29 @@ class AssayTypeReaderTest < ActiveSupport::TestCase
     refute_empty amp
   end
 
+  test "label exists?" do
+    reader = Seek::Ontologies::AssayTypeReader.instance
+    assert reader.label_exists?("amplification")
+    assert reader.label_exists?("AmplifiCation") #case insensitive
+    refute reader.label_exists?("sdkfhsdfkhsdfhksdf")
+    refute reader.label_exists?(nil)
+  end
+
+  test "all labels" do
+    reader = Seek::Ontologies::AssayTypeReader.instance
+    labels = reader.all_labels
+    assert_equal 52,labels.size
+    assert_include labels,"amplification"
+  end
+
+  test "class for uri" do
+    reader = Seek::Ontologies::AssayTypeReader.instance
+    c = reader.class_for_uri("http://www.mygrid.org.uk/ontology/JERMOntology#Amplification")
+    refute_nil c
+    assert_equal "http://www.mygrid.org.uk/ontology/JERMOntology#Amplification",c.uri
+    assert_nil reader.class_for_uri("http://www.mygrid.org.uk/ontology/JERMOntology#sdfskdfhsdf")
+  end
+
   test "parents are set" do
     amp = Seek::Ontologies::AssayTypeReader.instance.class_hierarchy.hash_by_uri["http://www.mygrid.org.uk/ontology/JERMOntology#Amplification"]
     refute_nil amp

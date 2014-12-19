@@ -1,44 +1,29 @@
 module Seek
-  module JWS
+  module Jws
+    module Simulator
+      extend ActiveSupport::Concern
 
-    class Simulator
-
-      UPLOAD_URL = "#{Seek::Config.jws_online_root}/webMathematica/model_upload_SEEK_xml.jsp"
-      SIMULATE_BASE_URL = "#{Seek::Config.jws_online_root}/webMathematica/UItester.jsp"
-
-
-      def simulate content_blob
-        filepath=content_blob.filepath
-        #this is necessary to get the correct filename and especially extension, which JWS relies on
-        tmpfile = Tempfile.new([content_blob.original_filename,File.extname(content_blob.original_filename)])
-        FileUtils.cp(filepath, tmpfile.path)
-        response = RestClient.post(upload_url, :upfile=>tmpfile, :uploadModel=>true,:filename=>content_blob.original_filename, :multipart=>true) { |response, request, result, &block |
-        if [301, 302, 307].include? response.code
-          response.follow_redirection(request, result, &block)
-        else
-          response.return!(request, result, &block)
-        end
-        }
-        extract_modelname_from_response(response.strip)
+      included do
+        include Seek::Jws::Interaction
+        before_filter :find_display_asset_for_jws, only: [:simulate]
+        before_filter :jws_enabled, only: [:simulate]
       end
 
-      private
-
-      def upload_url
-        return Seek::JWS::Simulator::UPLOAD_URL
+      def simulate
+        slug = upload_model_blob(select_jws_content_blob)
+        @simulate_url = model_simulate_url_from_slug(slug)
+        @no_sidebar=true
       end
 
-      def extract_modelname_from_response response
-        parser = LibXML::XML::Parser.string(response, :encoding => LibXML::XML::Encoding::UTF_8)
-        doc = parser.parse
-        name = doc.find_first("//uploader/modelname").content
-        name.strip
+      def select_jws_content_blob
+        blob = @display_model.jws_supported_content_blobs.first
+        fail 'Unable to find file to support JWS Online' unless blob
+        blob
       end
 
-      def self.simulator_frame_url modelname
-        "#{SIMULATE_BASE_URL}?fileName=#{modelname}&noHeader=true"
+      def find_display_asset_for_jws
+        find_display_asset
       end
-
     end
   end
 end

@@ -66,6 +66,21 @@ module Seek
     end
 
     def mime_magic_map
+       mime_magic_map = {}
+      MimeMagic::EXTENSIONS.each do |extension, mime|
+        if found = MimeMagic.by_extension(extension)
+          mime_magic_map[mime] = {}
+          mime_magic_map[mime][:name] = found.comment
+          mime_magic_map[mime][:icon_key] = "#{extension}_file"
+          mime_magic_map[mime][:extensions] = ["#{extension}"]
+        end
+    end
+
+       mime_magic_map
+      MIME_MAP.merge(mime_magic_map) { |ext, seek_value, magic_value| seek_value }
+    end
+
+    def mime_magic_map
       mime_magic_map = {}
       MimeMagic::EXTENSIONS.each do |extension, mime|
         if found = MimeMagic.by_extension(extension)
@@ -95,5 +110,6 @@ module Seek
     def missing_mimeicon
        {:icon_key => "missing_file"}
     end
+
   end
 end

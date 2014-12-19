@@ -41,10 +41,10 @@ class AssetTest < ActiveSupport::TestCase
 
   test "assay type titles" do
     df = Factory :data_file
-    assay = Factory :experimental_assay,:assay_type_label=>"aaa"
-    assay2 = Factory :modelling_assay,:assay_type_label=>"bbb"
-    assay3 = Factory :modelling_assay,:assay_type_label=>nil,:assay_type_uri=>"http://www.mygrid.org.uk/ontology/JERMOntology#Cell_cycle"
-    assay4 = Factory :modelling_assay,:assay_type_label=>nil,:assay_type_uri=>"http://some-made-up-uri-not-resolvable-from-ontology.org/types#to_force_nil_label"
+    assay = Factory :experimental_assay
+    assay2 = Factory :modelling_assay
+    assay3 = Factory :modelling_assay,:assay_type_uri=>"http://www.mygrid.org.uk/ontology/JERMOntology#Cell_cycle"
+    assay4 = Factory :modelling_assay,:assay_type_uri=>"http://some-made-up-uri-not-resolvable-from-ontology.org/types#to_force_nil_label"
 
     disable_authorization_checks do
       assay.relate(df)
@@ -58,7 +58,7 @@ class AssetTest < ActiveSupport::TestCase
       df.reload
     end
 
-    assert_equal ["Cell cycle","aaa","bbb"],df.assay_type_titles.sort
+    assert_equal ["Cell cycle", "Experimental assay type", "Model analysis type"],df.assay_type_titles.sort
     m=Factory :model
     assert_equal [],m.assay_type_titles
 
@@ -132,9 +132,10 @@ class AssetTest < ActiveSupport::TestCase
 
   test "tech type titles" do
     df = Factory :data_file
-    assay = Factory :experimental_assay,:technology_type_label=>"aaa"
-    assay2 = Factory :modelling_assay,:technology_type_label=>"bbb"
-    assay3 = Factory :modelling_assay,:technology_type_label=>nil
+    assay = Factory :experimental_assay,:technology_type_uri=>"http://www.mygrid.org.uk/ontology/JERMOntology#Binding"
+    assay2 = Factory :experimental_assay,:technology_type_uri=>"http://www.mygrid.org.uk/ontology/JERMOntology#Imaging"
+    assay3 = Factory :modelling_assay
+
 
     disable_authorization_checks do
       assay.relate(df)
@@ -145,7 +146,7 @@ class AssetTest < ActiveSupport::TestCase
       df.reload
     end
 
-    assert_equal ["aaa","bbb"],df.technology_type_titles.sort
+    assert_equal ["Binding","Imaging"],df.technology_type_titles.sort
     m=Factory :model
     assert_equal [],m.technology_type_titles
 
@@ -212,6 +213,105 @@ class AssetTest < ActiveSupport::TestCase
     assert_equal model.creators,model.related_people
     assert_equal presentation.creators,presentation.related_people
     assert_equal publication.creators,publication.related_people
+  end
+
+  test "supports_doi?" do
+    assert Model.supports_doi?
+    assert DataFile.supports_doi?
+    assert Sop.supports_doi?
+    assert Workflow.supports_doi?
+
+    refute Assay.supports_doi?
+    refute Presentation.supports_doi?
+
+    assert Factory(:model).supports_doi?
+    assert Factory(:data_file).supports_doi?
+    refute Factory(:presentation).supports_doi?
+  end
+
+  test "is_doiable?" do
+    df = Factory(:data_file, :policy => Factory(:public_policy))
+    assert df.can_manage?
+    assert !df.is_doi_minted?(1)
+    assert df.is_doiable?(1)
+
+    df.policy = Factory(:private_policy)
+    disable_authorization_checks{ df.save }
+    assert !df.is_doiable?(1)
+
+    df.policy = Factory(:public_policy)
+    df.doi = 'test_doi'
+    disable_authorization_checks{ df.save }
+    assert !df.is_doiable?(1)
+  end
+
+  test "is_doi_minted?" do
+    df = Factory :data_file
+    assert !df.is_doi_minted?(1)
+    df.doi = 'test_doi'
+    disable_authorization_checks{ df.save }
+    assert df.is_doi_minted?(1)
+  end
+
+  test 'is_doi_time_locked?' do
+    df = Factory :data_file
+    with_config_value :time_lock_doi_for, 7 do
+      assert df.is_doi_time_locked?
+    end
+    with_config_value :time_lock_doi_for, nil do
+      refute df.is_doi_time_locked?
+    end
+
+    df.created_at = 8.days.ago
+    disable_authorization_checks{ df.save}
+    with_config_value :time_lock_doi_for, 7 do
+      refute df.is_doi_time_locked?
+    end
+
+    with_config_value :time_lock_doi_for, "7" do
+      refute df.is_doi_time_locked?
+    end
+
+    with_config_value :time_lock_doi_for, nil do
+      refute df.is_doi_time_locked?
+    end
+  end
+
+  test 'is_any_doi_minted?' do
+    df = Factory :data_file
+    new_version = Factory :data_file_version, :data_file => df
+    assert_equal 2, df.version
+    assert !df.is_any_doi_minted?
+
+    new_version.doi = 'test_doi'
+    disable_authorization_checks{ new_version.save }
+    assert df.reload.is_any_doi_minted?
+  end
+
+  test "should not be able to delete after doi" do
+    User.current_user = Factory(:user)
+    df = Factory :data_file,:contributor=>User.current_user.person
+    assert df.can_delete?
+
+    df.doi="test.doi"
+    new_version = Factory :data_file_version, :data_file => df
+    new_version.doi="test.doi"
+    df.save!
+    new_version.save!
+    df.reload
+    refute df.can_delete?
+  end
+
+  test "generated doi" do
+    df = Factory :data_file
+    model = Factory :model
+    with_config_value :doi_prefix,"xxx" do
+      with_config_value :doi_suffix,"yyy" do
+        assert_equal "xxx/yyy.datafile.#{df.id}",df.generated_doi
+        assert_equal "xxx/yyy.datafile.#{df.id}.1",df.generated_doi(1)
+        assert_equal "xxx/yyy.model.#{model.id}.1",model.generated_doi(1)
+      end
+    end
   end
 
 end

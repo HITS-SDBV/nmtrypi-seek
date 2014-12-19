@@ -198,18 +198,18 @@ end
 
   Factory.define(:suggested_technology_type) do |f|
     f.sequence(:label) {|n| "A TechnologyType#{n}"}
-    f.parent_uri "http://www.mygrid.org.uk/ontology/JERMOntology#Technology_type"
+    f.ontology_uri "http://www.mygrid.org.uk/ontology/JERMOntology#Technology_type"
   end
 
   Factory.define(:suggested_assay_type) do |f|
     f.sequence(:label) {|n| "An AssayType#{n}"}
-    f.parent_uri "http://www.mygrid.org.uk/ontology/JERMOntology#Experimental_assay_type"
+    f.ontology_uri "http://www.mygrid.org.uk/ontology/JERMOntology#Experimental_assay_type"
     f.after_build{|type| type.term_type = "assay"}
   end
 
    Factory.define(:suggested_modelling_analysis_type, :class=> SuggestedAssayType) do |f|
     f.sequence(:label) {|n| "An Modelling Analysis Type#{n}"}
-    f.parent_uri "http://www.mygrid.org.uk/ontology/JERMOntology#Model_analysis_type"
+    f.ontology_uri "http://www.mygrid.org.uk/ontology/JERMOntology#Model_analysis_type"
     f.after_build{|type| type.term_type = "modelling_analysis"}
   end
 
@@ -243,9 +243,7 @@ end
   Factory.define(:experimental_assay, :parent => :assay_base) do |f|
     f.association :assay_class, :factory => :experimental_assay_class
     f.assay_type_uri "http://www.mygrid.org.uk/ontology/JERMOntology#Experimental_assay_type"
-    f.assay_type_label "experimental assay type"
     f.technology_type_uri "http://www.mygrid.org.uk/ontology/JERMOntology#Technology_type"
-    f.technology_type_label "Technology type"
     f.samples {[Factory.build(:sample, :policy => Factory(:public_policy))]}
   end
 
@@ -940,6 +938,7 @@ end
     f.sequence(:title) {|n| "A Workflow_#{n}"}
     f.projects {[Factory.build(:project)]}
     f.association :contributor, :factory => :person
+    f.association :category, :factory => :workflow_category
     f.after_create do |workflow|
       if workflow.content_blob.blank?
         workflow.content_blob = Factory.create(:enm_workflow, :asset => workflow, :asset_version=>workflow.version)
@@ -949,6 +948,10 @@ end
         workflow.content_blob.save
       end
     end
+  end
+
+  Factory.define :workflow_category do |f|
+    f.name 'a category'
   end
 
   Factory.define(:enm_workflow, :parent => :content_blob) do |f|

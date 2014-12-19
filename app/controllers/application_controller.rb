@@ -58,10 +58,6 @@ class ApplicationController < ActionController::Base
     request.host_with_port
   end
 
-  def application_root
-    return  "http://#{base_host}"
-  end
-  helper_method :application_root
   
   #Overridden from restful_authentication
   #Does a second check that there is a profile assigned to the user, and if not goes to the profile
@@ -71,13 +67,6 @@ class ApplicationController < ActionController::Base
       redirect_to(select_people_path) if current_user.person.nil?
       true
     else
-      false
-    end
-  end
-
-  def is_user_activated
-    if Seek::Config.activation_required_enabled && current_user && !current_user.active?
-      error("Activation of this account it required for gaining full access", "Activation required?")
       false
     end
   end
@@ -228,6 +217,17 @@ class ApplicationController < ActionController::Base
     end
   end
 
+  def filter_protected_update_params(params)
+    if params
+      [:contributor_id, :contributor_type, :original_filename, :content_type, :content_blob_id, :created_at, :updated_at, :last_used_at].each do |column_name|
+        params.delete(column_name)
+      end
+
+      params[:last_used_at] = Time.now
+    end
+    params
+  end
+
   def currently_logged_in
     current_user.person
   end
@@ -246,10 +246,6 @@ class ApplicationController < ActionController::Base
     User.admin_logged_in?
   end
 
-  def email_enabled?
-    Seek::Config.email_enabled
-  end
-
   def profile_for_login_required
     if User.logged_in? && !User.logged_in_and_registered?
       flash[:notice]="You have successfully registered your account, but now must select a profile, or create your own."
@@ -266,7 +262,7 @@ class ApplicationController < ActionController::Base
 
       when 'download', 'named_download', 'launch', 'submit_job', 'data', 'execute','plot', 'explore','visualise' ,
           'export_as_xgmml', 'download_log', 'download_results', 'input', 'output', 'download_output', 'download_input',
-          'view_result','compare_versions'
+          'view_result','compare_versions','simulate'
         'download'
 
       when 'edit', 'new', 'create', 'update', 'new_version', 'create_version',
@@ -311,29 +307,23 @@ class ApplicationController < ActionController::Base
 
       object = name.camelize.constantize.find(params[:id])
 
-      #remember the location to return to if somebody immediately logs in next
-      store_return_to_location
-
       if is_auth?(object, action)
         eval "@#{name} = object"
         params.delete :sharing unless object.can_manage?(current_user)
       else
         respond_to do |format|
-          if User.current_user.nil?
-            flash[:error] = "You are not authorized to #{action} this #{name.humanize}, you may need to login first."
-          else
-            flash[:error] = "You are not authorized to #{action} this #{name.humanize}."
-          end
-
           format.html do
-            redirect_path = case action
-                              when 'publish', 'manage', 'edit', 'download', 'delete'
-                                eval("#{self.controller_name.singularize}_path(#{object.id})")
-                              else
-                                eval "#{self.controller_name}_path"
-                            end
-            store_denied_and_redirected_to_location(redirect_path)
-            redirect_to redirect_path
+            case action
+              when 'publish', 'manage', 'edit', 'download', 'delete'
+                if User.current_user.nil?
+                  flash[:error] = "You are not authorized to #{action} this #{name.humanize}, you may need to login first."
+                else
+                  flash[:error] = "You are not authorized to #{action} this #{name.humanize}."
+                end
+                redirect_to(eval("#{self.controller_name.singularize}_path(#{object.id})"))
+              else
+                render :template => "general/landing_page_for_hidden_item", :locals => {:item => object}, :status => :forbidden
+            end
           end
           format.rdf { render :text => "You may not #{action} #{name}:#{params[:id]}", :status => :forbidden }
           format.xml { render :text => "You may not #{action} #{name}:#{params[:id]}", :status => :forbidden }
@@ -343,15 +333,17 @@ class ApplicationController < ActionController::Base
       end
     rescue ActiveRecord::RecordNotFound
       respond_to do |format|
-        if eval("@#{name}").nil?
-          flash[:error] = "The #{name.humanize.downcase} does not exist!"
-        else
-          flash[:error] = "You are not authorized to view #{name.humanize}"
+        format.html do
+          if eval("@#{name}").nil?
+            render :template => "general/landing_page_for_not_found_item", :status => :not_found
+          else
+            render :template => "general/landing_page_for_hidden_item", :locals => {:item => object}, :status => :forbidden
+          end
         end
+
         format.rdf { render  :text=>"Not found",:status => :not_found }
         format.xml { render  :text=>"<error>404 Not found</error>",:status => :not_found }
         format.json { render :text=>"Not found", :status => :not_found }
-        format.html { redirect_to eval "#{self.controller_name}_path" }
       end
       return false
     end
@@ -511,7 +503,7 @@ class ApplicationController < ActionController::Base
       filters.all? do |filter, value|
         filter = filter.to_s
         klass = filter.camelize.constantize
-        value = klass.find_by_id value.to_i
+        value = klass.find value.to_i
 
         detect_for_filter(filter, res, value)
       end

@@ -8,6 +8,7 @@ class Strain < ActiveRecord::Base
   include Subscribable
   include Seek::Biosamples::PhenoTypesAndGenoTypes
   include BackgroundReindexing
+  include Seek::Stats::ActivityCounts
 
   acts_as_authorized
   acts_as_uniquely_identifiable
@@ -42,10 +43,6 @@ class Strain < ActiveRecord::Base
   searchable(:auto_index=>false) do
       text :synonym
   end if Seek::Config.solr_enabled
-
-  def is_default?
-    title=="default" && is_dummy==true
-  end
 
   def is_default?
     title=="default" && is_dummy==true

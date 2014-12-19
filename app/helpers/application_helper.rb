@@ -10,12 +10,28 @@ module ApplicationHelper
   include Recaptcha::ClientHelper
 
 
-  def index_title
-    show_title(self.controller_name.humanize.capitalize)
+  def no_items_to_list_text
+    content_tag :div,:id=>"no-index-items-text" do
+      "There are no #{resource_text_from_controller.pluralize} found that are visible to you."
+    end
+  end
+
+  #e.g. SOP for sops_controller, taken from the locale based on the controller name
+  def resource_text_from_controller
+    internationalized_resource_name(controller_name.singularize.camelize, false)
+  end
+
+  def index_title title=nil
+    show_title(title || resource_text_from_controller.pluralize)
   end
 
   def is_front_page?
     current_page?(main_app.root_url)
+  end
+
+  #turns the object name from a form builder, in the equivalent id
+  def sanitized_object_name object_name
+    object_name.gsub(/\]\[|[^-a-zA-Z0-9:.]/, "_").sub(/_$/, "")
   end
 
   def seek_stylesheet_tags main='application'
@@ -202,11 +218,6 @@ module ApplicationHelper
   
   def empty_list_li_text list
     return "<li><div class='none_text'> None specified</div></li>".html_safe if is_nil_or_empty?(list)
-  end  
-
-  def model_title_or_not_specified model
-    text=model.nil? ? nil : model.title
-    text_or_not_specified text,:capitalize=>true    
   end
   
   def text_or_not_specified text, options = {}
@@ -338,32 +349,6 @@ module ApplicationHelper
     return "#{Seek::Config.application_title} "+name
   end
 
-  # http://www.igvita.com/blog/2006/09/10/faster-pagination-in-rails/
-  def windowed_pagination_links(pagingEnum, options)
-    link_to_current_page = options[:link_to_current_page]
-    always_show_anchors = options[:always_show_anchors]
-    padding = options[:window_size]
-
-    current_page = pagingEnum.page
-    html = ''
-
-    #Calculate the window start and end pages
-    padding = padding < 0 ? 0 : padding
-    first = pagingEnum.page_exists?(current_page  - padding) ? current_page - padding : 1
-    last = pagingEnum.page_exists?(current_page + padding) ? current_page + padding : pagingEnum.last_page
-
-    # Print start page if anchors are enabled
-    html << yield(1) if always_show_anchors and not first == 1
-
-    # Print window pages
-    first.upto(last) do |page|
-      (current_page == page && !link_to_current_page) ? html << page : html << yield(page)
-    end
-
-    # Print end page if anchors are enabled
-    html << yield(pagingEnum.last_page) if always_show_anchors and not last == pagingEnum.last_page
-    html.html_safe
-  end
 
   def favourite_group_popup_link_action_new resource_type=nil
     return link_to_remote_redbox("Create new #{t('favourite_group')}",
@@ -494,15 +479,7 @@ module ApplicationHelper
     "Effect.toggle('#{block_id}','slide',{duration:0.5})".html_safe
   end
 
-  def count_actions(object, actions=nil)
-    count = 0
-    if actions.nil?
-      count = ActivityLog.count(:conditions => {:activity_loggable_type => object.class.name, :activity_loggable_id => object.id})
-    else
-      count = ActivityLog.no_spider.count(:conditions => {:action => actions, :activity_loggable_type => object.class.name, :activity_loggable_id => object.id})
-    end
-    count
-  end
+
 
   def set_parameters_for_sharing_form object=nil
     object ||= eval "@#{controller_name.singularize}"
@@ -625,8 +602,8 @@ module ApplicationHelper
      Strain=>"You cannot delete this Strain. It might be published or it has #{I18n.t('biosamples.sample_parent_term').pluralize}/Samples associated with it or you are not authorized.",
      Specimen=>"You cannot delete this #{I18n.t 'biosamples.sample_parent_term'}. It might be published or it has Samples associated with it or you are not authorized.",
      Sample=>"You cannot delete this Sample. It might be published or it has #{I18n.t('assays.assay').pluralize} associated with it or you are not authorized.",
-     Project=>"You cannot delete this #{I18n.t 'project'}. It might has people associated with it.",
-     Institution=>"You cannot delete this Institution. It might has people associated with it."
+     Project=>"You cannot delete this #{I18n.t 'project'}. It may have people associated with it.",
+     Institution=>"You cannot delete this Institution. It may have people associated with it."
     }
   end
 
@@ -636,32 +613,6 @@ module ApplicationHelper
     no_deletion_explanation_message(model_item.class).html_safe
   end
 
-  #
-  # Converts the given HASH array like 'params' to a flat
-  # HASH array that's compatible with url_for and link_to
-  # From http://www.gamecreatures.com/blog/2007/08/21/rails-url_for-and-params-missery/
-  #
-  def flatten_param_hash( params )
-    found = true
-
-    while found
-      found = false
-      new_hash = {}
-
-      params.each do |key,value|
-        if value.is_a?( Hash )
-          found = true
-          value.each do |key2,value2|
-            new_hash[ key.to_s + '[' + key2.to_s + ']' ] = value2
-          end
-        else
-          new_hash[ key.to_s ] = value
-        end
-      end
-      params = new_hash
-    end
-    params
-  end
 
   #returns a new instance of the string describing a resource type, or nil if it is not applicable
   def instance_of_resource_type resource_type
@@ -682,16 +633,16 @@ module ApplicationHelper
   def describe_visibility(model)
     text = '<strong>Visibility:</strong> '
 
-    if model.policy.sharing_scope == 0
+    if model.policy.sharing_scope == Policy::PRIVATE
       css_class = 'private'
       text << "Private "
       text << "with some exceptions " unless model.policy.permissions.empty?
       text << image('lock', :style => 'vertical-align: middle')
-    elsif model.policy.sharing_scope == 2 && model.policy.access_type == 0
+    elsif model.policy.sharing_scope == Policy::ALL_SYSMO_USERS && model.policy.access_type == Policy::NO_ACCESS
       css_class = 'group'
       text << "Only visible to members of "
       text << model.policy.permissions.select {|p| p.contributor_type == 'Project'}.map {|p| p.contributor.title}.to_sentence
-    else
+    elsif model.policy.sharing_scope == Policy::EVERYONE
       css_class = 'public'
       text << "Public #{image('world', :style => 'vertical-align: middle')}"
     end
