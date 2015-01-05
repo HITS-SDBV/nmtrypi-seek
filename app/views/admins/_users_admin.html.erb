@@ -5,7 +5,7 @@
    invalid_users[:pal_mismatch] = Person.all.select { |p| p.is_pal? != p.project_roles.include?(pal_role) }
    invalid_users[:duplicates] = Person.duplicates
    invalid_users[:no_person] = User.without_profile
-   invalid_users[:no_user] = Person.userless_people
+   invalid_users[:no_user] = Person.not_registered
    pals = Person.pals
 
    non_activated_users = User.not_activated
