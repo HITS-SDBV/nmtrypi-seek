@@ -9,13 +9,14 @@ class DataFile < ActiveRecord::Base
   include Seek::Data::DataFileExtraction
   include Seek::Data::SpreadsheetExplorerRepresentation
   include Seek::Rdf::RdfGeneration
-
+  include Seek::Data::SearchExtraction
 
   attr_accessor :parent_name
 
   #searchable must come before acts_as_asset call
   searchable(:auto_index=>false) do
     text :spreadsheet_annotation_search_fields,:fs_search_fields
+    text :spreadsheet_contents_for_search#, :stored => true
   end if Seek::Config.solr_enabled
 
   acts_as_asset

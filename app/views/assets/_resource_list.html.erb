@@ -2,6 +2,86 @@
 <% narrow_view ||= false -%>
 <% actions_partial_disable ||= false %>
 <% view_type ||= 'view_some' %>
+<% found_data = [] %>
+
+<% if collection.first.class.name == "DataFile" && !collection.select { |df| df.content_blob.is_extractable_spreadsheet? }.empty? %>
+    <%= stylesheet_link_tag('spreadsheet_explorer', 'jquery.ui.resizable') %>
+    <%= javascript_include_tag 'jquery.ui.all', 'spreadsheet_explorer', #,'spreadsheet_explorer_plot',
+                               'flot/index' %>
+
+    <%#= javascript_include_tag  "tablesorter/jquery.tablesorter.js"%>
+    <%#= stylesheet_link_tag "tablesorter/blue/tablesorter_blue.css" %>
+
+    <%#= javascript_include_tag 'jquery.ui.all','jquery.handsontable.full' %>
+    <%#= stylesheet_link_tag 'jquery.handsontable.full' %>
+
+    <%
+       sheet_array = []
+       found_data = collection.select { |df| df.can_view? && df.content_blob.is_extractable_spreadsheet? }.select do |object|
+
+         workbook = Rails.cache.fetch(object.content_blob.cache_key) do
+           object.spreadsheet
+         end
+
+         xml = object.spreadsheet_xml
+
+         doc = LibXML::XML::Parser.string(xml).parse
+         doc.root.namespaces.default_prefix="ss"
+
+         #@origin_query = "Final Concentration,  LmPTR1 <=  30"
+         # @origin_query  ="Final Concentration, LmPTR1 [µM]"
+         @search_query = @search_query ? @search_query.gsub(/\s+/, " ").strip : ""
+         operators = ["<", "<=", ">", ">=", "="]
+         search_operator = operators.select { |o| @search_query.index(o) }.max_by(&:length)
+         if search_operator
+           search_arr = @search_query.split(search_operator)
+           search_field_name = search_arr.first
+           search_value = search_arr.last
+           search_operator = "=" if search_field_name == search_value
+
+           head_cells = doc.find("//ss:sheet[@hidden='false' and @very_hidden='false']/ss:rows/ss:row/ss:cell").find_all { |cell| cell.content.gsub(/\s+/, " ").strip.match(/#{search_field_name}/i) }
+           unless head_cells.blank?
+             head_cell = head_cells[0]
+             #head_sheet = head_cell.parent.parent.parent
+             head_col = head_cell.attributes["column"]
+             cells = doc.find("//ss:sheet[@hidden='false' and @very_hidden='false']/ss:rows/ss:row/ss:cell[@column=#{head_col}][text() #{search_operator} #{search_value}]").find_all
+
+           end
+         else
+           cells = doc.find("//ss:sheet[@hidden='false' and @very_hidden='false']/ss:rows/ss:row/ss:cell").find_all { |cell| cell.content.downcase.include? @search_query.downcase }
+         end
+
+
+
+         unless cells.blank?
+           cell_groups = cells.group_by { |c| c.parent.try(:parent).try(:parent).try(:attributes).to_h["name"] }
+           sheet_array |= cell_groups.map do |sheet_name, match_cells|
+
+             sheet = workbook.sheets.detect { |sh| sheet_name.downcase == sh.name.downcase }
+             rows_nums = match_cells.map { |c| c.attributes["row"].to_i }
+             col_nums = match_cells.map { |c| c.attributes["column"].to_i }
+             [sheet, rows_nums, col_nums, object.id]
+           end
+         end
+         !sheet_array.empty?
+       end
+        %>
+    <% unless found_data.empty? -%>
+        <div class="list_items_container" id="<%= collection.first.class.name %>_<%= view_type %>">
+
+          <!--- multiple  sheets --->
+          <% found_data.each do |item| -%>
+              <% if authorization_for_showing_already_done || item.can_view? -%>
+                  <%= render :partial => "spreadsheets/matched_lines", :locals => {:sheet_array => sheet_array, :object => item, :workbook => workbook } %>
+              <% end -%>
+          <% end %>
+           <!--- merged sheets --->
+           <%#= render :partial => "spreadsheets/merged_sheets", :locals => {:sheet_array => sheet_array}  if authorization_for_showing_already_done%>
+        </div>
+    <% end %>
+<% end %>
+
+ <% collection = collection - found_data %>
 
 <% unless collection.empty? -%>
   <div class="list_items_container" id="<%=collection.first.class.name%>_<%= view_type %>">

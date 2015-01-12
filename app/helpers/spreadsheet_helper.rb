@@ -24,4 +24,14 @@ module SpreadsheetHelper
       pager.replace(rows_with_index[start, per_page]) unless rows_with_index[start, per_page].nil?
     end
   end
+
+  def tag_link value
+    if value.match(/^NMT/i)
+
+      "<a class='vvv-popular' title='' href='/tags/76'>PTR1 #{value}</a>".html_safe
+
+    else
+      auto_link(h(value), :html => {:target => "_blank"})
+    end
+  end
 end  

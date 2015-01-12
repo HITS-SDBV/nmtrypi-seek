@@ -55,8 +55,8 @@ gem 'transaction_isolation'
 
 #gem for BiVeS and BudHat
 gem 'bives'
-
-
+#gem "google-drive"
+#gem 'handsontable_rails', '~> 0.0.2'
 #Linked to SysMO Git repositories
 gem 'gibberish', :git => "https://github.com/SysMO-DB/gibberish.git"
 gem 'white_list', :git => "https://github.com/SysMO-DB/white_list.git"

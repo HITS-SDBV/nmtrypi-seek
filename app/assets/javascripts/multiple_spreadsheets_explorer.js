@@ -1,3 +1,7 @@
+
+
+
+
 function annotation_source(id, type, name, url) {
     this.id = id;
     this.type = type;
@@ -22,6 +26,9 @@ function annotation(id, type, sheet_number, cell_range, content, date_created) {
 }
 
 var $j = jQuery.noConflict(); //To prevent conflicts with prototype
+
+
+
 
 $j(window)
     .resize(function(e) {
@@ -56,7 +63,7 @@ $j(document).ready(function ($) {
     };
 
     //Clickable worksheet tabs
-    $("a.sheet_tab")
+    $(spreadsheet_container_selector + "a.sheet_tab")
         .click(function () {
             activateSheet(null, $(this));
         })
@@ -65,20 +72,20 @@ $j(document).ready(function ($) {
         });
 
     //Cell selection
-    $("table.sheet td.cell")
+    $(spreadsheet_container_selector + "table.sheet td.cell")
         .mousedown(function () {
             if(!isMouseDown) {
                 //Update the cell info box to contain either the value of the cell or the formula
                 // also make hovering over the info box display all the text.
                 if($(this).attr("title"))
                 {
-                    $('#cell_info').val($(this).attr("title"));
-                    $('#cell_info').attr("title", $(this).attr("title"));
+                    $(spreadsheet_container_selector + '#cell_info').val($(this).attr("title"));
+                    $(spreadsheet_container_selector + '#cell_info').attr("title", $(this).attr("title"));
                 }
                 else
                 {
-                    $('#cell_info').val($(this).html());
-                    $('#cell_info').attr("title", $(this).html());
+                    $(spreadsheet_container_selector + '#cell_info').val($(this).html());
+                    $(spreadsheet_container_selector + '#cell_info').attr("title", $(this).html());
                 }
                 isMouseDown = true;
                 startRow = parseInt($(this).attr("row"));
@@ -91,6 +98,7 @@ $j(document).ready(function ($) {
         })
         .mouseover(function (e) {
             if (isMouseDown) {
+
                 endRow = parseInt($(this).attr("row"));
                 endCol = parseInt($(this).attr("col"));
 
@@ -100,11 +108,11 @@ $j(document).ready(function ($) {
     ;
 
     //Auto scrolling when selection box is dragged to the edge of the view
-    $("div.sheet")
+    $(spreadsheet_container_selector + "div.sheet")
         .mousemove(function (e) {
             if(isMouseDown)
             {
-                var sheet = $("div.active_sheet");
+                var sheet = $(spreadsheet_container_selector + "div.active_sheet");
                 if(e.pageY >= (sheet.position().top + sheet.outerHeight()) - slowScrollBoundary)
                     if(e.pageY >= (sheet.position().top + sheet.outerHeight()) - fastScrollBoundary)
                         yInc =  "+=50px";
@@ -146,7 +154,7 @@ $j(document).ready(function ($) {
     ;
 
     //Scroll headings when sheet is scrolled
-    $("div.sheet")
+    $(spreadsheet_container_selector + "div.sheet")
         .scroll(function (e) {
             $(this).parent().find("div.row_headings").scrollTop(($(this)).scrollTop());
             $(this).parent().parent().find("div.col_headings").scrollLeft(($(this)).scrollLeft());
@@ -174,20 +182,20 @@ $j(document).ready(function ($) {
                 if(scrolling)
                 {
                     scrolling = false;
-                    $('div.active_sheet').stop();
+                    $(spreadsheet_container_selector + 'div.active_sheet').stop();
                 }
                 //Hide annotations
-                $('#annotation_container').hide();
-                $('div.annotation').hide();
+                $(spreadsheet_container_selector + '#annotation_container').hide();
+                $(spreadsheet_container_selector + 'div.annotation').hide();
             }
         })
     ;
 
     //Select cells that are typed in
-    $('input#selection_data')
+    $(spreadsheet_container_selector + 'input#selection_data')
         .keyup(function(e) {
             if(e.keyCode == 13) {
-                var active_sheet = $j("div.active_sheet");
+                var active_sheet = $j(spreadsheet_container_selector + "div.active_sheet");
                 var active_sheet_number = active_sheet.id.split('_')[1];
                 select_range($(this).val(), active_sheet_number);
             }
@@ -196,13 +204,13 @@ $j(document).ready(function ($) {
 
     //Resizable column/row headings
     //also makes them clickable to select all cells in that row/column
-    $( "div.col_heading" )
+    $(spreadsheet_container_selector + "div.col_heading" )
         .resizable({
             minWidth: 20,
             handles: 'e',
             stop: function (){
-                $("table.active_sheet col:eq("+($(this).index()-1)+")").width($(this).width());
-                if ($j("div.spreadsheet_container").width()>max_container_width()) {
+                $(spreadsheet_container_selector + "table.active_sheet col:eq("+($(this).index()-1)+")").width($(this).width());
+                if ($j(spreadsheet_container_selector).width()>max_container_width()) {
                     adjust_container_dimensions();
                 }
             }
@@ -213,13 +221,13 @@ $j(document).ready(function ($) {
             select_cells(col,1,col,last_row,null);
         })
     ;
-    $( "div.row_heading" )
+    $(spreadsheet_container_selector + "div.row_heading" )
         .resizable({
             minHeight: 15,
             handles: 's',
             stop: function (){
                 var height = $(this).height();
-                $("table.active_sheet tr:eq("+$(this).index()+")").height(height).css('line-height', height-2 + "px");
+                $(spreadsheet_container_selector + "table.active_sheet tr:eq("+$(this).index()+")").height(height).css('line-height', height-2 + "px");
             }
         })
         .mousedown(function(){
@@ -233,8 +241,8 @@ $j(document).ready(function ($) {
 });
 
 function max_container_width() {
-    var max_width = $j(".corner_heading").width();
-    $j(".col_heading:visible").each(function() {
+    var max_width = $j(spreadsheet_container_selector + ".corner_heading").width();
+    $j(spreadsheet_container_selector + ".col_heading:visible").each(function() {
         max_width += $(this).offsetWidth;
     });
     return max_width;
@@ -242,19 +250,19 @@ function max_container_width() {
 
 function adjust_container_dimensions() {
     var max_width = max_container_width();
-    var spreadsheet_container_width = $j("div.spreadsheet_container").width();
+    var spreadsheet_container_width = $j(spreadsheet_container_selector).width();
     if (spreadsheet_container_width>=max_width) {
-        $j(".spreadsheet_container").width(max_width);
+        $j(spreadsheet_container_selector + ".spreadsheet_container").width(max_width);
         spreadsheet_container_width=max_width;
     }
     else {
-        $j(".spreadsheet_container").width("95%");
-        spreadsheet_container_width = $j("div.spreadsheet_container").width();
+        $j(spreadsheet_container_selector + ".spreadsheet_container").width("95%");
+        spreadsheet_container_width = $j(spreadsheet_container_selector).width();
     }
     var sheet_container_width = spreadsheet_container_width - 2;
     var sheet_width = spreadsheet_container_width - 45;
-    $j(".sheet_container").width(sheet_container_width);
-    $j(".sheet").width(sheet_width);
+    $j(spreadsheet_container_selector + ".sheet_container").width(sheet_container_width);
+    $j(spreadsheet_container_selector + ".sheet").width(sheet_width);
 
 }
 
@@ -309,14 +317,14 @@ function explodeCellRange(range) {
 // Is called after every AJAX call to rebind the set of annotations that may have
 // changed, and to re-enhance DOM elements that have been reloaded
 function bindAnnotations(annotation_sources) {
-    var annotationIndexTable = $j("div#annotation_overview table");
+    var annotationIndexTable = $j(spreadsheet_container_selector + "div#annotation_overview table");
     for(var s = 0; s < annotation_sources.size(); s++)
     {
         var source = annotation_sources[s];
 
         //Add a new section in the annotation index for the source
-        var stub_heading = $j("<tr></tr>").addClass("source_header").append($j("<td></td>").attr({colspan : 3})
-            .append($j("<a>Annotations from " + source.name + "</a>").attr({href : source.url})))
+        var stub_heading = $j(spreadsheet_container_selector + "<tr></tr>").addClass("source_header").append($j(spreadsheet_container_selector + "<td></td>").attr({colspan : 3})
+            .append($j(spreadsheet_container_selector + "<a>Annotations from " + source.name + "</a>").attr({href : source.url})))
             .appendTo(annotationIndexTable);
 
         for(var a = 0; a < source.annotations.size(); a++)
@@ -335,10 +343,10 @@ function bindAnnotations(annotation_sources) {
     //Text displayed in annotation index if no annotations present
     if(annotation_sources < 1)
     {
-        annotationIndexTable.append($j("<tr></tr>").append($j("<td colspan=\"3\">No annotations found</td>")));
+        annotationIndexTable.append($j(spreadsheet_container_selector + "<tr></tr>").append($j(spreadsheet_container_selector + "<td colspan=\"3\">No annotations found</td>")));
     }
     //Make the annotations draggable
-    $j('#annotation_container').draggable({handle: '#annotation_drag', zIndex: 100000000000000});
+    $j(spreadsheet_container_selector + '#annotation_container').draggable({handle: '#annotation_drag', zIndex: 100000000000000});
 }
 
 //Small annotation summary that jumps to said annotation when clicked
@@ -355,11 +363,11 @@ function createAnnotationStub(ann)
         type_class="text_annotation_type";
         content = ann.content.substring(0,40);
     }
-    var stub = $j("<tr></tr>").addClass("annotation_stub")
-        .append($j("<td>&nbsp;</td>").addClass(type_class))
-        .append($j("<td>Sheet"+(ann.sheetNumber+1)+"."+ann.cellRange+"</td>"))
-        .append($j("<td>"+content+"</td>"))
-        .append($j("<td>"+ann.dateCreated+"</td>"))
+    var stub = $j(spreadsheet_container_selector + "<tr></tr>").addClass("annotation_stub")
+        .append($j(spreadsheet_container_selector + "<td>&nbsp;</td>").addClass(type_class))
+        .append($j(spreadsheet_container_selector + "<td>Sheet"+(ann.sheetNumber+1)+"."+ann.cellRange+"</td>"))
+        .append($j(spreadsheet_container_selector + "<td>"+content+"</td>"))
+        .append($j(spreadsheet_container_selector + "<td>"+ann.dateCreated+"</td>"))
         .click( function (){
             goToSheetPage(ann);
         });
@@ -368,7 +376,7 @@ function createAnnotationStub(ann)
 }
 
 function goToSheetPage(annotation){
-    var paginateForSheet = $('paginate_sheet_' + (annotation.sheetNumber+1));
+    var paginateForSheet = $(spreadsheet_container_selector + 'paginate_sheet_' + (annotation.sheetNumber+1));
     if (paginateForSheet != null)
     {
         //calculate the page
@@ -385,12 +393,12 @@ function goToSheetPage(annotation){
             clickLink(link);
         }else{
             jumpToAnnotation(annotation.id, annotation.sheetNumber+1, annotation.cellRange);
-            $j('#annotation_overview').hide();
+            $j(spreadsheet_container_selector + '#annotation_overview').hide();
         }
 
     }else{
         jumpToAnnotation(annotation.id, annotation.sheetNumber+1, annotation.cellRange);
-        $j('#annotation_overview').hide();
+        $j(spreadsheet_container_selector + '#annotation_overview').hide();
     }
 }
 
@@ -410,7 +418,7 @@ function bindAnnotation(ann) {
     var annotation_of_current_page = current_page >= startPage && current_page <= endPage;
 
     if ((current_page == null) || annotation_of_current_page){
-        $j("table.sheet:eq("+ann.sheetNumber+") tr").slice((relativeMinRow-1),relativeMaxRow).each(function() {
+        $j(spreadsheet_container_selector + "table.sheet:eq("+ann.sheetNumber+") tr").slice((relativeMinRow-1),relativeMaxRow).each(function() {
 
             $j(this).children("td.cell").slice(ann.startCol-1,ann.endCol).addClass("annotated_cell")
                 .click(function () {show_annotation(ann.id,
@@ -423,7 +431,7 @@ function bindAnnotation(ann) {
 
 //to identify the current page for a specific sheet
 function currentPage(sheetNumber){
-    var paginateForSheet = $('paginate_sheet_' + (sheetNumber));
+    var paginateForSheet = $(spreadsheet_container_selector + 'paginate_sheet_' + (sheetNumber));
     if (paginateForSheet != null)
     {
         var current_page = paginateForSheet.getElementsByClassName('current')[0].innerText;
@@ -446,14 +454,14 @@ function toggle_annotation_form(annotation_id) {
 
 //To display the annotations
 function show_annotation(id,x,y) {
-    var annotation_container = $j("#annotation_container");
-    var annotation = $j("#annotation_" + id);
+    var annotation_container = $j(spreadsheet_container_selector + "#annotation_container");
+    var annotation = $j(spreadsheet_container_selector + "#annotation_" + id);
     var plot_element_id = "annotation_plot_data_"+id;
     annotation_container.css('left',x+20);
     annotation_container.css('top',y-20);
     annotation_container.show();
     annotation.show();
-    if ($j("#"+plot_element_id).length>0) {
+    if ($j(spreadsheet_container_selector + "#"+plot_element_id).length>0) {
         plot_cells(plot_element_id,'650','450');
     }
 
@@ -468,7 +476,7 @@ function jumpToAnnotation(id, sheet, range) {
     select_range(range, sheet);
 
     //Show annotation in middle of sheet
-    var cells = $j('.selected_cell');
+    var cells = $j(spreadsheet_container_selector + '.selected_cell');
     show_annotation(id,
         cells.position().left + cells.outerWidth(),
         cells.position().top);
@@ -489,22 +497,22 @@ function select_range(range, sheetNumber) {
     var relativeMaxRow = relative_rows[1];
 
     //Scroll to selected cells
-    var row = $j("table.active_sheet tr").slice((relativeMinRow-1),relativeMaxRow).first();
+    var row = $j(spreadsheet_container_selector + "table.active_sheet tr").slice((relativeMinRow-1),relativeMaxRow).first();
     var cell = row.children("td.cell").slice(startCol-1,endCol).first();
 
-    $j('div.active_sheet').scrollTop(row.position().top + $j('div.active_sheet').scrollTop() - 500);
-    $j('div.active_sheet').scrollLeft(cell.position().left + $j('div.active_sheet').scrollLeft() - 500);
+    $j(spreadsheet_container_selector + 'div.active_sheet').scrollTop(row.position().top + $j(spreadsheet_container_selector + 'div.active_sheet').scrollTop() - 500);
+    $j(spreadsheet_container_selector + 'div.active_sheet').scrollLeft(cell.position().left + $j(spreadsheet_container_selector + 'div.active_sheet').scrollLeft() - 500);
 }
 
 function deselect_cells() {
     //Deselect any cells and headings
-    $j(".selected_cell").removeClass("selected_cell");
-    $j(".selected_heading").removeClass("selected_heading");
+    $j(spreadsheet_container_selector + ".selected_cell").removeClass("selected_cell");
+    $j(spreadsheet_container_selector + ".selected_heading").removeClass("selected_heading");
     //Clear selection box
-    $j('#selection_data').val("");
-    $j('#cell_info').val("");
+    $j(spreadsheet_container_selector + '#selection_data').val("");
+    $j(spreadsheet_container_selector + '#cell_info').val("");
     //Hide selection-dependent buttons
-    $j('.requires_selection').hide();
+    $j(spreadsheet_container_selector + '.requires_selection').hide();
 }
 
 
@@ -531,19 +539,19 @@ function select_cells(startCol, startRow, endCol, endRow, sheetNumber) {
     var relativeMaxRow = relative_rows[1];
 
     //Deselect any cells and headings
-    $j(".selected_cell").removeClass("selected_cell");
-    $j(".selected_heading").removeClass("selected_heading");
+    $j(spreadsheet_container_selector + ".selected_cell").removeClass("selected_cell");
+    $j(spreadsheet_container_selector + ".selected_heading").removeClass("selected_heading");
 
     //"Select" dragged cells
-    $j("table.active_sheet tr").slice(relativeMinRow-1,relativeMaxRow).each(function() {
+    $j(spreadsheet_container_selector + "table.active_sheet tr").slice(relativeMinRow-1,relativeMaxRow).each(function() {
         $j(this).children("td.cell:not(.selected_cell)").slice(minCol-1,maxCol).addClass("selected_cell");
     });
 
     //"Select" dragged cells' column headings
-    $j("div.active_sheet").parent().parent().find("div.col_headings div.col_heading").slice(minCol-1,maxCol).addClass("selected_heading");
+    $j(spreadsheet_container_selector + "div.active_sheet").parent().parent().find("div.col_headings div.col_heading").slice(minCol-1,maxCol).addClass("selected_heading");
 
     //"Select" dragged cells' row headings
-    $j("div.active_sheet").parent().find("div.row_headings div.row_heading").slice(relativeMinRow-1,relativeMaxRow).addClass("selected_heading");
+    $j(spreadsheet_container_selector + "div.active_sheet").parent().find("div.row_headings div.row_heading").slice(relativeMinRow-1,relativeMaxRow).addClass("selected_heading");
 
     //Update the selection display e.g A3:B2
     var selection = "";
@@ -552,51 +560,52 @@ function select_cells(startCol, startRow, endCol, endRow, sheetNumber) {
     if(maxRow != minRow || maxCol != minCol)
         selection += (":" + num2alpha(maxCol).toString() + maxRow.toString());
 
-    $j('#selection_data').val(selection);
+    $j(spreadsheet_container_selector + '#selection_data').val(selection);
 
     //Update cell coverage in annotation form
-    $j('input.annotation_cell_coverage_class').attr("value",selection);
+    $j(spreadsheet_container_selector + 'input.annotation_cell_coverage_class').attr("value",selection);
 
     //Show selection-dependent controls
-    $j('.requires_selection').show();
+    $j(spreadsheet_container_selector + '.requires_selection').show();
 }
 
-function activateSheet(sheet, sheetTab) {
-    if (sheetTab == null) {
-        var i = sheet - 1;
-        sheetTab = $j("a.sheet_tab:eq(" + i + ")");
-    }
+function activateSheet(sheet, spreadsheet_index) {
+
+    var spreadsheet_container_selector = "div.spreadsheet_container." +  spreadsheet_index + " ";
+    var i = sheet - 1;
+    var sheetTab = $j(spreadsheet_container_selector + "a.sheet_tab:eq(" + i + ")");
+
 
     var sheetIndex = sheetTab.attr("index");
 
 
     //Clean up
     //Hide annotations
-    $j('div.annotation').hide();
-    $j('#annotation_container').hide();
+    $j(spreadsheet_container_selector + 'div.annotation').hide();
+    $j(spreadsheet_container_selector + '#annotation_container').hide();
 
     //Deselect previous tab
-    $j('a.selected_tab').removeClass('selected_tab');
+    $j(spreadsheet_container_selector + 'a.selected_tab').removeClass('selected_tab');
 
     //Disable old table + sheet
-    $j('.active_sheet').removeClass('active_sheet');
+    $j(spreadsheet_container_selector + '.active_sheet').removeClass('active_sheet');
 
     //Hide sheets
-    $j('div.sheet_container').hide();
+    $j(spreadsheet_container_selector + 'div.sheet_container').hide();
 
     //Hide paginates
-    $j('div.pagination').hide();
+    $j(spreadsheet_container_selector + 'div.pagination').hide();
 
     //Select the tab
     sheetTab.addClass('selected_tab');
 
     //Show the sheet
-    $j("div.sheet_container#spreadsheet_" + sheetIndex).show();
+    $j(spreadsheet_container_selector + "div#spreadsheet_" + sheetIndex+ ".sheet_container").show();
 
     //Show the sheet paginate
-    $j("div#paginate_sheet_" + sheetIndex).show();
+    $j(spreadsheet_container_selector + "div#paginate_sheet_" + sheetIndex).show();
 
-    var activeSheet = $j("div.sheet#spreadsheet_" + sheetIndex);
+    var activeSheet = $j(spreadsheet_container_selector + "div#spreadsheet_" + sheetIndex + ".sheet");
 
     //Show the div + set sheet active
     activeSheet.addClass('active_sheet');
@@ -610,7 +619,7 @@ function activateSheet(sheet, sheetTab) {
     deselect_cells();
 
     //Record current sheet in annotation form
-    $j('input#annotation_sheet_id').attr("value", sheetIndex -1);
+    $j(spreadsheet_container_selector + 'input#annotation_sheet_id').attr("value", sheetIndex -1);
 
     //Reset variables
     isMouseDown = false,
@@ -628,8 +637,8 @@ function activateSheet(sheet, sheetTab) {
 function copy_cells()
 {
 
-    var cells = $j('td.selected_cell');
-    var columns = $j('.col_heading.selected_heading').size();
+    var cells = $j(spreadsheet_container_selector + 'td.selected_cell');
+    var columns = $j(spreadsheet_container_selector + '.col_heading.selected_heading').size();
     var text = "";
 
     for(var i = 0; i < cells.size(); i += columns)
@@ -641,9 +650,9 @@ function copy_cells()
         text += "\n";
     }
 
-    $j("textarea#export_data").val(text);
-    $j("div.spreadsheet_popup").hide();
-    $j("div#export_form").show();
+    $j(spreadsheet_container_selector + "textarea#export_data").val(text);
+    $j(spreadsheet_container_selector + "div.spreadsheet_popup").hide();
+    $j(spreadsheet_container_selector + "div#export_form").show();
 }
 
 function changeRowsPerPage(){
@@ -651,7 +660,7 @@ function changeRowsPerPage(){
     if (current_href.endsWith('#'))
         current_href = current_href.substring(0,current_href.length-1);
 
-    var update_per_page = $('per_page').value;
+    var update_per_page = $(spreadsheet_container_selector + 'per_page').value;
     var update_href = '';
     if (current_href.match('page_rows') == null){
         update_href = current_href.concat('&page_rows='+update_per_page);
@@ -717,6 +726,10 @@ function relativeRows(minRow, maxRow, sheetNumber){
 function displayRowsPerPage(){
     paginations = document.getElementsByClassName('pagination');
     if (paginations.length > 0){
-        $('rows_per_page').show();
+        $(spreadsheet_container_selector + 'rows_per_page').show();
     }
+}
+
+function spreadsheet_container_selector(){
+
 }

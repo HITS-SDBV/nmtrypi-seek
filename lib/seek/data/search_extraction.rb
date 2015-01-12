@@ -50,6 +50,12 @@ module Seek
         doc.root.namespaces.default_prefix="ss"
 
         content = doc.find("//ss:sheet[@hidden='false' and @very_hidden='false']/ss:rows/ss:row/ss:cell").collect do |cell|
+          # sheet_index = cell.parent.try(:parent).try(:parent).try(:attributes).to_h["index"]
+          # row = cell.attributes["row"]
+          # col = cell.attributes["column"]
+          # content = cell.content
+          #
+          # content.blank?? "" : "#{content}_#{sheet_index}_#{row}_#{col}"
           cell.content
         end
         content.reject!{|v| v.blank?}
