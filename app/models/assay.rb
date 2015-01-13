@@ -3,11 +3,11 @@
 class Assay < ActiveRecord::Base
 
   include Seek::Rdf::RdfGeneration
-  include Seek::OntologyTypeHandling
-  include Seek::OntologyExtensionWithSuggestedType
+  include Seek::Ontologies::AssayOntologyTypes
   include Seek::Taggable
   include Seek::ProjectHierarchies::ItemsProjectsExtension if Seek::Config.project_hierarchy_enabled
-  #FIXME: needs to be declared before acts_as_isa, else ProjectCompat module gets pulled in  
+
+  #needs to be declared before acts_as_isa, else ProjectCompat module gets pulled in
   def projects
     study.try(:projects) || []
   end
@@ -49,7 +49,7 @@ class Assay < ActiveRecord::Base
   validates_presence_of :study, :message=>" must be selected"
   validates_presence_of :owner
   validates_presence_of :assay_class
-  #validate :either_samples_or_organisms_for_experimental_assay,  :if => "Seek::Config.is_virtualliver"
+
   validate :no_sample_for_modelling_assay
 
   before_validation :default_assay_and_technology_type
@@ -66,7 +66,6 @@ class Assay < ActiveRecord::Base
       strains.compact.map{|s| s.title}
     end
   end if Seek::Config.solr_enabled
-
 
 
   def project_ids
@@ -104,42 +103,6 @@ class Assay < ActiveRecord::Base
 
 
 
-  #uri for generating rdf for suggested assay type,
-  #if uri is valid, this will be ignored, as it is already added by assay_type_uri
-  #otherwise use the uri of parent in ontology
-  def suggested_assay_type_ontology_uri
-     uri = RDF::URI.new assay_type_uri
-     if uri.valid?
-       nil
-     else
-       SuggestedAssayType.where(:uri=> assay_type_uri).first.try(:ontology_uri)
-     end
-  end
-
-  #uri for generating rdf for suggested technology type,
-  #if uri is valid, this will be ignored, as it is already added by technology_type_uri
-  #otherwise use the uri of parent in ontology
-
-  def suggested_technology_type_ontology_uri
-    uri = RDF::URI.new technology_type_uri
-    if uri.valid?
-      nil
-    else
-      SuggestedTechnologyType.where(:uri=> technology_type_uri).first.try(:ontology_uri)
-    end
-  end
-  # super method defined in ontology_type_handling
-  # so the query order is: 1. read_attribute(:assay_type_label) 2.Ontology 3. SuggestedAssayType
-  def assay_type_label
-    super ||  SuggestedAssayType.where(:uri => self.assay_type_uri).first.try(:label)
-  end
-
-  # super method defined in ontology_type_handling
-   # so the query order is: 1. read_attribute(:technology_type_label) 2.Ontology 3. SuggestedTechnologyType
-  def technology_type_label
-      super || SuggestedTechnologyType.where(:uri => self.technology_type_uri).first.try(:label)
-  end
-
   def short_description
     type= self.assay_type_label.nil? ? "No type" : self.assay_type_label
    
@@ -152,7 +115,7 @@ class Assay < ActiveRecord::Base
 
   #returns true if this is a modelling class of assay
   def is_modelling?
-    return !assay_class.nil? && assay_class.key=="MODEL"
+    return assay_class && assay_class.is_modelling?
   end
 
   #returns true if this is an experimental class of assay
@@ -251,6 +214,10 @@ class Assay < ActiveRecord::Base
 
   def organism_terms
     organisms.collect{|o| o.searchable_terms}.flatten
+  end
+
+  def self.user_creatable?
+    Seek::Config.assays_enabled
   end
 
 

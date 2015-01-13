@@ -4,6 +4,7 @@ class PeopleController < ApplicationController
   include Seek::Publishing::PublishingCommon
   include Seek::Publishing::GatekeeperPublish
   include Seek::FacetedBrowsing
+  include Seek::DestroyHandling
 
   before_filter :find_and_authorize_requested_item, :only => [:show, :edit, :update, :destroy]
   before_filter :current_user_exists,:only=>[:select,:userless_project_selected_ajax,:create,:new]
@@ -186,12 +187,12 @@ class PeopleController < ApplicationController
         #send notification email to admin and project managers, if a new member is registering as a new person
         if Seek::Config.email_enabled && registration && is_sysmo_member
           #send mail to admin
-          Mailer.contact_admin_new_user_no_profile(member_details, current_user, base_host).deliver
+          Mailer.contact_admin_new_user(member_details, current_user, base_host).deliver
 
           #send mail to project managers
           project_managers = project_managers_of_selected_projects params[:projects]
           project_managers.each do |project_manager|
-            Mailer.contact_project_manager_new_user_no_profile(project_manager, member_details, current_user, base_host).deliver
+            Mailer.contact_project_manager_new_user(project_manager, member_details, current_user, base_host).deliver
           end
         end
         if (!current_user.active?)
@@ -221,11 +222,6 @@ class PeopleController < ApplicationController
   # PUT /people/1.xml
   def update
     @person.disciplines.clear if params[:discipline_ids].nil?
-
-    # extra check required to see if any avatar was actually selected (or it remains to be the default one)
-    
-    avatar_id = params[:person].delete(:avatar_id).to_i
-    @person.avatar_id = ((avatar_id.kind_of?(Numeric) && avatar_id > 0) ? avatar_id : nil)
     
     set_tools_and_expertise(@person,params)    
 
@@ -298,17 +294,6 @@ class PeopleController < ApplicationController
           gr.project_roles << r
         end
       end
-    end
-  end
-
-  # DELETE /people/1
-  # DELETE /people/1.xml
-  def destroy
-    @person.destroy
-
-    respond_to do |format|
-      format.html { redirect_to(people_url) }
-      format.xml  { head :ok }
     end
   end
 
@@ -401,11 +386,11 @@ class PeopleController < ApplicationController
     details = ''
     unless params[projects_or_institutions].blank?
       params[projects_or_institutions].each do |project_or_institution|
-        project_or_institution_details= project_or_institution.split(',')
-        if project_or_institution_details[0] == 'Others'
+        if project_or_institution.to_s=='0'
           details.concat("Other #{projects_or_institutions.singularize.humanize.pluralize}: #{params["other_#{projects_or_institutions}"]}; ")
         else
-          details.concat("#{projects_or_institutions.singularize.humanize.capitalize}: #{project_or_institution_details[0]}, Id: #{project_or_institution_details[1]}; ")
+          entity = projects_or_institutions.classify.constantize.find_by_id(project_or_institution)
+          details.concat("#{projects_or_institutions.singularize.humanize.capitalize}: #{entity.try(:title)}, Id: #{project_or_institution}; ")
         end
       end
     end
@@ -416,7 +401,8 @@ class PeopleController < ApplicationController
     project_manager_list = []
     unless projects_param.blank?
       projects_param.each do |project_param|
-        project = Project.find_by_id(project_param)
+        id = project_param
+        project = Project.find_by_id(id)
         project_managers = project.try(:project_managers)
         project_manager_list |= project_managers unless project_managers.nil?
       end

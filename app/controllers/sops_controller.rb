@@ -4,8 +4,7 @@ class SopsController < ApplicationController
   include DotGenerator
 
   include Seek::AssetsCommon
-  
-  #before_filter :login_required
+
   before_filter :find_assets, :only => [ :index ]
   before_filter :find_and_authorize_requested_item, :except => [ :index, :new, :create, :request_resource,:preview, :test_asset_url, :update_annotations_ajax]
   before_filter :find_display_asset, :only=>[:show, :download]
@@ -13,6 +12,7 @@ class SopsController < ApplicationController
   include Seek::Publishing::PublishingCommon
 
   include Seek::BreadCrumbs
+  include Seek::DataciteDoi
 
   def new_version
     if handle_upload_data
@@ -89,25 +89,14 @@ class SopsController < ApplicationController
 
       update_annotations @sop
       update_scales @sop
-      assay_ids = params[:assay_ids] || []
+
       respond_to do |format|
         if @sop.save
-
           create_content_blobs
-
-          # update attributions
-          Relationship.create_or_update_attributions(@sop, params[:attributions])
-          
-          #Add creators
-          AssetsCreator.add_or_update_creator_list(@sop, params[:creators])
-          
+          update_relationships(@sop,params)
+          update_assay_assets(@sop,params[:assay_ids])
           flash[:notice] = "#{t('sop')} was successfully uploaded and saved."
           format.html { redirect_to sop_path(@sop) }
-          Assay.find(assay_ids).each do |assay|
-            if assay.can_edit?
-              assay.relate(@sop)
-            end
-          end
         else
           format.html { 
             render :action => "new" 
@@ -122,22 +111,12 @@ class SopsController < ApplicationController
   
   # PUT /sops/1
   def update
-    # remove protected columns (including a "link" to content blob - actual data cannot be updated!)
-    if params[:sop]
-      [:contributor_id, :contributor_type, :original_filename, :content_type, :content_blob_id, :created_at, :updated_at, :last_used_at].each do |column_name|
-        params[:sop].delete(column_name)
-      end
-      
-      # update 'last_used_at' timestamp on the SOP
-      params[:sop][:last_used_at] = Time.now
-    end
-
+    sop_params=filter_protected_update_params(params[:sop])
+    
     update_annotations @sop
     update_scales @sop
 
-    assay_ids = params[:assay_ids] || []
-
-    @sop.attributes = params[:sop]
+    @sop.attributes = sop_params
 
     if params[:sharing]
       @sop.policy_or_default
@@ -146,28 +125,11 @@ class SopsController < ApplicationController
 
     respond_to do |format|
       if @sop.save
-        # update attributions
-        Relationship.create_or_update_attributions(@sop, params[:attributions])
-        
-        #update authors
-        AssetsCreator.add_or_update_creator_list(@sop, params[:creators])
-        
+        update_relationships(@sop,params)
+        update_assay_assets(@sop,params[:assay_ids])
         flash[:notice] = "#{t('sop')} metadata was successfully updated."
         format.html { redirect_to sop_path(@sop) }
-        # Update new assay_asset
-        Assay.find(assay_ids).each do |assay|
-          if assay.can_edit?
-            assay.relate(@sop)
-          end
-        end
 
-        #Destroy AssayAssets that aren't needed
-        assay_assets = @sop.assay_assets
-        assay_assets.each do |assay_asset|
-          if assay_asset.assay.can_edit? and !assay_ids.include?(assay_asset.assay_id.to_s)
-            AssayAsset.destroy(assay_asset.id)
-          end
-        end
       else
         format.html { 
           render :action => "edit" 
@@ -175,29 +137,6 @@ class SopsController < ApplicationController
       end
     end
   end
-  
-  # DELETE /sops/1
-  def destroy
-    @sop.destroy
-    
-    respond_to do |format|
-      format.html { redirect_to(sops_path) }
-    end
-  end
-
-  
-  def preview
-    
-    element=params[:element]
-    sop=Sop.find_by_id(params[:id])
-    
-    render :update do |page|
-      if sop.try :can_view?
-        page.replace_html element,:partial=>"assets/resource_preview",:locals=>{:resource=>sop}
-      else
-        page.replace_html element,:text=>"Nothing is selected to preview."
-      end
-    end
-  end
+ 
 
 end

@@ -41,10 +41,6 @@ module Seek
       mime_find(mime)[:name]
     end
 
-    def mime_nice_name2(mime)
-          mime_find2(mime)[:name]
-        end
-
     def mime_icon_key mime
       mime_find(mime)[:icon_key]
     end
@@ -59,10 +55,13 @@ module Seek
     end
 
     def mime_types_for_extension extension
-      mime_map = MIME_MAP.merge(mime_magic_map) { |ext, seek_value, magic_value| seek_value }
       mime_map.keys.select do |k|
         mime_map[k][:extensions].include?(extension.try(:downcase))
       end
+    end
+
+    def mime_map
+      MIME_MAP.merge(mime_magic_map) { |ext, seek_value, magic_value| seek_value }
     end
 
     def mime_magic_map
@@ -83,12 +82,14 @@ module Seek
 
     #Defaults to 'Unknown file type' with blank file icon
     def mime_find(mime)
-      MIME_MAP[mime] || mime_magic_map[mime] || {:name => "Unknown file type", :icon_key => "misc_file"}
     end
 
-    def mime_find2(mime)
-      mime_map = MIME_MAP.merge(mime_magic_map) { |ext, seek_value, magic_value| seek_value }
+    protected
+
+    #Defaults to 'Unknown file type' with blank file icon
+    def mime_find(mime)
       mime_map[mime] || {:name => "Unknown file type", :icon_key => "misc_file"}
     end
+
   end
 end

@@ -30,6 +30,18 @@ class PersonTest < ActiveSupport::TestCase
 
   end
 
+  test "me?" do
+    person = Factory(:person)
+    refute person.me?
+    User.current_user = person.user
+    assert person.me?
+    person = Factory(:brand_new_person)
+    assert_nil person.user
+    refute person.me?
+    User.current_user = nil
+    refute person.me?
+  end
+
   test "programmes" do
     person1=Factory(:person)
     prog = Factory(:programme,:projects=>person1.projects)
@@ -403,8 +415,8 @@ class PersonTest < ActiveSupport::TestCase
     assert_equal 3,p.projects.size
   end
   
-  def test_userless_people
-    peeps=Person.userless_people
+  test "not registered" do
+    peeps=Person.not_registered
     assert_not_nil peeps
     assert peeps.size>0,"There should be some userless people"
     assert_nil(peeps.find{|p| !p.user.nil?},"There should be no people with a non nil user")
@@ -710,4 +722,75 @@ class PersonTest < ActiveSupport::TestCase
     assert_empty p.projects
   end
 
+  test "add to project and institution subscribes to project" do
+    person = Factory (:brand_new_person)
+    inst = Factory(:institution)
+    proj = Factory(:project)
+
+    assert_empty person.project_subscriptions
+    person.add_to_project_and_institution(proj,inst)
+    person.save!
+
+    person.reload
+    assert_includes person.project_subscriptions.map(&:project),proj
+
+  end
+
+  test "add to project and institution" do
+    proj1=Factory :project
+    proj2=Factory :project
+
+    inst1=Factory :institution
+    inst2=Factory :institution
+
+    p1=Factory :brand_new_person
+    p2=Factory :brand_new_person
+    assert_difference("WorkGroup.count",1) do
+      assert_difference("GroupMembership.count",1) do
+        p1.add_to_project_and_institution(proj1,inst1)
+        p1.save!
+      end
+    end
+    p1.reload
+    assert_equal 1,p1.projects.count
+    assert_include p1.projects,proj1
+    assert_equal 1,p1.institutions.count
+    assert_include p1.institutions,inst1
+
+    assert_no_difference("WorkGroup.count") do
+      assert_difference("GroupMembership.count",1) do
+        p2.add_to_project_and_institution(proj1,inst1)
+      end
+    end
+
+    p2.reload
+    assert_equal 1,p2.projects.count
+    assert_include p2.projects,proj1
+    assert_equal 1,p2.institutions.count
+    assert_include p2.institutions,inst1
+
+    assert_difference("WorkGroup.count",1) do
+      assert_difference("GroupMembership.count",1) do
+        p1.add_to_project_and_institution(proj2,inst1)
+      end
+    end
+
+    assert_difference("WorkGroup.count",1) do
+      assert_difference("GroupMembership.count",1) do
+        p1.add_to_project_and_institution(proj1,inst2)
+      end
+    end
+
+    p1.reload
+    assert_equal 2,p1.projects.count
+    assert_include p1.projects,proj2
+    assert_equal 2,p1.institutions.count
+    assert_include p1.institutions,inst2
+
+    assert_no_difference("WorkGroup.count") do
+      assert_no_difference("GroupMembership.count") do
+        p1.add_to_project_and_institution(proj1,inst1)
+      end
+    end
+  end
 end

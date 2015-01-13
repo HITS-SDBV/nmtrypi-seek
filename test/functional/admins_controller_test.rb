@@ -130,7 +130,7 @@ class AdminsControllerTest < ActionController::TestCase
 
     assert !quentin.is_admin?
     assert aaron.is_admin?
-    
+    assert aaron.is_admin?
   end
 
   test "get project content stats" do
@@ -211,4 +211,31 @@ class AdminsControllerTest < ActionController::TestCase
     assert Seek::Config.project_news_enabled
   end
 
+  test "update doi locked, should be stored as int" do
+    login_as(:quentin)
+    post :update_features_enabled, :time_lock_doi_for => "6"
+    assert_equal 6,Seek::Config.time_lock_doi_for
+  end
+
+  test "update_redirect_to for update_features_enabled" do
+    login_as(:quentin)
+    post :update_features_enabled, :time_lock_doi_for => '1', :port => '25'
+    assert_redirected_to admin_path
+    assert_nil flash[:error]
+
+    post :update_features_enabled, :time_lock_doi_for => ''
+    assert_redirected_to features_enabled_admin_path
+    assert_not_nil flash[:error]
+  end
+
+  test "update_redirect_to for update_home_setting" do
+    login_as(:quentin)
+    post :update_home_settings, :project_news_number_of_entries => '10', :community_news_number_of_entries => '10'
+    assert_redirected_to admin_path
+    assert_nil flash[:error]
+
+    post :update_home_settings, :project_news_number_of_entries => '10', :community_news_number_of_entries => ''
+    assert_redirected_to home_settings_admin_path
+    assert_not_nil flash[:error]
+  end
 end

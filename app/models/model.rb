@@ -1,4 +1,4 @@
-require 'acts_as_asset'
+
 require 'acts_as_versioned_resource'
 require 'explicit_versioning'
 require 'title_trimmer'
@@ -24,6 +24,8 @@ class Model < ActiveRecord::Base
   end if Seek::Config.solr_enabled
 
   acts_as_asset
+
+  include Seek::Dois::DoiGeneration
 
   scope :default_order, order("title")
 
@@ -111,7 +113,7 @@ class Model < ActiveRecord::Base
         r
       end
 
-      fields = [:fs_search_fields, :spreadsheet_contents_for_search,:spreadsheet_annotation_search_fields, :searchable_tags]
+      fields = [:fs_search_fields, :content_blob,:spreadsheet_annotation_search_fields, :searchable_tags]
 
       search_terms.each do |key|
         key = Seek::Search::SearchTermFilter.filter(key)

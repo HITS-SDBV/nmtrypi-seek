@@ -45,21 +45,14 @@ class ProjectsControllerTest < ActionController::TestCase
     end
   end
 
-	def test_should_create_project
-		assert_difference('Project.count') do
-			post :create, :project => {:title=>"test"}
-		end
-
-		assert_redirected_to project_path(assigns(:project))
-	end
-
   def test_should_create_project
-    parent_id = Factory(:project,:title=>"Test Parent").id
+    parent = Factory(:project,:title=>"Test Parent")
 		assert_difference('Project.count') do
-			post :create, :project => {:title=>"test",:parent_id=>parent_id}
+			post :create, :project => {:title=>"test",:parent_id=>parent.id}
 		end
 
 		assert_redirected_to project_path(assigns(:project))
+    assert_includes assigns(:project).ancestors,parent
 	end
 
 	def test_should_show_project
@@ -127,8 +120,7 @@ class ProjectsControllerTest < ActionController::TestCase
     assert_no_difference('Project.count') do
       delete :destroy, :id => project
     end
-    assert_redirected_to project_path(project)
-    assert_not_nil flash[:error]
+    refute_nil flash[:error]
   end
   
  def test_non_admin_should_not_manage_projects
@@ -512,7 +504,7 @@ class ProjectsControllerTest < ActionController::TestCase
 		get :show,:id=>project
 		assert_select "ul.sectionIcons" do
 			assert_select "span.icon" do
-				assert_select "a[href=?]",admin_project_path(project),:text=>/Project administration/,:count=>0
+				assert_select "a[href=?]",admin_members_project_path(project),:count=>0
 			end
 		end
 	end
@@ -525,7 +517,7 @@ class ProjectsControllerTest < ActionController::TestCase
 		get :show,:id=>project
 		assert_select "ul.sectionIcons" do
 			assert_select "span.icon" do
-				assert_select "a[href=?]",admin_project_path(project),:text=>/#{I18n.t('project')} administration/,:count=>1
+				assert_select "a[href=?]",admin_members_project_path(project),:text=>/Administer #{I18n.t('project')} members/,:count=>1
 			end
 		end
 	end
@@ -560,7 +552,7 @@ class ProjectsControllerTest < ActionController::TestCase
 
     get :show, :id => project
     assert_response :success
-    assert_select "a", :text => /#{I18n.t('project')} administration/, :count => 1
+    assert_select "a[href=?]",admin_members_project_path(project), :text => /Administer #{I18n.t('project')} members/, :count => 1
 
     get :admin, :id => project
     assert_response :success
@@ -909,6 +901,7 @@ class ProjectsControllerTest < ActionController::TestCase
     new_institution = Factory(:institution)
     new_person = Factory(:person)
     new_person2 = Factory(:person)
+
     assert_no_difference("GroupMembership.count") do #2 deleted, 2 added
       assert_difference("WorkGroup.count",1) do
         post :update_members,
@@ -932,6 +925,12 @@ class ProjectsControllerTest < ActionController::TestCase
     assert_includes new_person.institutions,new_institution
     assert_includes new_person2.institutions,new_institution
     assert_includes project.work_groups,wg
+
+    assert_includes new_person.project_subscriptions.collect(&:project),project
+    assert_includes new_person2.project_subscriptions.collect(&:project),project
+
+    refute_includes person.project_subscriptions.collect(&:project),project
+    refute_includes person2.project_subscriptions.collect(&:project),project
 
   end
 

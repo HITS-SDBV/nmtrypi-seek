@@ -72,30 +72,51 @@ class AdminsController < ApplicationController
     Seek::Config.piwik_analytics_id_site = params[:piwik_analytics_id_site]
     Seek::Config.piwik_analytics_url = params[:piwik_analytics_url]
 
+    Seek::Config.doi_minting_enabled = string_to_boolean params[:doi_minting_enabled]
+    Seek::Config.datacite_username = params[:datacite_username]
+    Seek::Config.datacite_password_encrypt params[:datacite_password]
+    Seek::Config.datacite_url = params[:datacite_url]
+    Seek::Config.doi_prefix = params[:doi_prefix]
+    Seek::Config.doi_suffix = params[:doi_suffix]
+
+    time_lock_doi_for = params[:time_lock_doi_for]
+    time_lock_is_integer = only_integer time_lock_doi_for, 'time lock doi for'
+    Seek::Config.time_lock_doi_for = time_lock_doi_for.to_i if time_lock_is_integer
+
     port = params[:port]
     port_is_integer = only_integer(port, 'port')
     Seek::Config.set_smtp_settings('port', port) if port_is_integer
 
     Seek::Util.clear_cached
-    update_redirect_to port_is_integer, 'features_enabled'
+
+    validation_flag = time_lock_is_integer && port_is_integer
+    update_redirect_to validation_flag, 'features_enabled'
   end
 
   def update_home_settings
     Seek::Config.project_news_enabled = string_to_boolean params[:project_news_enabled]
     Seek::Config.project_news_feed_urls = params[:project_news_feed_urls]
-    Seek::Config.project_news_number_of_entries = params[:project_news_number_of_entries] if only_integer params[:project_news_number_of_entries], "#{t('project')} news items"
+
+    project_entries = params[:project_news_number_of_entries]
+    is_project_entries_integer = only_integer project_entries, "#{t('project')} news items"
+    Seek::Config.project_news_number_of_entries = project_entries if is_project_entries_integer
 
     Seek::Config.community_news_enabled = string_to_boolean params[:community_news_enabled]
     Seek::Config.community_news_feed_urls = params[:community_news_feed_urls]
-    Seek::Config.community_news_number_of_entries = params[:community_news_number_of_entries] if only_integer params[:community_news_number_of_entries], 'community news items'
+
+    community_entries = params[:community_news_number_of_entries]
+    is_community_entries_integer = only_integer community_entries, 'community news items'
+    Seek::Config.community_news_number_of_entries = community_entries if is_community_entries_integer
 
     Seek::Config.home_description = params[:home_description]
     begin
       Seek::FeedReader.clear_cache
-    rescue e
+    rescue => e
       logger.error "Error whilst attempting to clear feed cache #{e.message}"
     end
-    update_redirect_to true, 'home_settings'
+
+    validation_flag = is_project_entries_integer && is_community_entries_integer
+    update_redirect_to validation_flag, 'home_settings'
   end
 
   def rebrand
@@ -325,11 +346,11 @@ class AdminsController < ApplicationController
         when "users"
           format.html { render :partial => "admins/user_stats_list", :locals => { :title => title, :collection => collection} }
         when "content_stats"
-          format.html { render :partial => "admins/content_stats", :locals => {:stats => Seek::ContentStats.generate} }
+          format.html { render :partial => "admins/content_stats", :locals => {:stats => Seek::Stats::ContentStats.generate} }
         when "activity_stats"
-          format.html { render :partial => "admins/activity_stats", :locals => {:stats => Seek::ActivityStats.new} }
+          format.html { render :partial => "admins/activity_stats", :locals => {:stats => Seek::Stats::ActivityStats.new} }
         when "search_stats"
-          format.html { render :partial => "admins/search_stats", :locals => {:stats => Seek::SearchStats.new} }
+          format.html { render :partial => "admins/search_stats", :locals => {:stats => Seek::Stats::SearchStats.new} }
         when "job_queue"
           format.html { render :partial => "admins/job_queue" }
         when "auth_consistency"

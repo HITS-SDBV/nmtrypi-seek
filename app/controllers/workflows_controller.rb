@@ -15,6 +15,7 @@ class WorkflowsController < ApplicationController
 
   include Seek::Publishing::PublishingCommon
   include Seek::BreadCrumbs
+  include Seek::DataciteDoi
 
   def index
     respond_to do |format|
@@ -80,14 +81,8 @@ class WorkflowsController < ApplicationController
         # Pull title and from t2flow
         extract_workflow_metadata
 
-        # update attributions
-        Relationship.create_or_update_attributions(@workflow, params[:attributions])
+        update_relationships(@workflow,params)
 
-        # update related publications
-        Relationship.create_or_update_attributions(@workflow, params[:related_publication_ids].collect { |i| ["Publication", i.split(",").first] }, Relationship::RELATED_TO_PUBLICATION) unless params[:related_publication_ids].nil?
-
-        #Add creators
-        AssetsCreator.add_or_update_creator_list(@workflow, params[:creators])
         respond_to do |format|
           flash[:notice] = "#{t('workflow')} was successfully uploaded and saved." if flash.now[:notice].nil?
           format.html { redirect_to describe_ports_workflow_path(@workflow) }
@@ -105,17 +100,9 @@ class WorkflowsController < ApplicationController
   end
 
   def update
-    if params[:workflow]
-      [:contributor_id, :contributor_type, :original_filename, :content_type, :content_blob_id, :created_at, :updated_at, :last_used_at].each do |column_name|
-        params[:workflow].delete(column_name)
-      end
+    workflow_params=filter_protected_update_params(params[:workflow])
 
-      params[:workflow][:last_used_at] = Time.now
-    end
-
-    publication_params    = params[:related_publication_ids].nil?? [] : params[:related_publication_ids].collect { |i| ["Publication", i.split(",").first]}
-
-    @workflow.attributes = params[:workflow]
+    @workflow.attributes = workflow_params
 
      if params[:sharing]
        @workflow.policy_or_default
@@ -127,14 +114,7 @@ class WorkflowsController < ApplicationController
 
       extract_workflow_metadata
 
-      # update attributions
-      Relationship.create_or_update_attributions(@workflow, params[:attributions])
-
-      # update related publications
-      Relationship.create_or_update_attributions(@workflow, publication_params, Relationship::RELATED_TO_PUBLICATION)
-
-      #Add creators
-      AssetsCreator.add_or_update_creator_list(@workflow, params[:creators])
+      update_relationships(@workflow,params)
 
       respond_to do |format|
         flash[:notice] = "#{t('workflow')} was successfully updated." if flash.now[:notice].nil?
@@ -164,19 +144,6 @@ class WorkflowsController < ApplicationController
       respond_to do |format|
         format.html { redirect_to(workflows_path) }
         format.xml  { head :forbidden }
-      end
-    end
-  end
-
-  def preview
-    element=params[:element]
-    workflow=Workflow.find_by_id(params[:id])
-
-    render :update do |page|
-      if workflow.try :can_view?
-        page.replace_html element,:partial=>"assets/resource_preview",:locals=>{:resource=>workflow}
-      else
-        page.replace_html element,:text=>"Nothing is selected to preview."
       end
     end
   end

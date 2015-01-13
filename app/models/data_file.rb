@@ -1,4 +1,4 @@
-require 'acts_as_asset'
+
 require 'acts_as_versioned_resource'
 require 'explicit_versioning'
 require 'title_trimmer'
@@ -10,14 +10,17 @@ class DataFile < ActiveRecord::Base
   include Seek::Data::SpreadsheetExplorerRepresentation
   include Seek::Rdf::RdfGeneration
 
+
   attr_accessor :parent_name
 
   #searchable must come before acts_as_asset call
   searchable(:auto_index=>false) do
-    text :spreadsheet_annotation_search_fields,:fs_search_fields,:spreadsheet_contents_for_search
+    text :spreadsheet_annotation_search_fields,:fs_search_fields
   end if Seek::Config.solr_enabled
 
   acts_as_asset
+
+  include Seek::Dois::DoiGeneration
 
    scope :default_order, order('title')
 
@@ -195,7 +198,7 @@ class DataFile < ActiveRecord::Base
     results = {}
 
     if Seek::Config.solr_enabled && contains_extractable_spreadsheet?
-      search_terms = spreadsheet_annotation_search_fields | spreadsheet_contents_for_search | fs_search_fields | searchable_tags
+      search_terms = spreadsheet_annotation_search_fields | content_blob_search_terms | fs_search_fields | searchable_tags
       #make the array uniq! case-insensistive whilst mainting the original case
       dc = []
       search_terms = search_terms.inject([]) do |r,v|

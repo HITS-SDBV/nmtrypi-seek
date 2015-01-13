@@ -296,6 +296,9 @@ SEEK::Application.routes.draw do
       post :new_version
       #MERGENOTE - this is a destroy, and should be the destory method, not post since we are not updating or creating something.
       post :destroy_version
+      get :mint_doi_confirm
+      get :minted_doi
+      post :mint_doi
     end
     resources :studied_factors do
       collection do
@@ -329,7 +332,7 @@ SEEK::Application.routes.draw do
       post :request_resource
       post :update_annotations_ajax
       post :new_version
-      post :destroy_version
+      delete :destroy_version
     end
     resources :content_blobs do
       member do
@@ -343,7 +346,6 @@ SEEK::Application.routes.draw do
 
   resources :models do
     collection do
-      get :build
       get :preview
       post :test_asset_url
       post :items_for_result
@@ -352,7 +354,6 @@ SEEK::Application.routes.draw do
     member do
       get :compare_versions
       post :compare_versions
-      get :builder
       post :check_related_items
       get :visualise
       post :check_gatekeeper_required
@@ -360,16 +361,17 @@ SEEK::Application.routes.draw do
       get :matching_data
       get :published
       post :publish_related_items
-      post :submit_to_jws
       post :new_version
       post :submit_to_sycamore
       post :export_as_xgmml
       post :update_annotations_ajax
-      post :simulate
       post :publish
       post :execute
       post :request_resource
-      post :destroy_version
+      post :simulate
+      delete :destroy_version
+      post :mint_doi
+      get :mint_doi_confirm
     end
     resources :model_images do
       collection do
@@ -407,7 +409,9 @@ SEEK::Application.routes.draw do
       post :request_resource
       post :update_annotations_ajax
       post :new_version
-      post :destroy_version
+      delete :destroy_version
+      post :mint_doi
+      get :mint_doi_confirm
     end
     resources :experimental_conditions do
       collection do
@@ -555,6 +559,8 @@ SEEK::Application.routes.draw do
 #      get :view_items_in_tab
       post :favourite
       delete :favourite_delete
+      post :mint_doi
+      get :mint_doi_confirm
     end
 
     resources :runs, :controller => 'taverna_player/runs'
