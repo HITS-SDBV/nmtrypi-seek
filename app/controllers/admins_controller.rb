@@ -64,6 +64,9 @@ class AdminsController < ApplicationController
 
     Seek::Config.hide_details_enabled = string_to_boolean params[:hide_details_enabled]
     Seek::Config.activation_required_enabled = string_to_boolean params[:activation_required_enabled]
+    Seek::Config.public_people_profiles_enabled =   string_to_boolean params[:public_people_profiles_enabled]
+    Seek::Config.admin_impersonation_enabled =  string_to_boolean params[:admin_impersonation_enabled]
+
 
     Seek::Config.google_analytics_tracker_id = params[:google_analytics_tracker_id]
     Seek::Config.google_analytics_enabled = string_to_boolean params[:google_analytics_enabled]

@@ -124,6 +124,12 @@ SEEK::Application.configure do
   #MERGENOTE - why are these here? they should be in the database under the Scale model. Maybe an old relic
   Seek::Config.default :scales,["organism","liver","liverLobule","intercellular","cell"]
 
+ # Admin setting to allow user impersonation, useful for debugging
+  Seek::Config.default :admin_impersonation_enabled, false
+
+  # Show or hide people profiles
+  Seek::Config.default :public_people_profiles_enabled, false
+
   #magic guest is a special user required by BioVel, where a logged out user adopts a special guest user, but still appears to be logged out
   Seek::Config.default :magic_guest_enabled,false
 

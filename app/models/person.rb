@@ -294,7 +294,7 @@ class Person < ActiveRecord::Base
   end
 
   def can_view? user = User.current_user
-    !user.nil? || !Seek::Config.is_virtualliver
+    !user.nil? || Seek::Config.public_people_profiles_enabled
   end
 
   def can_edit? user = User.current_user
