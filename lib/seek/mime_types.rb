@@ -82,12 +82,6 @@ module Seek
 
     #Defaults to 'Unknown file type' with blank file icon
     def mime_find(mime)
-    end
-
-    protected
-
-    #Defaults to 'Unknown file type' with blank file icon
-    def mime_find(mime)
       mime_map[mime] || {:name => "Unknown file type", :icon_key => "misc_file"}
     end
 
