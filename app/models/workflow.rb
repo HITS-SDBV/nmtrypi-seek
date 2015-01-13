@@ -1,4 +1,4 @@
-require 'acts_as_asset'
+
 require 'acts_as_versioned_resource'
 require 'explicit_versioning'
 require 'title_trimmer'
@@ -9,6 +9,8 @@ require 't2flow/dot'
 class Workflow < ActiveRecord::Base
 
   acts_as_asset
+
+  include Seek::Dois::DoiGeneration
 
   scope :default_order, order('title')
 

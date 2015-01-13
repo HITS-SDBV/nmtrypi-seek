@@ -19,11 +19,6 @@ class PresentationsController < ApplicationController
     if handle_upload_data
       comments=params[:revision_comment]
 
-      #@presentation.content_blob = ContentBlob.new(:tmp_io_object => @tmp_io_object, :url=>@data_url)
-      #@presentation.content_type = params[:presentation][:content_type]
-      #@presentation.original_filename = params[:presentation][:original_filename]
-
-
       respond_to do |format|
         if @presentation.save_as_new_version(comments)
           create_content_blobs
@@ -71,14 +66,7 @@ class PresentationsController < ApplicationController
 
           create_content_blobs
 
-          # update attributions
-          Relationship.create_or_update_attributions(@presentation, params[:attributions])
-
-          # update related publications
-          Relationship.create_or_update_attributions(@presentation, params[:related_publication_ids].collect {|i| ["Publication", i.split(",").first]}, Relationship::RELATED_TO_PUBLICATION) unless params[:related_publication_ids].nil?
-
-          #Add creators
-          AssetsCreator.add_or_update_creator_list(@presentation, params[:creators])
+          update_relationships(@presentation,params)
 
           if !@presentation.parent_name.blank?
             render :partial=>"assets/back_to_fancy_parent", :locals=>{:child=>@presentation, :parent_name=>@presentation.parent_name}
@@ -140,8 +128,6 @@ class PresentationsController < ApplicationController
       params[:presentation][:last_used_at] = Time.now
     end
 
-    publication_params    = params[:related_publication_ids].nil?? [] : params[:related_publication_ids].collect { |i| ["Publication", i.split(",").first]}
-
     update_annotations @presentation
     update_scales @presentation
 
@@ -156,14 +142,7 @@ class PresentationsController < ApplicationController
     respond_to do |format|
       if @presentation.save
 
-        # update attributions
-        Relationship.create_or_update_attributions(@presentation, params[:attributions])
-
-        # update related publications
-        Relationship.create_or_update_attributions(@presentation,publication_params, Relationship::RELATED_TO_PUBLICATION)
-
-        #update creators
-        AssetsCreator.add_or_update_creator_list(@presentation, params[:creators])
+        update_relationships(@presentation,params)
 
         flash[:notice] = "#{t('presentation')} metadata was successfully updated."
         format.html { redirect_to presentation_path(@presentation) }
@@ -188,29 +167,5 @@ class PresentationsController < ApplicationController
     end
   end
 
-  # DELETE /presentations/1
-  # DELETE /presentations/1.xml
-  def destroy
-    @presentation.destroy
-
-    respond_to do |format|
-      format.html { redirect_to(presentations_path) }
-      format.xml  { head :ok }
-    end
-  end
-
-  def preview
-
-    element = params[:element]
-    presentation = Presentation.find_by_id(params[:id])
-
-    render :update do |page|
-      if presentation.try :can_view?
-        page.replace_html element,:partial=>"assets/resource_preview",:locals=>{:resource=>presentation}
-      else
-        page.replace_html element,:text=>"Nothing is selected to preview."
-      end
-    end
-  end
 
 end

@@ -41,7 +41,6 @@ module Seek
       mime_find(mime)[:name]
     end
 
-
     def mime_icon_key mime
       mime_find(mime)[:icon_key]
     end
@@ -66,34 +65,25 @@ module Seek
     end
 
     def mime_magic_map
-      mime_magic_map = {}
+       mime_magic_map = {}
       MimeMagic::EXTENSIONS.each do |extension, mime|
         if found = MimeMagic.by_extension(extension)
-          icon_key = "#{extension}_file"
-          icon_found = Seek::ImageFileDictionary.instance.image_filename_for_key(icon_key)
-          icon_key = icon_found ? icon_key : missing_mimeicon[:icon_key]
           mime_magic_map[mime] = {}
           mime_magic_map[mime][:name] = found.comment
-          mime_magic_map[mime][:icon_key] = icon_key
+          mime_magic_map[mime][:icon_key] = "#{extension}_file"
           mime_magic_map[mime][:extensions] = ["#{extension}"]
         end
       end
 
-      mime_magic_map
+       mime_magic_map
     end
 
     protected
+
     #Defaults to 'Unknown file type' with blank file icon
     def mime_find(mime)
       mime_map[mime] || {:name => "Unknown file type", :icon_key => "misc_file"}
     end
 
-    def unknown_mime
-      {:name => "Unknown file type", :icon_key => "misc_file"}
-    end
-
-    def missing_mimeicon
-       {:icon_key => "missing_file"}
-    end
   end
 end

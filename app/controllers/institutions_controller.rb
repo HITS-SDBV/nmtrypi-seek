@@ -3,6 +3,7 @@ class InstitutionsController < ApplicationController
   include WhiteListHelper
   include IndexPager
   include CommonSweepers
+  include Seek::DestroyHandling
 
   before_filter :find_requested_item, :only=>[:show,:edit,:update, :destroy]
   before_filter :find_assets, :only=>[:index]
@@ -73,10 +74,6 @@ class InstitutionsController < ApplicationController
   # PUT /institutions/1.xml
   def update
 
-    # extra check required to see if any avatar was actually selected (or it remains to be the default one)
-    avatar_id = params[:institution].delete(:avatar_id).to_i
-    @institution.avatar_id = ((avatar_id.kind_of?(Numeric) && avatar_id > 0) ? avatar_id : nil)
-
     respond_to do |format|
       if @institution.update_attributes(params[:institution])
         expire_resource_list_item_content
@@ -89,24 +86,6 @@ class InstitutionsController < ApplicationController
       end
     end
   end
-
-  # DELETE /institutions/1
-  # DELETE /institutions/1.xml
-  def destroy
-
-    respond_to do |format|
-      if @institution.can_delete?
-        @institution.destroy
-        format.html { redirect_to(institutions_url) }
-        format.xml { head :ok }
-      else
-        flash[:error] = "Unable to delete this Institution"
-        format.html { redirect_to(institution_url) }
-        format.xml { render :xml => "Unable to delete this Institution", :status => :unprocessable_entity }
-      end
-    end
-  end
-
   
   # returns a list of all institutions in JSON format
   def request_all

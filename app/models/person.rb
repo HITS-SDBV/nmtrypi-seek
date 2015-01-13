@@ -28,13 +28,13 @@ class Person < ActiveRecord::Base
   has_and_belongs_to_many :disciplines
 
   has_many :group_memberships, :dependent => :destroy
+  has_many :work_groups, :through=>:group_memberships
+  has_many :institutions,:through => :work_groups, :uniq => true
 
   has_many :favourite_group_memberships, :dependent => :destroy
   has_many :favourite_groups, :through => :favourite_group_memberships
 
-  has_many :work_groups, :through=>:group_memberships,
-           :after_add => [:subscribe_to_work_group_project, :touch_work_group_project],
-           :after_remove => [:unsubscribe_to_work_group_project, :touch_work_group_project]
+
   has_many :studies_for_person, :as=>:contributor, :class_name=>"Study"  
   has_many :assays,:foreign_key => :owner_id
   has_many :investigations_for_person,:as=>:contributor, :class_name=>"Investigation"
@@ -62,38 +62,11 @@ class Person < ActiveRecord::Base
   scope :without_group, :include=>:group_memberships, :conditions=>"group_memberships.person_id IS NULL"
   scope :registered,:include=>:user,:conditions=>"users.person_id != 0"
 
-  #FIXME: change userless_people to use this scope - unit tests
   scope :not_registered,:include=>:user,:conditions=>"users.person_id IS NULL"
 
   alias_attribute :webpage,:web_page
 
-  has_many :project_subscriptions, :before_add => proc {|person, ps| ps.person = person},:uniq=> true, :dependent => :destroy
-  accepts_nested_attributes_for :project_subscriptions, :allow_destroy => true
-
-  has_many :subscriptions,:dependent => :destroy
-
-  def subscribe_to_work_group_project wg
-    #subscribe direct project
-    project_subscriptions.build :project => wg.project unless project_subscriptions.detect{|ps| ps.project_id == wg.project_id}
-
-  end
-
-  def unsubscribe_to_work_group_project wg
-     # clear project_subscriptions and all subscriptions if person is not project member
-    if work_groups.empty?
-          project_subscriptions.delete_all
-          subscriptions.delete_all
-    elsif ps = project_subscriptions.detect{|ps| ps.project_id == wg.project_id}
-      #unsunscribe direct project subscriptions
-      project_subscriptions.delete ps
-    end
-
-  end
-
-  #touch project to expire cache for project members on project show page?
-  def touch_work_group_project wg
-    wg.project.touch
-  end
+  include Seek::Subscriptions::PersonProjectSubscriptions
 
   after_commit :queue_update_auth_table
 
@@ -175,12 +148,6 @@ class Person < ActiveRecord::Base
     end
   end
 
-
-  def self.userless_people
-    p=Person.all
-    return p.select{|person| person.user.nil?}
-  end
-
   #returns an array of Person's where the first and last name match
   def self.duplicates
     people=Person.all
@@ -217,22 +184,6 @@ class Person < ActiveRecord::Base
     end
   end
 
-  def people_i_may_know
-    res=[]
-    institutions.each do |i|
-      i.people.each do |p|
-        res << p unless p==self or res.include? p
-      end
-    end
-
-    projects.each do |proj|
-      proj.people.each do |p|
-        res << p unless p==self or res.include? p
-      end
-    end
-    return  res
-  end
-
   def can_create_new_items?
     member?
   end
@@ -248,11 +199,6 @@ class Person < ActiveRecord::Base
   def sweeps
     self.try(:user).try(:sweeps) || []
   end
-
-  def institutions
-    work_groups.collect {|wg| wg.institution }.uniq
-  end
-
 
   def projects
       #updating workgroups doesn't change groupmemberships until you save. And vice versa.
@@ -336,6 +282,10 @@ class Person < ActiveRecord::Base
     !match.nil?
   end
 
+  def me?
+    user && user==User.current_user
+  end
+
   #admin can administer other people, project manager can administer other people except other admins and themself
   def can_be_administered_by?(user)
     person = user.try(:person)
@@ -344,7 +294,7 @@ class Person < ActiveRecord::Base
   end
 
   def can_view? user = User.current_user
-    !user.nil? || !Seek::Config.is_virtualliver
+    !user.nil? || Seek::Config.public_people_profiles_enabled
   end
 
   def can_edit? user = User.current_user
@@ -442,6 +392,18 @@ class Person < ActiveRecord::Base
         end
       end
     end
+  end
+
+  #a utitlity method to simply add a person to a project and institution
+  #will automatically handle the WorkGroup and GroupMembership, and avoid creating duplicates
+  def add_to_project_and_institution project, institution
+    group = WorkGroup.where(:project_id=>project.id,:institution_id=>institution.id).first
+    group ||= WorkGroup.new :project=>project, :institution=>institution
+
+    membership = GroupMembership.where(:person_id=>id,:work_group_id=>group.id).first
+    membership ||= GroupMembership.new :person=>self,:work_group=>group
+
+    self.group_memberships << membership
   end
 
   private

@@ -11,6 +11,20 @@ class WorkflowsControllerTest < ActionController::TestCase
     login_as @member
   end
 
+  test "show" do
+    workflow = Factory :workflow,:contributor=>@member
+    get :show,:id=>workflow.id
+    assert_response :success
+    assert_select "h1",:text=>/#{workflow.title}/
+  end
+
+  test "edit" do
+    workflow = Factory :workflow,:contributor=>@member
+    get :edit,:id=>workflow.id
+    assert_response :success
+    assert_select "h1",:text=>/#{workflow.title}/
+  end
+
   test "extracts metadata on create" do
     #MERGENOTE - this is currently failing, but only on travis. Skipping for now to revisit later once everything else is coming together.
     skip("Revisit this later")
@@ -23,6 +37,23 @@ class WorkflowsControllerTest < ActionController::TestCase
 
     assert_equal 3, assigns(:workflow).input_ports.size
     assert_equal 'Hello Anyone With 3 Inputs', assigns(:workflow).title
+  end
+
+  test 'public visibility' do
+    workflow = Factory :workflow,:contributor=>@member, :policy => Factory(:public_policy)
+    get :show,:id=>workflow.id
+    assert_response :success
+    assert_select "span[class=visibility public]",:text=>/Public/
+
+    policy = workflow.policy
+    policy.sharing_scope = Policy::ALL_SYSMO_USERS
+    policy.access_type = Policy::VISIBLE
+    policy.save
+    workflow.reload
+
+    get :show,:id=>workflow.id
+    assert_response :success
+    assert_select "span[class=visibility public]",:text=>/Public/, :count => 0
   end
 
 end

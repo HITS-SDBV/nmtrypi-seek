@@ -2,13 +2,14 @@ class AssaysController < ApplicationController
 
   include DotGenerator
   include IndexPager
-  include Seek::AnnotationCommon
+  include Seek::AssetsCommon
 
+  before_filter :assays_enabled?
 
   before_filter :find_assets, :only=>[:index]
   before_filter :find_and_authorize_requested_item, :only=>[:edit, :update, :destroy, :show,:new_object_based_on_existing_one]
 
-  #project_membership_required_appended is an alias to project_membership_required, but is necesary to include the actions
+  #project_membership_required_appended is an alias to project_membership_required, but is necessary to include the actions
   #defined in the application controller
   before_filter :project_membership_required_appended, :only=>[:new_object_based_on_existing_one]
 
@@ -96,18 +97,9 @@ class AssaysController < ApplicationController
 
   def create
     params[:assay_class_id] ||= AssayClass.for_type("experimental").id
-    @assay        = Assay.new(params[:assay])
+    @assay = Assay.new(params[:assay])
 
-    organisms     = params[:assay_organism_ids] || []
-    sop_ids       = params[:assay_sop_ids] || []
-    data_file_ids = params[:data_file_ids] || []
-    model_ids     = params[:model_ids] || []
-
-     Array(organisms).each do |text|
-      o_id, strain_title, strain_id, culture_growth_type_text,t_id,t_title=text.split(",")
-      culture_growth=CultureGrowthType.find_by_title(culture_growth_type_text)
-      @assay.associate_organism(o_id, strain_id, culture_growth,t_id,t_title)
-    end
+    update_assay_organisms @assay, params
 
     @assay.owner=current_user.person
 
@@ -117,37 +109,24 @@ class AssaysController < ApplicationController
     update_scales @assay
 
 
-      if @assay.save
-        Array(data_file_ids).each do |text|
-          a_id, r_type = text.split(",")
-          d = DataFile.find(a_id)
-          @assay.relate(d, RelationshipType.find_by_title(r_type)) if d.can_view?
-        end
-        Array(model_ids).each do |a_id|
-          m = Model.find(a_id)
-          @assay.relate(m) if m.can_view?
-        end
-        Array(sop_ids).each do |a_id|
-          s = Sop.find(a_id)
-          @assay.relate(s) if s.can_view?
-        end
+    if @assay.save
+      update_assets_linked_to_assay @assay, params
 
-        # update related publications
-        Relationship.create_or_update_attributions(@assay, params[:related_publication_ids].collect { |i| ["Publication", i.split(",").first] }, Relationship::RELATED_TO_PUBLICATION) unless params[:related_publication_ids].nil?
+      update_relationships(@assay, params)
 
-        #required to trigger the after_save callback after the assets have been associated
-        @assay.save
-        if @assay.create_from_asset =="true"
-          render :action=>:update_assays_list
-        else
-          respond_to do |format|
+      #required to trigger the after_save callback after the assets have been associated
+      @assay.save
+      if @assay.create_from_asset =="true"
+        render :action => :update_assays_list
+      else
+        respond_to do |format|
           flash[:notice] = "#{t('assays.assay')} was successfully created."
           format.html { redirect_to(@assay) }
           format.xml { render :xml => @assay, :status => :created, :location => @assay }
-          end
         end
-      else
-        respond_to do |format|
+      end
+    else
+      respond_to do |format|
         format.html { render :action => "new" }
         format.xml { render :xml => @assay.errors, :status => :unprocessable_entity }
       end
@@ -155,29 +134,12 @@ class AssaysController < ApplicationController
   end
 
   def update
-
-    #FIXME: would be better to resolve the differences, rather than keep clearing and reading the assets and organisms
-    #DOES resolve differences for assets now
-    organisms             = params[:assay_organism_ids]||[]
-
-    organisms             = params[:assay_organism_ids] || []
-    sop_ids               = params[:assay_sop_ids] || []
-    data_file_ids         = params[:data_file_ids] || []
-    model_ids             = params[:model_ids] || []
-    publication_params    = params[:related_publication_ids].nil?? [] : params[:related_publication_ids].collect { |i| ["Publication", i.split(",").first]}
-
-    @assay.assay_organisms = []
-    Array(organisms).each do |text|
-          o_id, strain,strain_id,culture_growth_type_text,t_id,t_title=text.split(",")
-          culture_growth=CultureGrowthType.find_by_title(culture_growth_type_text)
-          @assay.associate_organism(o_id, strain_id, culture_growth,t_id,t_title)
-    end
+    update_assay_organisms @assay, params
 
     update_annotations @assay
     update_scales @assay
 
-    assay_assets_to_keep = [] #Store all the asset associations that we are keeping in this
-    @assay.attributes = params[:assay]
+    @assay.update_attributes(params[:assay])
     if params[:sharing]
       @assay.policy_or_default
       @assay.policy.set_attributes_with_sharing params[:sharing], @assay.projects
@@ -185,25 +147,9 @@ class AssaysController < ApplicationController
 
     respond_to do |format|
       if @assay.save
-        Array(data_file_ids).each do |text|
-          a_id, r_type = text.split(",")
-          d = DataFile.find(a_id)
-          assay_assets_to_keep << @assay.relate(d, RelationshipType.find_by_title(r_type)) if d.can_view?
-        end
-        Array(model_ids).each do |a_id|
-          m = Model.find(a_id)
-          assay_assets_to_keep << @assay.relate(m) if m.can_view?
-        end
-        Array(sop_ids).each do |a_id|
-          s = Sop.find(a_id)
-          assay_assets_to_keep << @assay.relate(s) if s.can_view?
-        end
-        #Destroy AssayAssets that aren't needed
-        (@assay.assay_assets - assay_assets_to_keep.compact).each { |a| a.destroy }
+        update_assets_linked_to_assay @assay, params
 
-        # update related publications
-
-        Relationship.create_or_update_attributions(@assay,publication_params, Relationship::RELATED_TO_PUBLICATION)
+        update_relationships(@assay, params)
 
         @assay.save!
 
@@ -211,11 +157,43 @@ class AssaysController < ApplicationController
         format.html { redirect_to(@assay) }
         format.xml { head :ok }
       else
-
         format.html { render :action => "edit" }
         format.xml { render :xml => @assay.errors, :status => :unprocessable_entity }
       end
     end
+  end
+
+  def update_assay_organisms assay,params
+    organisms             = params[:assay_organism_ids] || []
+
+    assay.assay_organisms = []
+    Array(organisms).each do |text|
+      o_id, strain,strain_id,culture_growth_type_text,t_id,t_title=text.split(",")
+      culture_growth=CultureGrowthType.find_by_title(culture_growth_type_text)
+      assay.associate_organism(o_id, strain_id, culture_growth,t_id,t_title)
+    end
+  end
+
+  def update_assets_linked_to_assay assay,params
+    sop_ids               = params[:assay_sop_ids] || []
+    data_file_ids         = params[:data_file_ids] || []
+    model_ids             = params[:model_ids] || []
+    assay_assets_to_keep = [] #Store all the asset associations that we are keeping in this
+    Array(data_file_ids).each do |text|
+      id, r_type = text.split(",")
+      d = DataFile.find(id)
+      assay_assets_to_keep << assay.relate(d, RelationshipType.find_by_title(r_type)) if d.can_view?
+    end
+    Array(model_ids).each do |id|
+      m = Model.find(id)
+      assay_assets_to_keep << assay.relate(m) if m.can_view?
+    end
+    Array(sop_ids).each do |id|
+      s = Sop.find(id)
+      assay_assets_to_keep << assay.relate(s) if s.can_view?
+    end
+    #Destroy AssayAssets that aren't needed
+    (assay.assay_assets - assay_assets_to_keep.compact).each { |a| a.destroy }
   end
 
   def show
@@ -226,36 +204,10 @@ class AssaysController < ApplicationController
     end
   end
 
-  def destroy
-
-    respond_to do |format|
-      if @assay.can_delete?(current_user) && @assay.destroy
-        format.html { redirect_to(assays_url) }
-        format.xml { head :ok }
-      else
-        flash.now[:error]="Unable to delete the assay" if !@assay.study.nil?
-        format.html { render :action=>"show" }
-        format.xml { render :xml => @assay.errors, :status => :unprocessable_entity }
-      end
-    end
-  end
-
   def update_types
     render :update do |page|
       page.replace_html "favourite_list", :partial=>"favourites/gadget_list"
     end
   end
 
-  def preview
-    element=params[:element]
-    assay  =Assay.find_by_id(params[:id])
-
-    render :update do |page|
-      if assay.try :can_view?
-        page.replace_html element, :partial=>"assays/preview_for_associate", :locals=>{:resource=>assay}
-      else
-        page.replace_html element, :text=>"Nothing is selected to preview."
-      end
-    end
-  end
 end

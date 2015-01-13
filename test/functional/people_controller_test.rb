@@ -168,8 +168,8 @@ class PeopleControllerTest < ActionController::TestCase
     assert_response :success
   end
 
-  test 'virtual liver hides access to index people page for logged out user' do
-    with_config_value 'is_virtualliver', true do
+  test 'whether hides access to index people page for logged out user' do
+    with_config_value 'public_people_profiles_enabled', false do
       Factory :person, first_name: 'Invisible', last_name: ''
       logout
       get :index
@@ -1221,13 +1221,12 @@ class PeopleControllerTest < ActionController::TestCase
     assert_select 'div.foldTitle', text: 'Subscriptions', count: 0
   end
 
-  test 'virtual liver blocks access to profile page whilst logged out' do
+  test 'blocks access to profile page whilst logged out' do
     a_person = Factory(:person)
     logout
-    as_virtualliver do
+    with_config_value 'public_people_profiles_enabled', false do
       get :show, id: a_person
-      assert_response :redirect
-      refute_nil flash[:error]
+      assert_response :forbidden
     end
   end
 
@@ -1398,5 +1397,32 @@ class PeopleControllerTest < ActionController::TestCase
     assert_redirected_to person_path(established_person)
 
     assert_includes assigns(:person).work_groups, work_group
+  end
+
+  test "should email admin and project managers when specifying project" do
+    proj_man1=Factory :project_manager
+    proj_man2=Factory :project_manager
+    proj1=proj_man1.projects.first
+    proj2=proj_man2.projects.first
+    project_without_manager = Factory :project
+
+    #check there are 3 uniq projects
+    assert_equal 3,[proj1,proj2,project_without_manager].uniq.size
+
+    user = Factory :activated_user
+    assert_nil user.person
+    login_as(user)
+
+    #3 emails - 1 to admin and 2 to project managers
+    assert_emails(3) do
+      post :create,
+           :person=>{:first_name=>"Fred",:last_name=>"BBB",:email=>"fred.bbb@email.com"},
+           :projects=>[proj1.id,proj2.id,project_without_manager.id],
+           :sysmo_member=>true
+    end
+
+    assert assigns(:person)
+    user.reload
+    assert_equal user.person,assigns(:person)
   end
 end
