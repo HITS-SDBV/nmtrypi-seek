@@ -168,8 +168,8 @@ class PeopleControllerTest < ActionController::TestCase
     assert_response :success
   end
 
-  test 'virtual liver hides access to index people page for logged out user' do
-    with_config_value 'is_virtualliver', true do
+  test 'whether hides access to index people page for logged out user' do
+    with_config_value 'public_people_profiles_enabled', false do
       Factory :person, first_name: 'Invisible', last_name: ''
       logout
       get :index
@@ -1221,10 +1221,10 @@ class PeopleControllerTest < ActionController::TestCase
     assert_select 'div.foldTitle', text: 'Subscriptions', count: 0
   end
 
-  test 'virtual liver blocks access to profile page whilst logged out' do
+  test 'blocks access to profile page whilst logged out' do
     a_person = Factory(:person)
     logout
-    as_virtualliver do
+    with_config_value 'public_people_profiles_enabled', false do
       get :show, id: a_person
       assert_response :forbidden
     end

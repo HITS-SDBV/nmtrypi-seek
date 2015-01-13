@@ -41,6 +41,7 @@ SEEK::Application.configure do
       Settings.defaults[:programmes_enabled] = true
       Settings.defaults[:project_hierarchy_enabled] = true
       Settings.defaults[:tabs_lazy_load_enabled] = false
+      Settings.defaults[:public_people_profiles_enabled] = true
 
       Settings.defaults[:project_link] = 'http://www.sysmo.net'
       Settings.defaults[:application_name] = 'SEEK'
