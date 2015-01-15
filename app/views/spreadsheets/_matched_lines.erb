@@ -48,7 +48,7 @@
 <% unless sheet_array.blank? %>
     <%= render :partial => "general/item_title", :locals => {:item => object} -%>
     <%= render :partial => "spreadsheets/spreadsheet_styles", :locals => {:styles => workbook.styles} if workbook %>
-    <%= render :partial => "spreadsheets/row", :locals => {:sheet_array => sheet_array, :object_id => object.id} unless cells.blank? %>
+    <%= render :partial => "spreadsheets/row", :locals => {:sheet_array => sheet_array, :object_id => object.id}  %>
 
     <% else %>
     <%= render :partial => "assets/resource_list_item", :object => object -%>
