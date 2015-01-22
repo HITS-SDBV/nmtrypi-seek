@@ -25,11 +25,13 @@ module SpreadsheetHelper
     end
   end
 
-  def tag_link value
-    if value.match(/^NMT/i)
-
-      "<a class='vvv-popular' title='' href='/tags/76'>PTR1 #{value}</a>".html_safe
-
+  def cell_link value
+    if value.match(/^NMT[-_]/i)
+     form_tag main_app.search_path, :html => {:style => 'display:inline;'} do
+        hidden_field_tag(:search_query, value)  +
+        hidden_field_tag(:search_type, "All")  +
+        link_to_function(value, "$(this).up('form').submit()")
+     end
     else
       auto_link(h(value), :html => {:target => "_blank"})
     end

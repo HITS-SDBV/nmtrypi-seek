@@ -117,7 +117,7 @@
                       <% c = col.index %>
                     <% if sheet[r] && sheet[r][c] -%>
                       <% cell = sheet[r][c] -%>
-                         <td row="<%= r -%>" col="<%= c -%>" id="cell_<%= to_alpha(c) + r.to_s -%>" title="<%= ("=" + cell.formula unless cell.formula.nil?) || "" -%>" class="cell <%= cell.style || ""-%>"><%= tag_link(cell.value) -%></td>
+                         <td row="<%= r -%>" col="<%= c -%>" id="cell_<%= to_alpha(c) + r.to_s -%>" title="<%= ("=" + cell.formula unless cell.formula.nil?) || "" -%>" class="cell <%= cell.style || ""-%>"><%= cell_link(cell.value) -%></td>
                     <% else -%>
                       <td row="<%= r -%>" col="<%= c -%>" id="cell_<%= to_alpha(c) + r.to_s -%>" class="cell"></td>
                     <% end -%>
