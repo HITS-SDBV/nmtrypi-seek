@@ -8,27 +8,7 @@ include SysMODB::SpreadsheetExtractor
 
 namespace :seek_dev do
 
-  task :find_cell => :environment do
 
-    qq = DataFile.search do |q|
-      q.keywords("NMT-A0001")
-      end
-    h = qq.hits.first
-
-    puts h.stored(:spreadsheet_contents_for_search)
-
-
-    df = DataFile.find 208
-    df.spreadsheet.sheets.detect do |sh|
-
-      sh.rows.each do |row|
-        1.upto(sh.last_col) do |c|
-          sh[row][c] == "NMT-A0001"
-        end
-      end
-
-    end
-  end
   desc "populate datafile"
   task :populate_datafile => :environment do
     data_file_list = YAML.load(File.read(File.join(Rails.root, "config/default_data", "data_file_list.yml")))
