@@ -1,0 +1,21 @@
+
+<% unless matched_items.empty? -%>
+    <%= stylesheet_link_tag('spreadsheet_explorer', 'jquery.ui.resizable') %>
+    <%= javascript_include_tag 'jquery.ui.all', 'spreadsheets_explorer' %>
+    <div class="list_items_container" id="<%= matched_items.first.class.name %>_<%= view_type %>">
+      <!--- multiple  sheets --->
+      <% matched_items.each do |item| -%>
+          <% workbook = Rails.cache.fetch(item.content_blob.cache_key) do
+            item.spreadsheet
+          end
+          %>
+          <% if authorization_for_showing_already_done || item.can_view? -%>
+              <%= render :partial => "spreadsheets/matched_lines", :locals => {:sheet_array => sheet_array.select { |a| a[3] == item.id }, :object => item, :workbook => workbook} %>
+          <% end -%>
+      <% end %>
+      <!--- merged sheets --->
+      <%#= render :partial => "spreadsheets/merged_sheets", :locals => {:sheet_array => sheet_array}  if authorization_for_showing_already_done%>
+    </div>
+<% end %>
+
+<%  %>
