@@ -148,6 +148,10 @@ class Person < ActiveRecord::Base
     end
   end
 
+  def self.userless_people
+    Person.includes(:user).select{|p| p.user.nil?}
+  end
+
   #returns an array of Person's where the first and last name match
   def self.duplicates
     people=Person.all
@@ -294,7 +298,7 @@ class Person < ActiveRecord::Base
   end
 
   def can_view? user = User.current_user
-    !user.nil? || !Seek::Config.is_virtualliver
+    !user.nil? || Seek::Config.public_people_profiles_enabled
   end
 
   def can_edit? user = User.current_user

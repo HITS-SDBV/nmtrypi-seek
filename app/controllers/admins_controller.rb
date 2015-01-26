@@ -64,6 +64,9 @@ class AdminsController < ApplicationController
 
     Seek::Config.hide_details_enabled = string_to_boolean params[:hide_details_enabled]
     Seek::Config.activation_required_enabled = string_to_boolean params[:activation_required_enabled]
+    Seek::Config.public_people_profiles_enabled =   string_to_boolean params[:public_people_profiles_enabled]
+    Seek::Config.admin_impersonation_enabled =  string_to_boolean params[:admin_impersonation_enabled]
+
 
     Seek::Config.google_analytics_tracker_id = params[:google_analytics_tracker_id]
     Seek::Config.google_analytics_enabled = string_to_boolean params[:google_analytics_enabled]
@@ -334,6 +337,49 @@ class AdminsController < ApplicationController
           format.html { render :partial => "admins/workflow_stats" }
         when "none"
           format.html { render :text=>"" }
+      end
+    end
+  end
+
+  def get_user_stats
+    partial = nil
+    collection = []
+    action = nil
+    title = nil
+    @page = params[:id]
+    case @page
+      when 'invalid_users_profiles'
+        partial = 'invalid_user_stats_list'
+        invalid_users = {}
+        pal_role = ProjectRole.pal_role
+        invalid_users[:pal_mismatch] = Person.all.select { |p| p.is_pal? != p.project_roles.include?(pal_role) }
+        invalid_users[:duplicates] = Person.duplicates
+        invalid_users[:no_person] = User.without_profile
+        invalid_users[:no_user] = Person.userless_people
+        collection = invalid_users
+      when 'users_requiring_activation'
+        partial = 'user_stats_list'
+        collection = User.not_activated
+        action = "activate"
+        title = "Users have not yet activated their account"
+      when 'non_project_members'
+        partial = 'user_stats_list'
+        collection = Person.without_group.registered
+        title = "Users are not in a #{Seek::Config.project_name} #{t('project')}"
+      when 'pals'
+        partial = 'user_stats_list'
+        collection = Person.pals
+        title = 'List of PALs'
+      when 'administrators'
+        partial = 'admin_selection'
+      when "none"
+        partial = "none"
+    end
+    respond_to do |format|
+      if partial == "none"
+        format.html { render :text=>"" }
+      else
+        format.html { render :partial => partial, :locals => {:collection => collection, :action => action, :title => title} }
       end
     end
   end

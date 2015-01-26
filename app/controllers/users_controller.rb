@@ -7,6 +7,8 @@ class UsersController < ApplicationController
   skip_before_filter :restrict_guest_user
   skip_before_filter :project_membership_required
   skip_before_filter :profile_for_login_required,:only=>[:update,:cancel_registration]
+
+  include Seek::AdminBulkAction
   
   # render new.rhtml
   def new

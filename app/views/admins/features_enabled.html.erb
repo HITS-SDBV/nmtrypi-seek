@@ -57,6 +57,19 @@
             :field=>check_box_tag(:activation_required_enabled, 1, Seek::Config.activation_required_enabled)
     } -%>
 
+    <%= render :partial => 'setting_li', :locals => {
+            :description => "Login as another user in SEEK.",
+            :name => "Login as another user enabled",
+            :field => check_box_tag(:admin_impersonation_enabled, 1, Seek::Config.admin_impersonation_enabled)
+    } -%>
+
+    <%= render :partial => 'setting_li', :locals => {
+            :description => "Whether show or hide people's profiles with only general information(e.g. projects, institutions, roles...) to public.",
+            :name => "show people's profiles to public",
+            :field => check_box_tag(:public_people_profiles_enabled, 1, Seek::Config.public_people_profiles_enabled)
+    } -%>
+
+
     <%= render :partial=>'setting_li',:locals=>{
             :description=>"Whether integration with JWS Online is enabled. Enabling this allows simulation of SBML models with JWS Online.",
             :name=>"JWS Online enabled",
