@@ -14,9 +14,9 @@
 
  </style>
  <%
-    default_per_page = 200
+    default_per_page = 10
     if sheet_array.length > 3
-      default_per_page = 100
+      default_per_page = 5
     end
  %>
  <% per_page = params[:page_rows].try(:to_i) || default_per_page %>
@@ -149,22 +149,9 @@
 
  <script type = "text/javascript">
      var perPage = <%= default_per_page %>;
-
        <% if params[:page_rows] %>
            perPage = <%= params[:page_rows] %>;
        <% end %>
-
-      //var spreadsheet_container_selector = "div.spreadsheet_container." + "<%#= object_id %>" + " ";
-
-
-      addLoadEvent(function(){
-        activateSheet(1, null, <%= object_id %>);
-         displayRowsPerPage(<%= object_id %>);
-         //enableTableSorter(<%#= object_id %>);
-      });
-
-
-
   </script>
 
       

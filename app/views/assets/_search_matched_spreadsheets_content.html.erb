@@ -13,5 +13,13 @@
       <%#= render :partial => "spreadsheets/merged_sheets", :locals => {:sheet_array => sheet_array}  if authorization_for_showing_already_done%>
     </div>
 <% end %>
-
-<%  %>
+<script type = "text/javascript">
+   var item_ids = new Array(<%= matched_items.map(&:id).map(&:to_s).join(",") %>);
+     addLoadEvent(function(){
+       for(var i = 0; i < item_ids.length; i++){
+           activateSheet(1, null, item_ids[i]);
+           displayRowsPerPage(item_ids[i]);
+           //enableTableSorter(<%#= object_id %>);
+       }
+     });
+ </script>
