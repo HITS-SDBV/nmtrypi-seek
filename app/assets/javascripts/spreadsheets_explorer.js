@@ -769,10 +769,10 @@ function addLoadEvent(func) {
         window.onload = func;
     } else {
         window.onload = function() {
+            func();
             if (oldonload) {
                 oldonload();
             }
-            func();
         }
     }
 }
