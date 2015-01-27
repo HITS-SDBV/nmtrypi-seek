@@ -2,21 +2,22 @@
  <style>
 
    div.row_headings {
-       height: auto;
+       /*4 rows*/
+       height: 100px;
    }
 
    div.sheet_container{
-       height: auto;
+       height: 100px;
    }
    div.sheet {
-       height: auto;
+       height: 100px;
    }
 
  </style>
  <%
-    default_per_page = 10
+    default_per_page = 200
     if sheet_array.length > 3
-      default_per_page = 5
+      default_per_page = 100
     end
  %>
  <% per_page = params[:page_rows].try(:to_i) || default_per_page %>
@@ -49,6 +50,7 @@
             columns_display = sheet.columns.compact
           end
 
+          per_page = rows_display.count
           wp_rows = generate_paginate_rows(rows_display, sheet_index, per_page)
        %>
 
@@ -129,7 +131,7 @@
           <br style="clear:both"/>
         </div>
       </div>
-       <%= will_paginate(wp_rows,
+       <%#= will_paginate(wp_rows,
                             :id => "paginate_sheet_#{object_id}_#{sheet_index}",
                             :params => {:sheet => sheet_index, :page_rows => per_page, :annotation_id => nil},
                             :previous_label => "&#8593; Previous",
