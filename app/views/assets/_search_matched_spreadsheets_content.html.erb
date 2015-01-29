@@ -1,23 +1,25 @@
-
 <% unless matched_items.empty? -%>
     <%= stylesheet_link_tag('spreadsheet_explorer', 'jquery.ui.resizable') %>
     <%= javascript_include_tag 'jquery.ui.all', 'spreadsheets_explorer' %>
-      <!--- multiple  sheets --->
-      <% matched_items.each do |item| -%>
-          <% if authorization_for_showing_already_done || item.can_view? -%>
-              <%= render :partial => "spreadsheets/matched_lines", :locals => {:sheet_array => sheet_array.select { |a| a[3] == item.id }, :object => item} %>
-          <% end -%>
-      <% end %>
-      <!--- merged sheets --->
-      <%#= render :partial => "spreadsheets/merged_sheets", :locals => {:sheet_array => sheet_array}  if authorization_for_showing_already_done%>
+    <!--- multiple  sheets --->
+    <% matched_items.each do |item| -%>
+        <% if authorization_for_showing_already_done || item.can_view? -%>
+            <%= render :partial => "spreadsheets/matched_lines", :locals => {:sheet_array => sheet_array.select { |a| a[3] == item.id }, :object => item} %>
+        <% end -%>
+    <% end %>
+    <!--- merged sheets --->
+    <%#= render :partial => "spreadsheets/merged_sheets", :locals => {:sheet_array => sheet_array}  if authorization_for_showing_already_done%>
 <% end %>
-<script type = "text/javascript">
-   var item_ids = new Array(<%= matched_items.map(&:id).map(&:to_s).join(",") %>);
-     addLoadEvent(function(){
-       for(var i = 0; i < item_ids.length; i++){
-           activateSheet(1, null, item_ids[i]);
-           displayRowsPerPage(item_ids[i]);
-           //enableTableSorter(<%#= object_id %>);
-       }
-     });
- </script>
+<script type="text/javascript">
+    addLoadEvent(function () {
+        var item_ids = new Array();
+        <% matched_items.each do |item|%>
+             item_ids.push("<%= item.id %>");
+        <% end %>
+        for (var i = 0; i < item_ids.length; i++) {
+            activateSheet(1, null, item_ids[i]);
+            //displayRowsPerPage(item_ids[i]);
+            //enableTableSorter(<%#= object_id %>);
+        }
+    });
+</script>
