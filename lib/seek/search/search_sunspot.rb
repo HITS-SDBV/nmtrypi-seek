@@ -6,12 +6,12 @@ module Seek
           searchable do
             text :title do
               if self.respond_to?(:title)
-                title
+                [title, Seek::Search::SearchTermStandardize.to_standardize(title)]
               end
             end
             text :description do
               if self.respond_to?(:description)
-                description
+                [description, Seek::Search::SearchTermStandardize.to_standardize(description)]
               end
             end
             text :searchable_tags do

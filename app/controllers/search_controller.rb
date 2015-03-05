@@ -57,6 +57,8 @@ class SearchController < ApplicationController
 
     downcase_query = @search_query.downcase
 
+    standardized_downcase_query = Seek::Search::SearchTermStandardize.to_standardize downcase_query
+
     @results=[]
 
     if (Seek::Config.solr_enabled and !downcase_query.blank?)
@@ -65,7 +67,7 @@ class SearchController < ApplicationController
           sources.delete(Specimen) if !Seek::Config.is_virtualliver
           sources.each do |source|
             search = source.search do |query|
-              query.keywords(downcase_query)
+              query.keywords(standardized_downcase_query)
               query.paginate(:page => 1, :per_page => source.count ) if source.count > 30  # By default, Sunspot requests the first 30 results from Solr
             end
 
@@ -78,7 +80,7 @@ class SearchController < ApplicationController
       else
            object = type.singularize.camelize.constantize
            search = object.search do |query|
-             query.keywords(downcase_query)
+             query.keywords(standardized_downcase_query)
              query.paginate(:page => 1, :per_page => object.count ) if object.count > 30 # By default, Sunspot requests the first 30 results from Solr
            end
             @search_hits = search.hits

@@ -23,18 +23,18 @@ module Seek
         unless File.exists?(pdf_filepath)
           #copy dat file to original file extension in order to convert to pdf on this file
           file_extension = mime_extensions(content_type).first
-          tmp_file = Tempfile.new(['','.'+ file_extension])
+          tmp_file = Tempfile.new(['', '.'+ file_extension])
           copied_filepath = tmp_file.path
 
           FileUtils.cp dat_filepath, copied_filepath
 
-          ConvertOffice::ConvertOfficeFormat.new.convert(copied_filepath,pdf_filepath)
+          ConvertOffice::ConvertOfficeFormat.new.convert(copied_filepath, pdf_filepath)
           t = Time.now
           while !File.exists?(pdf_filepath) && (Time.now - t) < MAXIMUM_PDF_CONVERT_TIME
             sleep(1)
           end
         end
-      rescue Exception=> e
+      rescue Exception => e
         Rails.logger.error("Problem with converting file of content_blob #{id} to pdf - #{e.class.name}:#{e.message}")
         raise(e)
       end
@@ -51,7 +51,8 @@ module Seek
           content = File.open(txt_filepath).read
           unless content.blank?
             content = filter_text_content content
-            split_content content
+            content = split_content content
+            content = standardize_content content
           else
             []
           end
@@ -64,8 +65,17 @@ module Seek
 
     private
 
-    def split_content content,delimiter="\n"
-      content.split(delimiter).select{|str| !str.blank?}
+    def standardize_content content
+      content.collect do |val|
+        standardized_underscored_value = Seek::Search::SearchTermStandardize.to_standardize(val)
+        standardized_value_underscore_prefix = standardized_underscored_value.split(/(\d+)/).first
+        standardized_value_hyphen_prefix = standardized_value_underscore_prefix.split("_").join("-")
+        [standardized_underscored_value, standardized_value_underscore_prefix, standardized_value_hyphen_prefix]
+      end.flatten.uniq.compact
+    end
+
+    def split_content content, delimiter="\n"
+      content.split(delimiter).select { |str| !str.blank? }
     end
 
     #filters special characters, keeping alphanumeric characters, hyphen ('-'), underscore('_'), ('[',']') and newlines

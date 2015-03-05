@@ -86,7 +86,8 @@ module SearchHelper
 
         end
       else
-        cells = doc.find("//ss:sheet[@hidden='false' and @very_hidden='false']/ss:rows/ss:row/ss:cell").find_all { |cell| cell.content.downcase.include? search_query.downcase }
+        standardized_underscore_search_query = Seek::Search::SearchTermStandardize.to_standardize(search_query).underscore
+        cells = doc.find("//ss:sheet[@hidden='false' and @very_hidden='false']/ss:rows/ss:row/ss:cell").find_all { |cell| Seek::Search::SearchTermStandardize.to_standardize(cell.content).underscore.include? standardized_underscore_search_query }
       end
       unless cells.blank?
         cell_groups = cells.group_by { |c| c.parent.try(:parent).try(:parent).try(:attributes).to_h["name"] }
