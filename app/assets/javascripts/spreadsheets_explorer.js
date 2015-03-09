@@ -763,16 +763,3 @@ function enableTableSorter(spreadsheet_id){
                                                      });
     });
 }
-function addLoadEvent(func) {
-    var oldonload = window.onload;
-    if (typeof window.onload != 'function') {
-        window.onload = func;
-    } else {
-        window.onload = function() {
-            func();
-            if (oldonload) {
-                oldonload();
-            }
-        }
-    }
-}

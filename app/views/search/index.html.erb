@@ -37,7 +37,7 @@
               <% resource_hash = classify_for_tabs @results -%>
               <%= render :partial => "assets/resource_listing_tabbed_by_class",
                          :locals => {:resource_hash => resource_hash,
-                                     :display_immediately => true,
+                                     :display_immediately => false,
                                      :narrow_view => true,
                                      :authorization_already_done => true} -%>
           <% end %>

@@ -11,15 +11,39 @@
     <%#= render :partial => "spreadsheets/merged_sheets", :locals => {:sheet_array => sheet_array}  if authorization_for_showing_already_done%>
 <% end %>
 <script type="text/javascript">
-    addLoadEvent(function () {
-        var item_ids = new Array();
-        <% matched_items.each do |item|%>
-             item_ids.push("<%= item.id %>");
-        <% end %>
-        for (var i = 0; i < item_ids.length; i++) {
-            activateSheet(1, null, item_ids[i]);
-            //displayRowsPerPage(item_ids[i]);
-            //enableTableSorter(<%#= object_id %>);
-        }
-    });
+
+  function checkAndDisplayTabsImmediatly(){
+      for (var i = 0; i < tabber_ids.length; i++) {
+                 var tabber_id = tabber_ids[i];
+              if( $j("div#" + tabber_id).is(":visible") === false){
+                  $j("div#" + tabber_id).show();
+              }
+          }
+  }
+
+  function showMatchedItems(){
+      var item_ids = new Array();
+            <% matched_items.each do |item|%>
+            item_ids.push("<%= item.id %>");
+            <% end %>
+            for (var i = 0; i < item_ids.length; i++) {
+                activateSheet(1, null, item_ids[i]);
+                //displayRowsPerPage(item_ids[i]);
+                //enableTableSorter(<%#= object_id %>);
+            }
+  }
+    window.onload = function () {
+        var tabberOptions = {'onLoad': function () {
+            displayTabs();
+        }};
+        tabberAutomatic(tabberOptions);
+        //make sure tabs are shown
+        checkAndDisplayTabsImmediatly();
+        showMatchedItems();
+
+    };
+
+
 </script>
+
+
