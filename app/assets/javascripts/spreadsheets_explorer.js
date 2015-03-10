@@ -583,14 +583,7 @@ function activateSheet(sheet, sheetTab, spreadsheet_index) {
     var sheetIndex = sheetTab.attr("index");
 
     var root_element = sheetTab.closest("div.spreadsheet_container");
-   // alert(root_element.attr("class"));
 
-
-//    $j = function(selector, context){
-//        return new jQuery.fn.init(selector, root_element);
-//   }
-    //Clean up
-    //Hide annotations
    //Clean up
     //Hide annotations
     $j('div.annotation', root_element).hide();
@@ -642,7 +635,7 @@ function activateSheet(sheet, sheetTab, spreadsheet_index) {
 
     //FIXME: for some reason, calling this twice solves a problem where the column and column header widths are mis-aligned
     adjust_container_dimensions();
-    adjust_container_dimensions();
+    //adjust_container_dimensions();
    // return false;
 }
 

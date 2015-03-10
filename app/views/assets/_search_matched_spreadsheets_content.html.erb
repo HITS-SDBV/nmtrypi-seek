@@ -11,38 +11,70 @@
     <%#= render :partial => "spreadsheets/merged_sheets", :locals => {:sheet_array => sheet_array}  if authorization_for_showing_already_done%>
 <% end %>
 <script type="text/javascript">
-
-  function checkAndDisplayTabsImmediatly(){
-      for (var i = 0; i < tabber_ids.length; i++) {
-                 var tabber_id = tabber_ids[i];
-              if( $j("div#" + tabber_id).is(":visible") === false){
-                  $j("div#" + tabber_id).show();
-              }
-          }
-  }
-
-  function showMatchedItems(){
-      var item_ids = new Array();
-            <% matched_items.each do |item|%>
-            item_ids.push("<%= item.id %>");
-            <% end %>
-            for (var i = 0; i < item_ids.length; i++) {
-                activateSheet(1, null, item_ids[i]);
-                //displayRowsPerPage(item_ids[i]);
-                //enableTableSorter(<%#= object_id %>);
-            }
-  }
     window.onload = function () {
-        var tabberOptions = {'onLoad': function () {
-            displayTabs();
-        }};
+        var tabberOptions = {
+            'onLoad': function() {
+
+                /* In order to avoid adjusting spreadsheets container multiple times, boolean property 'spreadsheet_container_adjusted' is added to each tab */
+                var tabber = arguments[0]["tabber"];
+                AddNewPropertyToTabs({'tabber': tabber, 'property_name': 'spreadsheet_container_adjusted','property_value':false });
+
+                displayTabsImmediately();
+            },
+            'onTabDisplay': function() {
+                var tabber = arguments[0]["tabber"];
+                var tabberIndex = arguments[0]["index"];
+                if (tabber.tabs[tabberIndex].spreadsheet_container_adjusted === false && $j("div.spreadsheet_container:visible").length > 0) {
+                     adjust_container_dimensions();
+                    tabber.tabs[tabberIndex].spreadsheet_container_adjusted = true
+                }
+
+            }
+        };
+
+
         tabberAutomatic(tabberOptions);
-        //make sure tabs are shown
-        checkAndDisplayTabsImmediatly();
         showMatchedItems();
 
     };
 
+    function AddNewPropertyToTabs() {
+        var tabber = arguments[0]["tabber"];
+        var property_name = arguments[0]["property_name"];
+        if (tabber != null) {
+            for (var i = 0; i < tabber.tabs.length; i++) {
+                tabber.tabs[i][property_name] = arguments[0]["property_value"];
+            }
+
+        }
+    }
+    function displayTabsImmediately() {
+        for (var i = 0; i < tabber_ids.length; i++) {
+            var tabber_id = tabber_ids[i];
+            var spinner = $(tabber_id + "_spinner");
+            if (spinner != null) {
+                spinner.hide();
+                $(tabber_id).show();
+            }
+        }
+    }
+    function addSpreadsheetContainerAdjustedToTabber(){
+        for (var i = 0; i < tabber_ids.length; i++) {
+            var tabber_id = tabber_ids[i];
+            $(tabber_id).show();
+        }
+    }
+    function showMatchedItems() {
+        var item_ids = new Array();
+        <% matched_items.each do |item|%>
+        item_ids.push("<%= item.id %>");
+        <% end %>
+        for (var i = 0; i < item_ids.length; i++) {
+            activateSheet(1, null, item_ids[i]);
+            //displayRowsPerPage(item_ids[i]);
+            //enableTableSorter(<%#= object_id %>);
+        }
+    }
 
 </script>
 
