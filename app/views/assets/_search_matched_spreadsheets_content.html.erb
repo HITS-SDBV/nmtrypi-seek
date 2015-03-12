@@ -3,7 +3,7 @@
     <%= javascript_include_tag 'jquery.ui.all', 'spreadsheets_explorer' %>
     <!--- multiple  sheets --->
     <% matched_items.each do |item| -%>
-        <% if authorization_for_showing_already_done || item.can_view? -%>
+        <% if authorization_for_showing_already_done || item.can_download? -%>
             <%= render :partial => "spreadsheets/matched_lines", :locals => {:sheet_array => sheet_array.select { |a| a[3] == item.id }, :object => item} %>
         <% end -%>
     <% end %>
