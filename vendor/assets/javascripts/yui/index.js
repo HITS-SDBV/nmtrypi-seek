@@ -1,2 +1,3 @@
 // ...
+//= require yui/yahoo-dom-event
 //= require_tree .
