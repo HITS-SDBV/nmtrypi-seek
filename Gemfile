@@ -89,6 +89,7 @@ gem 'mechanize'
 gem 'mimemagic'
 
 gem 'datacite_doi_ify'
+gem 'rcdk', '0.3.0',  :path => "vendor/gems/rcdk-0.3.0"
 group :assets do
   gem 'turbo-sprockets-rails3'
   gem 'yui-compressor'
