@@ -23,8 +23,7 @@
 # Boston, MA 02111-1301, USA.
 
 require 'rubygems'
-require_gem 'rjb'
-require 'rjb'
+
 
 # Adds the fully-qualified path <tt>path_to_jarfile</tt> to the <tt>
 # CLASSPATH</tt> environment variable. Any jarfiles added after the

@@ -58,7 +58,7 @@
                   <% 1.upto(sheet.last_col) do |c| %>
                     <% if sheet[r] && sheet[r][c] -%>
                       <% cell = sheet[r][c] -%>
-                      <td row="<%= r -%>" col="<%= c -%>" id="cell_<%= to_alpha(c) + r.to_s -%>" title="<%= ("=" + cell.formula unless cell.formula.nil?) || "" -%>" class="cell <%= cell.style || ""-%>"><%= cell_link(cell.value) -%></td>
+                      <td row="<%= r -%>" col="<%= c -%>" id="cell_<%= to_alpha(c) + r.to_s -%>" title="<%= ("=" + cell.formula unless cell.formula.nil?) || "" -%>" class="cell <%= cell.style || ""-%>"><%= cell_link(cell.value, @display_data_file.data_file_id) -%></td>
                     <% else -%>
                       <td row="<%= r -%>" col="<%= c -%>" id="cell_<%= to_alpha(c) + r.to_s -%>" class="cell"></td>
                     <% end -%>

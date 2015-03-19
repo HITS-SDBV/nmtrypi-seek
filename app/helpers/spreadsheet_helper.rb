@@ -25,13 +25,25 @@ module SpreadsheetHelper
     end
   end
 
-  def cell_link value
-    if value.match(/^NMT[-_]/i)
-     form_tag main_app.search_path, :html => {:style => 'display:inline;'} do
+  def cell_link value, data_id
+    if Seek::Search::SearchTermStandardize.to_standardize?(value)
+      id_smiles_hash =  Seek::Data::CompoundsExtraction.instance.compound_id_smiles_hash
+      standardized_value = Seek::Search::SearchTermStandardize.to_standardize(value)
+      smiles =  id_smiles_hash[standardized_value]
+      smile_graph_link = nil
+      if smiles
+        graph_url = compound_visualization_path({id: data_id,compound_id: standardized_value})
+        smile_graph_link = image_tag_for_key("image", graph_url, 'View graph', {:rel => "lightbox"}, nil)
+      end
+
+     search_link = form_tag main_app.search_path, :html => {:style => 'display:inline;'} do
         hidden_field_tag(:search_query, value)  +
         hidden_field_tag(:search_type, "All")  +
-        link_to_function(value, "$(this).up('form').submit()")
-     end
+        link_to_function(value, "$(this).up('form').submit()") +
+        " " +
+        smile_graph_link
+     end.html_safe
+
     else
       auto_link(h(value), :html => {:target => "_blank"})
     end

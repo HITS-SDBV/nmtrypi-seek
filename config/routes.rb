@@ -639,6 +639,8 @@ SEEK::Application.routes.draw do
   #tabber lazy load
   match 'application/resource_in_tab' => 'application#resource_in_tab'
 
+  #compound extraction
+  match '/data_files/compound_visualization/:id/:compound_id' => 'data_files#compound_visualization', :as => :compound_visualization
   #error rendering
   match "/404" => "errors#error_404"
   match "/422" => "errors#error_422"
