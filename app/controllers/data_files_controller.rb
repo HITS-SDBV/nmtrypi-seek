@@ -315,17 +315,7 @@ class DataFilesController < ApplicationController
     smiles =  Seek::Data::CompoundsExtraction.instance.compound_id_smiles_hash[compound_id]
     if smiles
       path_to_png  = Seek::Config.temporary_filestore_path + '/image_assets/' + "#{compound_id}.png"
-      RCDK::Util::Image.smiles_to_png smiles, path_to_png, 300, 300 unless File.exists?(path_to_png)
-      # mol = RCDK::Util::Lang.read_smiles smiles
-      # mol = RCDK::Util::XY::coordinate_molecule mol
-      # out=Java::Io::ByteArrayOutputStream.new
-      # image=Net::Sf::Structure::Cdk::Util::ImageKit.createRenderedImage(mol, 300, 300)
-      #
-      # Javax::Imageio::ImageIO.write(image, "png", out)
-
-
-      #path_to_png
-
+      RCDK::Util::Image.smiles_to_png smiles, path_to_png, 600, 600 unless File.exists?(path_to_png)
        send_file(path_to_png, :type => "image/png", :disposition => "inline", :filename => "#{compound_id}.png")
     else
       send_file("app/assets/images/" + view_context.icon_filename_for_key("image"), :type => "image/png", :disposition => "inline", :filename => "#{compound_id}")

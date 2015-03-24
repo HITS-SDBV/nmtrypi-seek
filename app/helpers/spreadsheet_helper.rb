@@ -32,7 +32,7 @@ module SpreadsheetHelper
       smiles =  id_smiles_hash[standardized_value]
       if smiles
         graph_url = compound_visualization_path({id: data_id,compound_id: standardized_value})
-        smile_graph_link = image_tag_for_key("image", graph_url, 'View graph', {:rel => "lightbox"}, nil)
+        smile_graph_link = image_tag_for_key("compound_formula", graph_url, 'View graph', {:rel => "lightbox"}, nil)
       else
         smile_graph_link = "<span class='none_text'>None</span>".html_safe
       end
