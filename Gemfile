@@ -90,7 +90,7 @@ gem 'mimemagic'
 
 gem 'datacite_doi_ify'
 gem 'rjb'
-gem 'rcdk', '0.3.0',  :path => "vendor/gems/rcdk-0.3.0"
+gem 'rcdk', '0.3.0', :git => "https://github.com/aina1205/rcdk.git"
 group :assets do
   gem 'turbo-sprockets-rails3'
   gem 'yui-compressor'

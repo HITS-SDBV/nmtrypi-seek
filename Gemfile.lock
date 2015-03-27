@@ -101,6 +101,12 @@ GIT
     white_list_formatted_content (1.0.0)
 
 GIT
+  remote: https://github.com/aina1205/rcdk.git
+  revision: 2221fd00068b009bbe9dbc91c9a574a5f9c09073
+  specs:
+    rcdk (0.3.0)
+
+GIT
   remote: https://github.com/myGrid/annotations.git
   revision: d33e78993ee957fa12d71cbe9f03100dd9b0ad15
   specs:
@@ -136,11 +142,6 @@ GIT
   revision: 977048211b94599fe0f08eb37a481f3d69df48f6
   specs:
     calendar_date_select (1.16.2)
-
-PATH
-  remote: vendor/gems/rcdk-0.3.0
-  specs:
-    rcdk (0.3.0)
 
 GEM
   remote: https://rubygems.org/
