@@ -32,3 +32,10 @@ require 'rcdk/java'
 require_jar File.join(File.dirname(__FILE__), '..', 'java', 'lib', 'cdk-' + CDK_VERSION + '.jar')
 require_jar File.join(File.dirname(__FILE__), '..', 'java', 'lib', 'structure-cdk-' + STRUCTURE_CDK_VERSION + '.jar')
 require_jar File.join(File.dirname(__FILE__), '..', 'java', 'lib', 'opsin-big-' + OPSIN_VERSION + '.jar')
+
+classpath = '.'
+Dir["#{File.dirname(__FILE__)}/../java/lib/*.jar"].each do |jar|
+  classpath << File::PATH_SEPARATOR + File.expand_path(jar)
+end
+
+Rjb::load(classpath, ['-Djava.awt.headless=true', '-Xms128M', '-Xmx256M'])
