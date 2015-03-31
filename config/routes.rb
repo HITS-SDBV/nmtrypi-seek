@@ -640,7 +640,8 @@ SEEK::Application.routes.draw do
   match 'application/resource_in_tab' => 'application#resource_in_tab'
 
   #compound extraction
-  match '/data_files/compound_visualization/:id/:compound_id' => 'data_files#compound_visualization', :as => :compound_visualization
+  match '/compound_visualization/:id/:compound_id' => 'data_files#compound_visualization', :as => :compound_visualization, :via => :get
+  match '/compound_attributes_view/:id/:compound_id' => 'data_files#compound_attributes_view', :as => :compound_attributes_view, :via => :get
   #error rendering
   match "/404" => "errors#error_404"
   match "/422" => "errors#error_422"

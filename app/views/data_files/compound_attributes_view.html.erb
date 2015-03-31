@@ -1,0 +1,29 @@
+
+<div id="redbox_contents_div" class="redbox_contents" style="width:600px; height:600px; overflow: scroll;">
+  <%= link_to_close_redbox image_tag("close.gif"), :style => "float:right; margin-left:0.5em; vertical-align:middle;" -%>
+  <div class="head">
+    <span style="float:center;"> Attributes View of Compound: <%= @compound_id %></span>
+  </div>
+  <div class="body">
+   <table>
+     <thead>
+     <th>Attribute Name</th>
+     <th>Attribute Value</th>
+     </thead>
+     <tbody>
+      <% @compound_attributes.sort_by{|k, v| k.to_s}.to_h.each do |attr_name, attr_value| %>
+     <% attr_value = attr_value=="hidden"? "<span class='none_text'>hidden</span>".html_safe : attr_value%>
+        <tr>
+        <td> <%= attr_name %></td>
+        <td><%= attr_value %></td>
+        </tr>
+
+      <% end %>
+
+     </tbody>
+   </table>
+    <div align="center" style="margin-top: 1em">
+      <input type=button value='Close' onclick="RedBox.close()">
+    </div>
+  </div>
+</div>

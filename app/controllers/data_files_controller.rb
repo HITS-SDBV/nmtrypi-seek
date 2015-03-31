@@ -312,7 +312,7 @@ class DataFilesController < ApplicationController
 
   def compound_visualization
     compound_id = params[:compound_id]
-    smiles =  Seek::Data::CompoundsExtraction.instance.compound_id_smiles_hash[compound_id]
+    smiles =  Seek::Data::CompoundsExtraction.get_compound_id_smiles_hash[compound_id]
     if smiles
       compounds_image_path = Seek::Config.temporary_filestore_path + '/image_assets/compounds'
       path_to_png  = compounds_image_path + "#{compound_id}.png"
@@ -322,6 +322,15 @@ class DataFilesController < ApplicationController
     else
       send_file("app/assets/images/" + view_context.icon_filename_for_key("image"), :type => "image/png", :disposition => "inline", :filename => "#{compound_id}")
     end
+  end
+
+  def compound_attributes_view
+      compounds_hash = Seek::Data::CompoundsExtraction.get_compounds_hash
+      @compound_id = params[:compound_id]
+      standardized_compound_id = Seek::Search::SearchTermStandardize.to_standardize(@compound_id)
+
+      @compound_attributes = Hash(compounds_hash[standardized_compound_id])
+     render :compound_attributes_view,  :layout => false
   end
   def clear_population bio_samples
       specimens = Specimen.find_all_by_title bio_samples.instance_values["specimen_names"].values

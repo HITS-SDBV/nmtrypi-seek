@@ -1,5 +1,5 @@
 <%= stylesheet_link_tag('spreadsheet_explorer', 'jquery.ui.resizable', 'lightbox') %>
-<%= javascript_include_tag 'jquery.ui.all','spreadsheet_explorer','spreadsheet_explorer_plot',
+<%= javascript_include_tag 'jquery.ui.all', 'spreadsheet_explorer','spreadsheet_explorer_plot',
                            'flot/index', 'zoom/lightbox' %>
 
 <div style="margin-left: auto; margin-right: auto; margin-top: 2em; width: 98%;">
@@ -16,7 +16,7 @@
           :title => "Add new annotation", :class => "spreadsheet_button requires_selection" %>
     <% end %>
     <%= link_to image('spreadsheet_export') + " Export Data", "#", :onclick =>"copy_cells(); return false;",
-          :title => "Export selected cells into an external application", :class => "spreadsheet_button requires_selection" %>
+        :title => "Export selected cells into an external application", :class => "spreadsheet_button requires_selection" %>
     <%= link_to image('graph') + " Plot Data", "#", :onclick =>"plot_selected_cells('plot_data','620','400'); return false;",
           :title => "Export selected cells into an external application", :class => "spreadsheet_button requires_selection" %>
     <%= link_to image('destroy') + " Clear Selection", "#", :onclick =>"deselect_cells();$j('#cell_info').val(''); return false;",
