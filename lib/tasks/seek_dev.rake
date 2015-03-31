@@ -8,7 +8,12 @@ include SysMODB::SpreadsheetExtractor
 
 namespace :seek_dev do
 
-
+  desc "cache compounds hash"
+  task :cache_compounds => :environment do
+    (User.all + [nil]).each do |user|
+      Seek::Data::CompoundsExtraction.get_compound_id_smiles_hash(user)
+    end
+  end
   desc "populate datafile"
   task :populate_datafile => :environment do
     data_file_list = YAML.load(File.read(File.join(Rails.root, "config/default_data", "data_file_list.yml")))
