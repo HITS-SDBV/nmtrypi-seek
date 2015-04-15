@@ -1,4 +1,4 @@
-<%= javascript_include_tag "swfobject","cytoscape_web/index" %>
+<%= javascript_include_tag "swfobject","cytoscape_web_1.0.4/index" %>
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
 <html>
@@ -10,9 +10,9 @@
                 var div_id = "cytoscapeweb";
                 var options = {
                     // where you have the Cytoscape Web SWF
-                    swfPath: "/swfs/CytoscapeWeb",
+                    swfPath: "<%= asset_path("cytoscape_web_1.0.4/swfs/CytoscapeWeb") %>",
                     // where you have the Flash installer SWF
-                    flashInstallerPath: "/swfs/playerProductInstall"
+                    flashInstallerPath: "<%= asset_path("cytoscape_web_1.0.4/swfs/playerProductInstall") %>"
                 };
                // init and draw
                 var vis = new org.cytoscapeweb.Visualization(div_id, options);
