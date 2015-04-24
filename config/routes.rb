@@ -367,7 +367,6 @@ SEEK::Application.routes.draw do
       post :publish_related_items
       post :new_version
       post :submit_to_sycamore
-      post :export_as_xgmml
       post :update_annotations_ajax
       post :publish
       post :execute

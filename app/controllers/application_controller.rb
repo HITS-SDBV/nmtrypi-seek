@@ -261,7 +261,7 @@ class ApplicationController < ActionController::Base
         'view'
 
       when 'download', 'named_download', 'launch', 'submit_job', 'data', 'execute','plot', 'explore','visualise' ,
-          'export_as_xgmml', 'download_log', 'download_results', 'input', 'output', 'download_output', 'download_input',
+           'download_log', 'download_results', 'input', 'output', 'download_output', 'download_input',
           'view_result','compare_versions','simulate','compound_visualization'
         'download'
 

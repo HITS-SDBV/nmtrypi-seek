@@ -53,22 +53,7 @@ class ModelsController < ApplicationController
     @blob2=blobs[1]
   end
 
-  def export_as_xgmml
-    type = params[:type]
-    body = @_request.body.read
-    orig_doc = find_xgmml_doc @display_model
-    head = orig_doc.to_s.split("<graph").first
-    xgmml_doc = head + body
 
-    xgmml_file = "model_#{@model.id}_version_#{@display_model.version}_export.xgmml"
-    tmp_file= Tempfile.new("#{xgmml_file}", "#{Rails.root}/tmp/")
-    File.open(tmp_file.path, "w") do |tmp|
-      tmp.write xgmml_doc
-    end
-
-    send_file tmp_file.path, :type => "#{type}", :disposition => 'attachment', :filename => xgmml_file
-    tmp_file.close
-  end
 
   def visualise
     raise Exception.new("This #{t('model')} does not support Cytoscape") unless @display_model.contains_xgmml?

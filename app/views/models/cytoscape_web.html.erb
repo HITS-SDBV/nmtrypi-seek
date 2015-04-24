@@ -1,4 +1,4 @@
-<%= javascript_include_tag "swfobject","cytoscape_web_1.0.4/index" %>
+<%= javascript_include_tag "swfobject","cytoscape_web_1.0.4/index", "application_shared" %>
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
 <html>
@@ -290,12 +290,18 @@
                   return data;
 
               }
+               function export_as_xgmml() {
+                  var  contentType = 'application/xml';
+                   var xml_header = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?> \n';
+                   var xgmml_file_content = (xml_header + vis.xgmml());
+                   var file_name = "model_<%= @model.id %>_version_<%= @display_model.version %>_export.xgmml";
 
-               function export_vis(format) {
-                  vis.exportNetwork('xgmml', '<%= model_path(@model)%>/export_as_xgmml?type=xml');
+                   var a = document.createElement('a');
+                   var blob = new Blob([ xgmml_file_content], {'type':contentType, });
+                   a.href = window.URL.createObjectURL(blob);
+                   a.download = file_name;
+                   clickLink(a);
                }
-
-
 
         </script>
         <style>
@@ -336,7 +342,7 @@
         </div>
 
         <center>
-          <input type="submit" onclick="javascript:export_vis('xgmml')" value="Export As XGMML" style="margin-top: 2">
+          <%= link_to_function "Export As XGMML", "export_as_xgmml()" %>
         </center>
 
         <div id="properties">
