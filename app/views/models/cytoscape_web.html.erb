@@ -10,9 +10,9 @@
                 var div_id = "cytoscapeweb";
                 var options = {
                     // where you have the Cytoscape Web SWF
-                    swfPath: "<%= asset_path("cytoscape_web_1.0.4/swfs/CytoscapeWeb") %>",
+                    swfPath: "<%= asset_path("cytoscape_web_1.0.4/CytoscapeWeb.swf").split(".swf").first %>",
                     // where you have the Flash installer SWF
-                    flashInstallerPath: "<%= asset_path("cytoscape_web_1.0.4/swfs/playerProductInstall") %>"
+                    flashInstallerPath: "<%= asset_path("cytoscape_web_1.0.4/playerProductInstall.swf").split(".swf").first %>"
                 };
                // init and draw
                 var vis = new org.cytoscapeweb.Visualization(div_id, options);

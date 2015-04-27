@@ -27,7 +27,7 @@ module SEEK
     config.assets.css_compressor = :yui
 
     config.assets.precompile += ['*.js','*.css']
-
+    config.assets.paths +=%W(#{Rails.root}/app/assets/flashes #{Rails.root}/vendor/assets/flashes)
     # Force all environments to use the same logger level
     # (by default production uses :info, the others :debug)
     # config.log_level = :info
