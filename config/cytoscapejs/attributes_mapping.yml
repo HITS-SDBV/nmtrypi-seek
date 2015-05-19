@@ -1,0 +1,55 @@
+# cytoscapejs elements styles mapping
+# attribute_name is the attribute of node and is case sensitive (e.g. <node fillColor="#aaaaaa")
+# or name attribute of att  (e.g. <att name = "fillColor" value="#aaaaaa" type="String">) which is child of node in the xgmml
+# two delimiters: "<<" is parent-child, "##" is replacement of ":" in the original name
+node_fill_color:
+  attribute_name: [graphics<<fill, node.fillColor]
+  default_value: "#bbbbbb"
+
+edge_fill_color:
+  attribute_name: [graphics<<fill]
+  default_value: "#bbbbbb"
+
+node_shape:
+    attribute_name: [node.shape,graphics<<type]
+    default_value:  ECLIPSE
+
+node_label_font:
+    attribute_name: [graphics<<cy##nodeLabelFont]
+
+node_label_color:
+    attribute_name: [node.labelColor]
+    default_value: "#000000"
+
+node_line_style:
+    attribute_name: [node.lineStyle]
+
+edge_line_style:
+    attribute_name: [graphics<<cy##edgeLineType]
+
+node_line_width:
+    attribute_name: [node.lineWidth, graphics<<width]
+    default_value: 1
+
+edge_line_width:
+    attribute_name: [graphics<<width, edge.lineWidth]
+    default_value: 1
+
+node_border_color:
+    attribute_name: [node.borderColor, graphics<<outline]
+
+source_arrow_color:
+    attribute_name: [sourceArrowColor, graphics<<cy##sourceArrowColor]
+
+target_arrow_color:
+    attribute_name: [targetArrowColor, graphics<<cy##targetArrowColor]
+
+#style_attribute:
+#    attribute_name:
+#    default_value:
+
+
+
+
+
+

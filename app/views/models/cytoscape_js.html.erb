@@ -1,0 +1,46 @@
+<%= stylesheet_link_tag "cytoscape_model_graph" %>
+<%= javascript_include_tag "cytoscape_model_graph" %>
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html>
+<head>
+  <title><%= t('model') %> Visualization with Cytoscape Web</title>
+<body>
+<div id="model_cytoscape"></div>
+<center>
+  <%= link_to_function "Export As XGMML", 'export_as_xgmml()' %>
+</center>
+
+ <%= select_tag "model_graph_layout" %>
+
+<div id="properties">
+  <div style="height: 10%">
+    <%= link_to_function "Export As XGMML", "export_as_xgmml()" %>
+  </div>
+  <div>
+    <div class="label"><label class="title">Node</label></div>
+    <br/>
+
+    <div id="node_properties">
+      No node is selected.
+    </div>
+  </div>
+  <div>
+    <div class="label"><label class="title">Edge</label></div>
+    <br/>
+
+    <div id="edge_properties">
+      No edge is selected.
+    </div>
+  </div>
+</div>
+</body>
+<script type="text/javascript" charset="utf-8">
+    var elements = <%= @cytoscape_elements.html_safe %>;
+    var layout = <%= @layout.html_safe %>
+    var origin_xml_doc = <%= @doc.to_json.html_safe %>;
+    drawModelGraph(elements, layout);
+    setOriginalXMLDoc(origin_xml_doc);
+    var export_file_name = "model_<%= @model.id %>_version_<%= @display_model.version %>_export.xgmml";
+</script>
+</html>

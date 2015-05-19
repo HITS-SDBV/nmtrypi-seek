@@ -1,0 +1,61 @@
+/* The Cytoscape Web container must have its dimensions set. */
+html, body {
+    font: 14px helvetica neue, helvetica, arial, sans-serif;
+}
+
+#model_cytoscape {
+    position: absolute;
+    width: 75%;
+    height: 100%;
+    float: left;
+    background-color: white;
+
+}
+
+#properties {
+    float: right;
+    width: 18%;
+    background-color: white;
+    border-left: 1px solid lightgray;
+    padding-left: 1%;
+    padding-right: 1%;
+    padding-bottom: 1%;
+    margin-top: 1em;
+    margin-bottom: 1em;
+
+}
+
+.half {
+    height: 45%
+}
+
+.label {
+    margin-top: 1em;
+}
+
+label.title {
+    margin-top: 0.25em;
+    color: white;
+    padding: 0.4em 0.25em;
+    background: #0B94B0;
+    border-radius: 5px;
+
+}
+
+table, th, td {
+    border: 1px solid #dcdcdc;
+}
+table {
+    border: 1;
+    cellpadding: 5;
+}
+
+th {
+    text-align: left;
+    color: #0B94B0;
+}
+
+td {
+    text-align: left;
+}
+

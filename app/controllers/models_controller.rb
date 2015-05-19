@@ -54,15 +54,11 @@ class ModelsController < ApplicationController
   end
 
 
-
   def visualise
     raise Exception.new("This #{t('model')} does not support Cytoscape") unless @display_model.contains_xgmml?
-    # for xgmml file
-    doc = find_xgmml_doc @display_model
-    # convert " to \" and newline to \n
-    #e.g.  "... <att type=\"string\" name=\"canonicalName\" value=\"CHEMBL178301\"/>\n ...  "
-    @graph = %Q("#{doc.root.to_s.gsub(/"/, '\"').gsub!("\n", '\n')}")
-    render :cytoscape_web, :layout => false
+    @doc = find_xgmml_doc @display_model
+    @cytoscape_elements, @layout = generate_cytoscape_json(@doc)
+    render :cytoscape_js, :layout => false
   end
 
   # GET /models
@@ -328,9 +324,7 @@ class ModelsController < ApplicationController
 
   def find_xgmml_doc model
     xgmml_content_blob = model.xgmml_content_blobs.first
-    file = open(xgmml_content_blob.filepath)
-    doc = LibXML::XML::Parser.string(file.read).parse
-    doc
+    doc = File.read(xgmml_content_blob.filepath)
   end
 
   def create_model_image model_object, params_model_image
@@ -339,5 +333,79 @@ class ModelsController < ApplicationController
     latest_version = model_object.latest_version
     latest_version.model_image_id = model_object.model_image_id
     latest_version.save
+  end
+
+  def generate_cytoscape_json xml_doc_string
+    hash_string = Hash.from_xml(xml_doc_string.gsub(/type="string"/, 'type="text"'))
+    cytoscape_elements_hash = {"nodes" => hash_string["graph"]["node"].map { |n| {"data" => flatten_hash(n)} },
+                               "edges" => hash_string["graph"]["edge"].map { |n| {"data" => flatten_hash(n)} }}
+    cytoscape_elements_hash = {"nodes" => cytoscape_elements_hash["nodes"].map { |n| {"data" => rebuild_cytoscape_hash(n["data"]).reject { |k, v| k.include? "edge_" }, "position" => {"x" => n["data"]["graphics<<x"].to_f, "y" => n["data"]["graphics<<y"].to_f}} },
+                               "edges" => cytoscape_elements_hash["edges"].map { |n| {"data" => rebuild_cytoscape_hash(n["data"]).reject { |k, v| k.include? "node_" }} }}
+
+    cytoscape_layout = "random"
+    defined_layout = hash_string["graph"]["att"].detect { |a| a["name"].downcase.include? "layout" }
+    cytoscape_layout = defined_layout["value"] if defined_layout
+    position = cytoscape_elements_hash["nodes"].detect { |n| n["data"]["x"] && n["data"]["y"] }
+    cytoscape_layout = "preset" if position
+    layout_hash = {"name" => cytoscape_layout}
+
+    [cytoscape_elements_hash.to_json, layout_hash.to_json]
+  end
+
+  def flatten_hash(hash)
+    hash.each_with_object({}) do |(k, v), h|
+      if v.is_a? Hash
+        flatten_hash(v).map do |h_k, h_v|
+          new_h_k = "#{k}<<#{h_k}"
+          h[new_h_k] = h_v
+        end
+      else
+        h[k] = v
+      end
+    end
+  end
+
+
+  def rebuild_cytoscape_hash hash
+    new_hash = hash.each_with_object({}) do |(k, v), h|
+      #change ":" to "_" in the key
+      if k.include?(":")
+        h[k.gsub(/:/, "##")] = v
+        #mapping postion keys to cytoscape styles
+      elsif k == "graphics<<x" || k == "graphics<<y"
+        h[k.split("<<").last] = v.to_f
+      else
+        h[k] = v
+      end
+    end
+
+    add_default_cytoscape_values(new_hash)
+  end
+
+  def add_default_cytoscape_values(hash)
+    style_mapping = YAML.load(File.read("#{Rails.root}/config/cytoscapejs/attributes_mapping.yml"))
+    default_styles_hash = style_mapping.each_with_object({}) do |(key, value), new_h|
+      new_value = find_or_set_default_hash(hash, value["attribute_name"], value["default_value"])
+      new_value = rgb2hex(new_value) if key.downcase.include?("color") && new_value && !new_value.include?("#")
+      new_h[key] = new_value
+    end
+
+    hash.reverse_merge default_styles_hash
+  end
+
+  def find_or_set_default_hash hash, keywords, default_value
+    att_names = hash["att"].map { |a| a["name"] }
+    key = (hash.keys + att_names).detect { |k| Array(keywords).detect { |kw| k.downcase.include?(kw.downcase) } }
+    att_value = hash["att"].detect { |a| a["name"]==key }.try { |h| h["value"] }
+    hash[key].blank? && att_value.blank? ? default_value : hash[key] || att_value
+  end
+
+  def rgb2hex rgb_string
+    color_hex = rgb_string.split(",").map do |c|
+      hex = c.to_i.to_s(16)
+      c.to_i > 16 ? hex : "0#{hex}"
+    end.join("")
+
+    "##{color_hex}"
   end
 end

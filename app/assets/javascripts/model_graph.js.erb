@@ -1,0 +1,360 @@
+<% environment.context_class.instance_eval { include ModelsHelper } %>
+var xmlDoc;
+var xml_string = null;
+var style_mapping = <%= cytoscapejs_style_attributes_mapping.html_safe %>;
+
+function drawModelGraph(elements, layout) {
+    var cy = cytoscape({
+        container: document.getElementById('model_cytoscape'),
+        style: cytoscape.stylesheet()
+                .selector('node')
+                .css({
+                    'content': 'data(label)',
+                    'color': 'data(node_label_color)',
+                    'text-valign': 'center',
+                    'font-family': 'data(node_label_font)',
+                    'background-color': 'data(node_fill_color)',
+                    'shape': 'data(node_shape)'
+                })
+                .selector('edge')
+                .css({
+                    //'content': 'data(label)',
+                    'target-arrow-shape': 'triangle',
+                    'width': 'data(edge_line_width)',
+                    'line-style': "data(edge_line_style)",
+                    'line-color': 'data(edge_fill_color)',
+                    'source-arrow-color': 'data(source_arrow_color)',
+                    'target-arrow-color': 'data(target_arrow_color)'
+                })
+                .selector('node:selected')
+                .css({
+                    'border-width': 3,
+                    'border-color': 'red',
+                    'text-outline-color': 'red'
+                })
+                .selector('edge:selected')
+                .css({
+                    'target-arrow-color': "red"
+                }),
+
+        elements: elements,
+
+        layout: layout,
+
+        ready: function () {
+            window.cy = this;
+        }
+
+    });
+
+
+    cy.on('tap', 'node', function (evt) {
+        var node = evt.cyTarget;
+        show_properties("node", node);
+        hide_properties("edge");
+    });
+
+    cy.on('tap', 'edge', function (evt) {
+        var edge = evt.cyTarget;
+        show_properties("edge", edge);
+        hide_properties("node");
+    });
+
+}
+
+function createEditableElement(element, target, variable_name, variable_value) {
+    var input_text = element;
+    if (variable_value === "true" || variable_value === "false") {
+        input_text.type = "checkbox";
+        input_text.checked = (variable_value == "true" ? true : false)
+    } else {
+        input_text.type = "text";
+        if (variable_value === null || variable_value === undefined) {
+            input_text.value = "none";
+        } else {
+            input_text.value = variable_value;
+        }
+
+    }
+    input_text.id = variable_name;
+    // in place editing and validation
+    input_text.onchange = function () {
+        var xml_attr_name = this.id, xml_attr_value = this.value;
+        var style_name = mapped_attribute_name(this.id);
+        var style_value = mapped_attribute_value(style_name, this.value);
+        if (this.type === "checkbox") {
+            style_value = this.checked;
+            xml_attr_value = this.checked;
+        }
+
+        set_data_value(target, style_name, style_value);
+        if (style_name != xml_attr_name || style_value != xml_attr_value) {
+            set_data_value(target, xml_attr_name, xml_attr_value);
+        }
+        // redraw cytoscape js graph
+        cy.load(cy.json().elements);
+
+        //update xml doc for export
+        updateDoc(target, xml_attr_name, xml_attr_value);
+    };
+}
+function updateDoc(target, attr_name, value) {
+
+
+    var node_or_edge = target.isNode() ? "node" : (target.isEdge() ? "edge" : null),
+            id = target.data('id');
+
+    if (node_or_edge && xml_string) {
+        if (window.DOMParser) {
+            parser = new DOMParser();
+            xmlDoc = parser.parseFromString(xml_string, "text/xml");
+        }
+        else // Internet Explorer
+        {
+            xmlDoc = new ActiveXObject("Microsoft.XMLDOM");
+            xmlDoc.async = false;
+            xmlDoc.loadXML(xml_string);
+        }
+
+        var node = xmlDoc.getElementById(id);
+        setNodeAttribute(node, attr_name, value);
+        // update xml string
+        xml_string = (new XMLSerializer()).serializeToString(xmlDoc);
+    }
+}
+function setNodeAttribute(node, name, value) {
+    if (node.getAttribute(name)) {
+        node.setAttribute(name, value);
+    }
+    else {
+        var child_nodes = node.children;
+        for (var i = 0; i < child_nodes.length; i++) {
+            if (child_nodes[i].getAttribute("name") === name) {
+                child_nodes[i].setAttribute("value", value);
+                break;
+            } else {
+                if (i == child_nodes.length - 1) {
+                    node.setAttribute(name, value);
+                }
+            }
+        }
+    }
+}
+function mapped_attribute_name(name) {
+    var mapped_name = name.replace("##", ":");
+    for (var key in style_mapping) {
+        if (style_mapping[key]["attribute_name"].indexOf(name) != -1) {
+            mapped_name = key;
+            break;
+        }
+    }
+
+    return mapped_name;
+}
+
+function isMappedStyleAttribute(name) {
+    return !(style_mapping[name] === undefined);
+}
+
+
+function mapped_attribute_value(name, value) {
+    //e.g. rgb colors(r,g,b), return the hex value
+    if (name.toLowerCase().indexOf("color") != -1 && value.split(",").length > 0) {
+        return "#" + rgb2hex(value);
+    } else {
+        return value;
+    }
+}
+
+function rgb2hex(rgb) {
+    var colors = rgb.split(","), hex = "";
+    for (var i in colors) {
+        var int = parseInt(colors[i]),
+                hex_i = int.toString(16);
+        hex_i = int > 16 ? hex_i : "0" + hex_i;
+        hex += hex_i
+    }
+    return hex;
+}
+
+function setOriginalXMLDoc(origin_xml_doc) {
+    if (xml_string === null) {
+        xml_string = origin_xml_doc
+    }
+}
+function sort_keys(hash) {
+    var keys = [],
+            k;
+    for (k in hash) {
+        if (k === "att") {
+            var atts = hash[k];
+            for (var i in atts) {
+                keys.push(atts[i]["name"])
+            }
+        }
+        if (hash.hasOwnProperty(k)) {
+            keys.push(k);
+        }
+    }
+    keys.sort(function (a, b) {
+        return a.toLowerCase().localeCompare(b.toLowerCase())
+    });
+    return keys;
+}
+
+function show_properties(group_id, target) {
+    var element = document.getElementById(group_id + "_properties");
+    element.innerHTML = "";
+    var table_id = group_id + "_table";
+    var table = document.getElementById(table_id);
+    if (table == null) {
+        table = document.createElement('table');
+        table.id = table_id;
+        table.class = "properties_table";
+        if (target.data("comment") == undefined) {
+            target.data("comment", null);
+        }
+        var sorted_keys = sort_keys(target.data());
+        for (var i in sorted_keys) {
+            var variable_name = sorted_keys[i];
+            var variable_value = get_data_value(target, variable_name);
+            if (isMappedStyleAttribute(variable_name) || variable_name.indexOf("<<") != -1 || style_mapping[variable_name] != null || ["x", "y", "att"].indexOf(variable_name) != -1) {
+                continue;
+            }
+            var row = document.createElement('tr');
+            var col1 = document.createElement('th');
+            if (variable_name === 'name')
+                col1.textContent = 'type of the node(name)';
+            else
+                col1.textContent = variable_name.replace("##", ":");
+            col1.textAlign = "left";
+            var col2 = document.createElement('td');
+            switch (variable_name.toLowerCase()) {
+                // non-editable attributes:
+                case "id":
+                case "description":
+                case "synonym":
+                case "smiles":
+                    col2.textContent = variable_value;
+                    break;
+                // linkable attributes:
+                case "uniprot":
+                    if (variable_value != null && variable_value != "Unspecified") {
+                        var url = document.createElement('a');
+                        url.href = 'http://www.uniprot.org/uniprot/' + variable_value;
+                        url.textContent = variable_value;
+                        url.target = "_blank";
+                        col2.appendChild(url);
+                    } else {
+                        col2.textContent = variable_value;
+                    }
+                    break;
+                case "label":
+                    if (variable_value != null && variable_value.indexOf("CHEMBL") != -1 && group_id == "node") {
+                        // compound/target CHEMBLs
+                        var url = document.createElement('a');
+                        if (target.data("Uniprot") == null) {
+                            url.href = 'https://www.ebi.ac.uk/chembldb/compound/inspect/' + variable_value;
+                        } else {
+                            url.href = 'https://www.ebi.ac.uk/chembldb/target/inspect/' + variable_value;
+                        }
+                        url.textContent = variable_value;
+                        url.target = "_blank";
+                        col2.appendChild(url);
+                    } else {
+                        var input_text = document.createElement('input');
+                        createEditableElement(input_text, target, variable_name, variable_value);
+                        col2.appendChild(input_text);
+                    }
+                    break;
+                // editable attributes
+                default:
+                    // attributes with keywords are un-editable
+                    var key_words = ["BindingAffinity", "EvidenceType", "ActivityComment", "Extra Data", "source", "target"];
+                    for (var i in key_words) {
+                        if (variable_name.indexOf(key_words[i]) == 0) {
+                            col2.textContent = variable_value;
+                            break;
+                        } else {
+                            //others are editable
+                            if (i == (key_words.length - 1)) {
+                                var input_text = document.createElement('input');
+                                createEditableElement(input_text, target, variable_name, variable_value);
+                                col2.appendChild(input_text);
+                            }
+                        }
+                    }
+                    break;
+            }
+            row.appendChild(col1);
+            row.appendChild(col2);
+
+            //hide null attributes except 'comment'
+            if (variable_value == null) {
+
+                if (variable_name == "comment") {
+                    table.appendChild(row);
+                }
+            } else {
+                table.appendChild(row);
+            }
+
+        }
+        element.appendChild(table);
+    }
+}
+
+function get_data_value(target, property_name) {
+    var property_value;
+    if ((property_value = target.data(property_name)) === undefined) {
+        for (var j in target.data("att")) {
+            if (target.data("att")[j]["name"] === property_name) {
+                property_value = target.data("att")[j]["value"]
+                break;
+            }
+        }
+    }
+    return property_value;
+}
+
+function set_data_value(target, property_name, property_value) {
+    if (target.data(property_name) != "undefined") {
+        target.data(property_name, property_value);
+    } else {
+        for (var i in target.data("att")) {
+            if (target.data("att")[i]["name"] === property_name) {
+                target.data("att")[i]["value"] = property_value;
+            }
+        }
+    }
+}
+
+function hide_properties(group_id) {
+
+    var element = document.getElementById(group_id + "_properties");
+    var table_id = group_id + "_table";
+    var table = document.getElementById(table_id);
+    if (table != null) {
+        element.removeChild(table);
+    }
+    element.innerHTML = "No " + group_id + " is selected.";
+}
+
+function export_as_xgmml(filename) {
+
+    var contentType = 'application/xml';
+    var xgmml_file_content = (xml_string);
+    var file_name = export_file_name;
+
+    if (typeof filename != "undefined") {
+        file_name = filename;
+    }
+    var a = document.createElement('a');
+    var blob = new Blob([ xgmml_file_content], {'type': contentType, });
+    a.href = window.URL.createObjectURL(blob);
+    a.download = file_name;
+    clickLink(a);
+}
+
+
+

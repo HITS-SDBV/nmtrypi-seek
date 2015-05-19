@@ -70,4 +70,8 @@ module ModelsHelper
   def show_jws_simulate?
     Seek::Config.jws_enabled && @model.can_download? && @display_model.is_jws_supported?
   end
+
+  def cytoscapejs_style_attributes_mapping
+    YAML.load(File.read("#{Rails.root}/config/cytoscapejs/attributes_mapping.yml")).to_json
+  end
 end
