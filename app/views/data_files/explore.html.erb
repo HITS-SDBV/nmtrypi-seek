@@ -1,5 +1,5 @@
-<%= stylesheet_link_tag('spreadsheet_explorer', 'jquery.ui.resizable', 'lightbox') %>
-<%= javascript_include_tag 'jquery.ui.all','spreadsheet_explorer','spreadsheet_explorer_plot',
+<%= stylesheet_link_tag('spreadsheet_explorer', 'jquery.ui.resizable', 'lightbox', 'spreadsheet_heatmap') %>
+<%= javascript_include_tag 'jquery.ui.all', 'spreadsheet_heatmap','spreadsheet_explorer','spreadsheet_explorer_plot',
                            'flot/index', 'zoom/lightbox' %>
 
 <div style="margin-left: auto; margin-right: auto; margin-top: 2em; width: 98%;">
@@ -21,12 +21,16 @@
           :title => "Export selected cells into an external application", :class => "spreadsheet_button requires_selection" %>
     <%= link_to image('destroy') + " Clear Selection", "#", :onclick =>"deselect_cells();$j('#cell_info').val(''); return false;",
           :title => "Cancel the current selection", :class => "spreadsheet_button requires_selection" %>
+    <%= link_to image('spreadsheet') + " Heat Map", "#", :onclick =>"heatmap_selected_cells(); return false;",
+                :title => "Show the heat map", :class => "spreadsheet_button requires_selection" %>
   </div>
   
   <div class="spreadsheet_viewer" id="spreadsheet_outer_frame">
     <%= render :partial => "spreadsheets/annotation_form" %>
     <%= render :partial => "spreadsheets/export" %>
     <%= render :partial => "spreadsheets/plot" %>
+    <%= render :partial => "spreadsheets/d3_heatmap" %>
+
     
     <div id="annotations">
       <%= render :partial => "spreadsheets/annotations", :locals=>{ :annotations => @display_data_file.spreadsheet_annotations } %>

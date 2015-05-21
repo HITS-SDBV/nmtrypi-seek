@@ -720,3 +720,47 @@ function displayRowsPerPage(){
         $('rows_per_page').show();
     }
 }
+
+function select_heatmap_cells(col, totalRow, sheetNumber) {
+
+    $j("table.active_sheet tr").slice(0,totalRow).each(function() {
+        var count = $j(this).children("td.cell").size();
+        $j(this).children("td.cell")[col-1].className += " heatmap_cell";
+        if ( $j(this).children("td.cell")[col-1].className.indexOf("heatmap_cell") === -1){
+            $j(this).children("td.cell")[col-1].className += " heatmap_cell"
+        }
+    });
+
+    $j("table.active_sheet tr td.heatmap_cell:not(.selected_cell)").addClass("selected_cell");
+
+}
+
+function deselect_heatmap_cells(col, totalRow, sheetNumber){
+    $j("table.active_sheet tr").slice(0,totalRow).each(function() {
+        if ( $j(this).children("td.cell")[col-1].className.indexOf("heatmap_cell") != -1){
+            $j(this).children("td.cell")[col-1].className = $j(this).children("td.cell")[col-1].className.replace("heatmap_cell", "")
+            $j(this).children("td.cell")[col-1].className = $j(this).children("td.cell")[col-1].className.replace("selected_cell", "")
+        }
+    });
+
+    $j("table.active_sheet tr td.heatmap_cell:not(.selected_cell)").addClass("selected_cell");
+
+}
+function heatmap_selected_cells() {
+    var heatmap_data= new Array();
+    $j("table.active_sheet tr").each(function() {
+        var heatmap_cells = $j(this).children("td.heatmap_cell");
+        for(var i=0; i < heatmap_cells.size() ; i++){
+            //if($j(this).index() > 0){
+                heatmap_data.push({heatmap_col_index: i ,row: $j(this).index(), col : heatmap_cells.eq(i).index(), value : heatmap_cells.eq(i).html() });
+            //}
+        }
+
+    });
+    set_heatmap_data(heatmap_data);
+    draw_legend(heatmap_data);
+    draw_heatmap(heatmap_data);
+    draw_slider();
+
+    $j('#heatmap_container').show();
+}
