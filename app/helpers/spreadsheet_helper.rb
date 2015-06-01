@@ -34,7 +34,7 @@ module SpreadsheetHelper
         graph_url = compound_visualization_path({id: data_id,compound_id: standardized_value})
         smile_graph_link = image_tag_for_key("compound_formula", graph_url, 'View graph', {:rel => "lightbox"}, nil)
       else
-        smile_graph_link = "<span class='none_text'>None</span>".html_safe
+        smile_graph_link = "<img alt='None' class='none_text'>".html_safe
       end
 
      search_link = form_tag main_app.search_path, :html => {:style => 'display:inline;'} do
