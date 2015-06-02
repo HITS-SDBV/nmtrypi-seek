@@ -6,7 +6,7 @@ module Seek
         Rails.cache.fetch("#{DataFile.order('updated_at desc').first.content_blob.cache_key}-#{user.try(:cache_key)}-all-compound-id-smile-hash") do
           id_smiles_hash = {}
           DataFile.all.each do |df|
-            id_smiles_hash.merge! get_compound_id_smiles_hash_per_file(df, user)
+            id_smiles_hash.merge!(get_compound_id_smiles_hash_per_file(df, user)){ |key, v1, v2| [v1,v2].detect{|v| !v.blank? && v != "hidden"} || v1  }
           end
           #sort by key
           id_smiles_hash.sort_by { |k, v| k.to_s }.to_h
@@ -36,6 +36,15 @@ module Seek
           id_smiles_hash
         end
 
+      end
+
+      def self.clear_cache
+        User.all.each do |user|
+          Rails.cache.delete("#{DataFile.order('updated_at desc').first.content_blob.cache_key}-#{user.try(:cache_key)}-all-compound-id-smile-hash")
+          DataFile.all.each do |df|
+            Rails.cache.delete("#{df.content_blob.cache_key}-#{user.try(:cache_key)}-compound-id-smile-hash")
+          end
+        end
       end
 
       private
