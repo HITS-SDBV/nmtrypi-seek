@@ -312,7 +312,7 @@ class DataFilesController < ApplicationController
 
   def compound_visualization
     compound_id = params[:compound_id]
-    smiles =  Seek::Data::CompoundsExtraction.instance.compound_id_smiles_hash[compound_id]
+    smiles =  Seek::Data::CompoundsExtraction.get_compound_id_smiles_hash[compound_id]
     if smiles
       compounds_image_path = Seek::Config.temporary_filestore_path + '/image_assets/compounds'
       path_to_png  = compounds_image_path + "#{compound_id}.png"
