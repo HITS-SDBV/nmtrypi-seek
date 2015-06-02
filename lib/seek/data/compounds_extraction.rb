@@ -3,7 +3,7 @@ module Seek
     class CompoundsExtraction
 
       def self.get_compound_id_smiles_hash user=User.current_user
-        Rails.cache.fetch("#{DataFile.order('updated_at desc').first.content_blob.cache_key}-#{user.try(:cache_key)}-compound-id-smile-hash") do
+        Rails.cache.fetch("#{DataFile.order('updated_at desc').first.content_blob.cache_key}-#{user.try(:cache_key)}-all-compound-id-smile-hash") do
           id_smiles_hash = {}
           DataFile.all.each do |df|
             id_smiles_hash.merge! get_compound_id_smiles_hash_per_file(df, user)
