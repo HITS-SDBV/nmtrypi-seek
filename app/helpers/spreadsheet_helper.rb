@@ -27,14 +27,20 @@ module SpreadsheetHelper
 
   def cell_link value, data_id
     if Seek::Search::SearchTermStandardize.to_standardize?(value)
-      id_smiles_hash =  Seek::Data::CompoundsExtraction.instance.compound_id_smiles_hash
+      id_smiles_hash =  Seek::Data::CompoundsExtraction.get_compound_id_smiles_hash
       standardized_value = Seek::Search::SearchTermStandardize.to_standardize(value)
       smiles =  id_smiles_hash[standardized_value]
       if smiles
-        graph_url = compound_visualization_path({id: data_id,compound_id: standardized_value})
-        smile_graph_link = image_tag_for_key("compound_formula", graph_url, 'View graph', {:rel => "lightbox"}, nil)
+        if smiles == "hidden"
+          html_options =  { :class => "disabled",:title=> "graph cannot be viewed as smiles is hidden!"}
+          graph_url = "#"
+        else
+          html_options =  {:rel => "lightbox"}
+          graph_url = compound_visualization_path({id: data_id,compound_id: standardized_value})
+        end
+        smile_graph_link = image_tag_for_key("compound_formula", graph_url, 'View graph',html_options, nil)
       else
-        smile_graph_link = "<span class='none_text'>None</span>".html_safe
+        smile_graph_link = "<img alt='None' class='none_text'>".html_safe
       end
 
      search_link = form_tag main_app.search_path, :html => {:style => 'display:inline;'} do

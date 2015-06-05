@@ -77,8 +77,8 @@ $j(document).ready(function ($) {
                 }
                 else
                 {
-                    $('#cell_info').val($(this).html());
-                    $('#cell_info').attr("title", $(this).html());
+                    $('#cell_info').val($(this).text());
+                    $('#cell_info').attr("title", $(this).text());
                 }
                 isMouseDown = true;
                 startRow = parseInt($(this).attr("row"));
@@ -636,7 +636,7 @@ function copy_cells()
     {
         for(var j = 0; j < columns; j += 1)
         {
-            text += (cells.eq(i + j).html() + "\t");
+            text += (cells.eq(i + j).text() + "\t");
         }
         text += "\n";
     }
