@@ -28,6 +28,7 @@ module SpreadsheetHelper
   def cell_link value, data_id
     if Seek::Search::SearchTermStandardize.to_standardize?(value)
       id_smiles_hash =  Seek::Data::CompoundsExtraction.get_compound_id_smiles_hash
+
       standardized_value = Seek::Search::SearchTermStandardize.to_standardize(value)
       smiles =  id_smiles_hash[standardized_value]
       if smiles
@@ -42,15 +43,24 @@ module SpreadsheetHelper
       else
         smile_graph_link = "<img alt='None' class='none_text'>".html_safe
       end
+     full_info_link = link_to_remote_redbox("#{value}",
+                                            { :url => compound_attributes_view_path(:id => data_id, :compound_id => value),
+                                              :failure => "alert('Sorry, an error has occurred.'); RedBox.close();",
+                                              :method => :get
+                                            },
+                                            {:id => "compound_attributes_view"
+                                            }
 
+     )
      search_link = form_tag main_app.search_path, :html => {:style => 'display:inline;'} do
         hidden_field_tag(:search_query, value)  +
         hidden_field_tag(:search_type, "All")  +
-        link_to_function(value, "$(this).up('form').submit()") +
-        " " +
-        smile_graph_link
+        #link_to_function(image_tag(assets_path("famfamfam_silk/zoom.png")), "$(this).up('form').submit()") #+
+        image_tag_for_key("show","$(this).up('form').submit()" , "search compound #{value}", nil, nil, :function) +
+         " " +
+         smile_graph_link
      end.html_safe
-
+     (full_info_link + search_link).html_safe
     else
       auto_link(h(value), :html => {:target => "_blank"})
     end
