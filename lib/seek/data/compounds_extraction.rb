@@ -15,8 +15,9 @@ module Seek
           compounds_hash
         end
       end
+        end
+      end
 
-      def self.get_compounds_hash_per_file(data_file, user=User.current_user)
         Rails.cache.fetch("#{data_file.content_blob.cache_key}-#{user.try(:cache_key)}-compound-hash") do
           compounds_hash = {}
           if  data_file.spreadsheet
@@ -82,6 +83,20 @@ module Seek
 
       def get_compound_id_smiles_hash_per_file data_file
         Rails.cache.fetch("#{data_file.content_blob.cache_key}-compound-id-smile-hash") do
+
+      def self.get_compound_id_smiles_hash user=User.current_user
+        Rails.cache.fetch("#{DataFile.order('updated_at desc').first.content_blob.cache_key}-#{user.try(:cache_key)}-all-compound-id-smile-hash") do
+          id_smiles_hash = {}
+          DataFile.all.each do |df|
+            id_smiles_hash.merge!(get_compound_id_smiles_hash_per_file(df, user)){ |key, v1, v2| [v1,v2].detect{|v| !v.blank? && v != "hidden"} || v1  }
+          end
+          #sort by key
+          id_smiles_hash.sort_by { |k, v| k.to_s }.to_h
+        end
+      end
+
+      def self.get_compound_id_smiles_hash_per_file data_file, user=User.current_user
+        Rails.cache.fetch("#{data_file.content_blob.cache_key}-#{user.try(:cache_key)}-compound-id-smile-hash") do
           id_smiles_hash = {}
           #temporiably only excels
           if data_file.content_blob.is_extractable_spreadsheet?
@@ -94,20 +109,24 @@ module Seek
               row_index = id_cell.attributes["row"]
               smile = smiles_cells.detect { |cell| cell.attributes["row"] == row_index }.try(:content)
               if id_cell && is_standard_compound_id?(id_cell.content) && !smile.blank?
-                standardized_content = Seek::Search::SearchTermStandardize.to_standardize(id_cell.content)
-                id_smiles_hash[standardized_content] = smile
+                standardized_compound_id = Seek::Search::SearchTermStandardize.to_standardize(id_cell.content)
+                smile_or_hidden = data_file.can_download?(user) ? smile : "hidden"
+                id_smiles_hash[standardized_compound_id] = smile_or_hidden
               end
             end
           end
-
-
-
-
-
-
           id_smiles_hash
         end
 
+      end
+
+      def self.clear_cache
+        User.all.each do |user|
+          Rails.cache.delete("#{DataFile.order('updated_at desc').first.content_blob.cache_key}-#{user.try(:cache_key)}-all-compound-id-smile-hash")
+          DataFile.all.each do |df|
+            Rails.cache.delete("#{df.content_blob.cache_key}-#{user.try(:cache_key)}-compound-id-smile-hash")
+          end
+        end
       end
 
       private
