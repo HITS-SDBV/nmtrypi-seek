@@ -314,7 +314,7 @@ class DataFilesController < ApplicationController
     compound_id = params[:compound_id]
     smiles =  Seek::Data::CompoundsExtraction.get_compound_id_smiles_hash[compound_id]
     if smiles
-      compounds_image_path = Seek::Config.temporary_filestore_path + '/image_assets/compounds'
+      compounds_image_path = Seek::Config.temporary_filestore_path + '/image_assets/compounds/'
       path_to_png  = compounds_image_path + "#{compound_id}.png"
       FileUtils.mkdir_p compounds_image_path unless File.exists? compounds_image_path
       RCDK::Util::Image.smiles_to_png smiles, path_to_png, 600, 600 unless File.exists?(path_to_png)

@@ -5,35 +5,25 @@ module Seek
 
       # compounds hash
       def self.get_compounds_hash user=User.current_user
-        Rails.cache.fetch("#{DataFile.order("updated_at desc").first.content_blob.cache_key}-#{user.try(:cache_key)}-compound-hash") do
+        Rails.cache.fetch("#{DataFile.order("updated_at desc").first.content_blob.cache_key}-#{user.try(:cache_key)}-compounds-hash-all") do
           compounds_hash = {}
           DataFile.all.each do |df|
             compounds_hash.merge!(get_compounds_hash_per_file(df, user)) { |compound_id, attr1, attr2| Hash(attr1).merge(Hash(attr2)) }
           end
-          #Rails.logger.warn "compounds_hash:   #{compounds_hash}"
-          # Rails.logger.warn "compound nmt_a1:   #{compounds_hash["nmt_a1"]}"
           compounds_hash
         end
       end
-        end
-      end
 
-        Rails.cache.fetch("#{data_file.content_blob.cache_key}-#{user.try(:cache_key)}-compound-hash") do
+      def self.get_compounds_hash_per_file(data_file, user=User.current_user)
+        Rails.cache.fetch("#{data_file.content_blob.cache_key}-#{user.try(:cache_key)}-compounds-hash-per-file") do
           compounds_hash = {}
-          if  data_file.spreadsheet
-            Rails.logger.warn "&&&&&&&&&&&&&&&&& data file #{data_file.id}"
+          if data_file.spreadsheet
             begin
               compound_id_sheets = data_file.spreadsheet.sheets.select { |sh| sh.actual_rows.sort_by(&:index)[0].actual_cells.detect { |cell| cell.value.match(/compound/i) } }
             rescue NoMethodError, NameError => e
-              Rails.logger.warn "!!!!!!!!!!!!!!!!!!!!!!!!!!!!! exception #{data_file.id} #{e.message}"
               compound_id_sheets = nil
             end
-
-            Rails.logger.warn "$$$$$$$$$$$$$$$$$$$$$$ continued #{data_file.id} compound_id_sheets.blank? #{compound_id_sheets.blank?}"
-
-
             if !compound_id_sheets.blank?
-              Rails.logger.warn "compound_id_sheets not blank"
               compound_id_sheets.each do |sheet|
                 header_cells = sheet.actual_rows.sort_by(&:index)[0].actual_cells.reject { |cell| cell.value.empty? }
                 compound_attributes = []
@@ -42,7 +32,6 @@ module Seek
                 header_cells.each do |head_cell|
                   header_hash[head_cell.column] = head_cell.value
                 end
-                Rails.logger.warn "header_hash of data file #{data_file.id}:   #{header_hash}"
                 compound_id_cell = header_cells.detect { |cell| cell.value.match(/compound/i) }
                 compound_id_column = compound_id_cell.column
 
@@ -56,7 +45,6 @@ module Seek
                   end
                   compound_attributes << row_hash
                 end
-                Rails.logger.warn "compound_attributes of data file #{data_file.id}:   #{compound_attributes}"
                 # get hash
                 grouped_attributes_by_compound_id = compound_attributes.group_by { |attr| attr[compound_id_cell.value] }
                 grouped_attributes_by_compound_id.each do |id, attr|
@@ -66,29 +54,15 @@ module Seek
               end
             end
           end
-          Rails.logger.warn "compounds_hash of data file #{data_file.id}:   #{compounds_hash}"
           compounds_hash
         end
       end
 
       def self.get_compound_id_smiles_hash user=User.current_user
-        id_smiles_hash = {}
-        get_compounds_hash(user).each do |id, attributes|
-          id_smiles_hash[id] = attributes.detect { |k, v| k.match(/smile/i) }.try(:last)
-        end
-
-        id_smiles_hash
-
-      end
-
-      def get_compound_id_smiles_hash_per_file data_file
-        Rails.cache.fetch("#{data_file.content_blob.cache_key}-compound-id-smile-hash") do
-
-      def self.get_compound_id_smiles_hash user=User.current_user
-        Rails.cache.fetch("#{DataFile.order('updated_at desc').first.content_blob.cache_key}-#{user.try(:cache_key)}-all-compound-id-smile-hash") do
+        Rails.cache.fetch("#{DataFile.order('updated_at desc').first.content_blob.cache_key}-#{user.try(:cache_key)}-compound-id-smile-hash-all") do
           id_smiles_hash = {}
           DataFile.all.each do |df|
-            id_smiles_hash.merge!(get_compound_id_smiles_hash_per_file(df, user)){ |key, v1, v2| [v1,v2].detect{|v| !v.blank? && v != "hidden"} || v1  }
+            id_smiles_hash.merge!(get_compound_id_smiles_hash_per_file(df, user)) { |key, v1, v2| [v1, v2].detect { |v| !v.blank? && v != "hidden" } || v1 }
           end
           #sort by key
           id_smiles_hash.sort_by { |k, v| k.to_s }.to_h
@@ -96,7 +70,7 @@ module Seek
       end
 
       def self.get_compound_id_smiles_hash_per_file data_file, user=User.current_user
-        Rails.cache.fetch("#{data_file.content_blob.cache_key}-#{user.try(:cache_key)}-compound-id-smile-hash") do
+        Rails.cache.fetch("#{data_file.content_blob.cache_key}-#{user.try(:cache_key)}-compound-id-smile-hash-per-file") do
           id_smiles_hash = {}
           #temporiably only excels
           if data_file.content_blob.is_extractable_spreadsheet?
@@ -117,14 +91,13 @@ module Seek
           end
           id_smiles_hash
         end
-
       end
 
       def self.clear_cache
         User.all.each do |user|
-          Rails.cache.delete("#{DataFile.order('updated_at desc').first.content_blob.cache_key}-#{user.try(:cache_key)}-all-compound-id-smile-hash")
+          Rails.cache.delete("#{DataFile.order('updated_at desc').first.content_blob.cache_key}-#{user.try(:cache_key)}-compound-id-smile-hash-all")
           DataFile.all.each do |df|
-            Rails.cache.delete("#{df.content_blob.cache_key}-#{user.try(:cache_key)}-compound-id-smile-hash")
+            Rails.cache.delete("#{df.content_blob.cache_key}-#{user.try(:cache_key)}-compound-id-smile-hash-per-file")
           end
         end
       end
