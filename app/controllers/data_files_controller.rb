@@ -227,7 +227,7 @@ class DataFilesController < ApplicationController
     @last_used_before_now = @data_file.last_used_at
 
     @data_file.just_used
-
+    commontator_thread_show( @data_file)
     #Rails.logger.warn "template in data_files_controller/show : #{params[:parsing_template]}"
 
     respond_to do |format|

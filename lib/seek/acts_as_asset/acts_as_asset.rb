@@ -28,7 +28,7 @@ module Seek
       def acts_as_asset
         attr_accessor :parent_name
         include Seek::Taggable
-
+        acts_as_commentable
         acts_as_scalable
         acts_as_authorized
         acts_as_uniquely_identifiable

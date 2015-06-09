@@ -1,5 +1,7 @@
 SEEK::Application.routes.draw do
 
+  mount Commontator::Engine => '/commontator'
+
   mount TavernaPlayer::Engine, :at => (SEEK::Application.config.relative_url_root || "/")
 
   resources :scales do
