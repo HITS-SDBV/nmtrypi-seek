@@ -42,7 +42,6 @@ module MenuHelper
     definitions << {:title=>t("menu.documentation"),:spacer=>true, :hide=>!Seek::Config.documentation_enabled,:sections=>[
         {:controller=>"help_documents",:title=>t("menu.help")},
         {:controller=>"help_documents",:page=>"faq",:title=>t("menu.faq")},
-        {:controller=>"help_documents",:page=>"templates",:title=>t("menu.jerm_templates")},
         {:controller=>"help_documents",:page=>"isa-best-practice",:title=>t("menu.isa_best_practice")}
     ]}
     definitions
