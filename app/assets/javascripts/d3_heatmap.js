@@ -1,21 +1,26 @@
 var heatmap_data;
-var colorScale;
-var colors = colorbrewer.YlGnBu[9];  //["#ffffd9","#edf8b1","#c7e9b4","#7fcdbb","#41b6c4","#1d91c0","#225ea8","#253494","#081d58"]; // alternatively colorbrewer.YlGnBu[9]
+
+//var colorScale;
+//var colors = colorbrewer.YlGnBu[9];  //["#ffffd9","#edf8b1","#c7e9b4","#7fcdbb","#41b6c4","#1d91c0","#225ea8","#253494","#081d58"]; // alternatively colorbrewer.YlGnBu[9]
+var heatMap = d3.select("#heatmap").selectAll(".col");
+
 
 function set_heatmap_data(data){
     heatmap_data = data;
 }
-function draw_legend(data){
 
-    var buckets  = 9;
-       colorScale = d3.scale.quantile()
-        .domain([0, buckets - 1, d3.max(data, function (d) {
-            return d.value;
-        })])
+
+function update_heatmap(values) {
+    var colorScale = d3.scale.quantile()
+        .domain(values)
         .range(colors);
+    heatMap.style("fill", function (d) {
+        //console.log("cell value: " + d.value);
+        return colorScale(d.value);
+    });
 }
 function draw_heatmap(data) {
-    console.log("draw heatmap")
+    set_heatmap_data(data);
     var rows = new Array(),
         cols = new Array(),
         col_labels = new Array();
@@ -41,7 +46,7 @@ function draw_heatmap(data) {
     var margin = { top: 10, right: 0, bottom: 100, left: 100 },
         gridSize = 38,
         legendElementWidth = gridSize * 2,
-        buckets = 9,
+        buckets = 3,
         legendWidth = legendElementWidth * buckets,
         allGridWidth = gridSize * cols.length,
         heatMapWidth = allGridWidth < legendWidth ? legendWidth : allGridWidth,
@@ -95,7 +100,7 @@ function draw_heatmap(data) {
 //        .call(wrap, x.rangeBand());
 
 
-    var heatMap = svg.selectAll(".col")
+     heatMap = svg.selectAll(".col")
         .data(data)
         .enter().append("rect")
         .attr("x", function (d) {
@@ -111,44 +116,25 @@ function draw_heatmap(data) {
         .attr("height", gridSize)
         .style("fill", colors[0]);
 
-    heatMap.transition().duration(1000)
-        .style("fill", function (d) {
-            return colorScale(d.value);
-        });
+
+   var min =  d3.min(data, function (d) {
+        return parseFloat(d.value);
+    }),
+       max = d3.max(data, function (d) {
+        return parseFloat(d.value);
+    });
+
+    //$j('#slide1').slider("option",{min: (Number(min.toFixed(1))-0.1), max: (Number(max.toFixed(1))+0.1)});
+    //$j("#slide1").slider('values',0,min+1); // sets first handle (index 0) to 50
+    //$j("#slide1").slider('values',1,max-1);
+    //doUpdate();
+    update_heatmap( $j('#slide1').slider.limits());
 
     heatMap.append("title").text(function (d) {
         return ("Row: " + d.row + ", Col: " + d.col + ", Value: " + d.value);
     });
 
-    var legend = svg.selectAll(".legend")
-        .data([0].concat(colorScale.quantiles()), function (d) {
-            return d;
-        })
-        .enter().append("g")
-        .attr("class", "legend");
 
-    legend.append("rect")
-        .attr("x", function (d, i) {
-            return legendElementWidth * i;
-        })
-        .attr("y", 0)
-        //.attr("y", height)
-        .attr("width", legendElementWidth)
-        .attr("height", gridSize / 2)
-        .style("fill", function (d, i) {
-            return colors[i];
-        });
-
-    legend.append("text")
-        .attr("class", "mono")
-        .text(function (d) {
-            return "≥ " + Math.round(d);
-        })
-        .attr("x", function (d, i) {
-            return legendElementWidth * i;
-        })
-        .attr("y", gridSize);
-    //.attr("y", height + gridSize);
 }
 
 function draw_slider(){
@@ -267,4 +253,5 @@ function wrap(text, width) {
         }
     });
 }
+
 

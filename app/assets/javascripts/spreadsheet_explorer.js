@@ -757,10 +757,8 @@ function heatmap_selected_cells() {
         }
 
     });
-    set_heatmap_data(heatmap_data);
-    draw_legend(heatmap_data);
     draw_heatmap(heatmap_data);
-    draw_slider();
 
     $j('#heatmap_container').show();
+   doUpdate();
 }
