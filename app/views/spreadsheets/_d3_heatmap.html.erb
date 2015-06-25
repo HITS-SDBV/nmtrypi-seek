@@ -13,16 +13,22 @@
     }
 </style>
 
-<div id="heatmap_container" class="spreadsheet_popup" style="width: 900px; height: 800px;overflow: scroll;display: none">
+<div id="heatmap_container" class="spreadsheet_popup" style="max-height:600px;overflow: scroll;display: none">
+
+
   <div class="spreadsheet_box_title">
     <div style="float: left">Data heatmap</div>
     <div style="float: right;"><a href="#" onclick="$j('#heatmap_container').hide(); return false;">Close</a></div>
     <br style="clear:both"/>
   </div>
-  <p>
+<div>
+  <button class="zoomin" type="button">+</button>
+  <button class="zoomout" type="button">--</button>
+</div>
+  <div>
     <label for="amount">Screening (slider change):</label>
     <input type="text" id="amount" readonly style="border:0; color:#f6931f; font-weight:bold;">
-  </p>
+  </div>
 
   <div class="slide ui-slider ui-slider-horizontal ui-widget ui-widget-content ui-corner-all" id="slide1" transform="translate(0,0)"> </div>
   <div id="heatmap" style=""></div>
@@ -33,8 +39,39 @@
   //http://wiki.jqueryui.com/w/page/12138059/Slider#specs
   // range = true to avoid handles overlapping works only with two handels
   var colors = [ 'green', 'yellow','red'];
-  var limits = [-100, 0, 50, 100]
+  var limits = [-100, 0, 50, 100];
 
+  $j('.zoomout').click(function(){
+      var matrixTransformVal = [],
+              matrixScaleY = 0,
+              outHeight = 0;
+      //Scaling
+      matrixTransformVal = $j('#heatmap_matrix').attr("transform").match(/[\d\.\d]+/g);
+      //$j('text.legend').attr('style', 'visibility:hidden');
+      matrixScaleY = matrixTransformVal[3] / 2;
+      $j('#heatmap_matrix').removeAttr('transform');
+      $j('#heatmap_matrix').attr('transform', 'translate(' + matrixTransformVal[0] +',' + matrixTransformVal[1]+ ') scale('+ matrixTransformVal[2]+ ',' + matrixScaleY + ' )' );
+      console.log($j('#heatmap_matrix').attr("transform"));
+      //Height setting
+      $j('svg.grid').attr("height", $j('svg.grid').attr("height") / 2); // setting layer1 height
+  });
+
+  $j('.zoomin').click(function(){
+      var matrixTransformVal = [],
+              matrixScaleY = 0,
+              inHeight = 0;
+      //Scaling
+      var matrixTransformVal = $j('#heatmap_matrix').attr("transform").match(/[\d\.\d]+/g);
+      if(matrixTransformVal[3] <= .5) {  //Don't allow to zoom in than actual size
+          if(matrixTransformVal[3] >= .5){$j('text.legend').attr('style', 'visibility:show');}
+          matrixScaleY = matrixTransformVal[3] * 2;
+          $j('#heatmap_matrix').removeAttr('transform');
+          $j('#heatmap_matrix').attr('transform', 'translate(' + matrixTransformVal[0] +',' + matrixTransformVal[1]+ ') scale('+ matrixTransformVal[2]+ ',' + matrixScaleY + ' )' );
+         console.log($j('#heatmap_matrix').attr("transform"));
+          //Height setting
+          $j('svg.grid').attr("height", $j('svg.grid').attr("height") * 2); // setting layer1 height
+      }
+  });
     var doUpdate = function(event, ui) {
 
         // Setting handle/span background color

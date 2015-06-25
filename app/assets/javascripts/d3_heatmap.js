@@ -63,7 +63,8 @@ function draw_heatmap(data) {
         .attr("height", height + margin.top + margin.bottom)
         .attr("class", "grid")
         .append("g")
-        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+        .attr("id", "heatmap_matrix")
+        .attr("transform", "translate(" + margin.left + "," + margin.top + ") " + "scale(1,1)");
 
     var rowLabels = svg.selectAll(".rowLabel")
         .data(rows)
