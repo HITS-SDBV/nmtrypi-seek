@@ -66,7 +66,7 @@ $j(document).ready(function ($) {
 
     //Cell selection
     $("table.sheet td.cell")
-        .mousedown(function () {
+        .mousedown(function (evt) {
             if(!isMouseDown) {
                 //Update the cell info box to contain either the value of the cell or the formula
                 // also make hovering over the info box display all the text.
@@ -84,17 +84,36 @@ $j(document).ready(function ($) {
                 startRow = parseInt($(this).attr("row"));
                 startCol = parseInt($(this).attr("col"));
             }
+            var selected_cells = $("td.selected_cell"),
+                selected_headings = $("div.selected_heading");
 
             select_cells(startCol, startRow, startCol, startRow, null);
+            if(evt.ctrlKey){
+                selected_cells.addClass("selected_cell");
+                selected_headings.addClass("selected_heading");
+            }
 
             return false; // prevent text selection
         })
-        .mouseover(function (e) {
+        .dblclick(function (){
+            var row = parseInt($(this).attr("row"));
+            var col = parseInt($(this).attr("col"));
+
+            $("table.active_sheet tr td.cell[row="+row +"][col=" + col + "]").removeClass("selected_cell");
+
+        })
+        .mouseover(function (evt) {
             if (isMouseDown) {
                 endRow = parseInt($(this).attr("row"));
                 endCol = parseInt($(this).attr("col"));
+                var selected_cells = $("td.selected_cell"),
+                    selected_headings = $("div.selected_heading");
 
                 select_cells(startCol, startRow, endCol, endRow, null);
+                if(evt.ctrlKey){
+                    selected_cells.addClass("selected_cell");
+                    selected_headings.addClass("selected_heading");
+                }
             }
         })
     ;
@@ -207,36 +226,24 @@ $j(document).ready(function ($) {
                 }
             }
         })
-        //.mousedown(function(){
-        //    console.log("col mouse down");
-        //    //$(this).children("input[type='checkbox']")[0].checked = true;
-        //    $(this).trigger("selected");
-        //})
-        .on("selected", function(){
-            var $this = $(this);
-            var col = $this.index();
-            $this.addClass("selected_heading");
-            $this.children("input[type='checkbox']")[0].checked = true;
-
-            $this.parent().parent().parent().find("div.row_heading input").each(function(){
-                this.checked = true;
-                $(this).parent("div.row_heading").addClass("selected_heading");
-
-                $("table.active_sheet tr td.cell[row=" + this.value + "][col=" + col + "]").addClass("selected_cell");
-
-            });
-            $("div.spreadsheet_controls a.spreadsheet_button").show();
-
+        .mousedown(function(evt){
+            var col = $(this).index();
+            var last_row = $(this).parent().parent().parent().find("div.row_heading").size();
+            var selected_cells = $("td.selected_cell"),
+                selected_headings = $("div.selected_heading");
+            select_cells(col,1,col,last_row,null);
+            if(evt.ctrlKey){
+                selected_cells.addClass("selected_cell");
+                selected_headings.addClass("selected_heading");
+            }
         })
-        .on("deselected", function(){
+        .dblclick(function (){
             var col = $(this).index();
             $(this).removeClass("selected_heading");
             $("table.active_sheet tr td.cell[col=" + col + "]").removeClass("selected_cell");
-            if($("table.active_sheet tr td.cell.selected_cell").length ===0){
-                $("div.spreadsheet_controls a.spreadsheet_button").hide();
-            }
+
         })
-    ;
+;
     $( "div.row_heading" )
         .resizable({
             minHeight: 15,
@@ -246,19 +253,25 @@ $j(document).ready(function ($) {
                 $("table.active_sheet tr:eq("+$(this).index()+")").height(height).css('line-height', height-2 + "px");
             }
         })
-        .on("selected", function(){
+        .mousedown(function(evt){
             var row = $(this).index() + 1;
-            $(this).addClass("selected_heading");
-            $(this).parent().parent().parent().find("div.col_heading.selected_heading input").each(function(){
-                if($(this)[0].checked){
-                    $j("table.active_sheet tr td.cell[row=" + row + "][col=" + $(this)[0].value + "]").addClass("selected_cell")
-                }
-            });
+            var last_col = $(this).parent().parent().parent().find("div.col_heading").size();
+            var selected_cells = $("td.selected_cell"),
+                selected_headings = $("div.selected_heading");
+
+            select_cells(1,row,last_col,row,null);
+            if(evt.ctrlKey){
+                selected_cells.addClass("selected_cell");
+                selected_headings.addClass("selected_heading");
+            }
+
         })
-        .on("deselected", function(){
-            var row = $(this).index() + 1;
+        .dblclick(function (){
+            var row = $(this).index()+1;
+            console.log("row index: "+ row);
             $(this).removeClass("selected_heading");
-            $j("table.active_sheet tr td.cell[row=" + row + "]").removeClass("selected_cell");
+            $("table.active_sheet tr td.cell[row=" + row + "]").removeClass("selected_cell");
+
         })
     ;
 
@@ -540,9 +553,7 @@ function deselect_cells() {
     $j('.requires_selection').hide();
 }
 
-function select_cells2(selected_rows, selected_columns){
-    
-}
+
 //Select cells in a specified area
 function select_cells(startCol, startRow, endCol, endRow, sheetNumber) {
     var minRow = startRow;
@@ -786,9 +797,9 @@ function heatmap_selected_cells() {
     $j("table.active_sheet tr").each(function() {
         var heatmap_cells = $j(this).children("td.selected_cell");
         for(var i=0; i < heatmap_cells.size() ; i++){
-            //if($j(this).index() > 0){
-                heatmap_data.push({heatmap_col_index: i ,row: $j(this).index(), col : heatmap_cells.eq(i).index(), value : heatmap_cells.eq(i).html() });
-            //}
+            if($j(this).index() > 0){
+                heatmap_data.push({heatmap_col_index: i ,row: $j(this).index()+1, col : heatmap_cells.eq(i).index(), value : heatmap_cells.eq(i).html() });
+            }
         }
 
     });
