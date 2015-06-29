@@ -70,11 +70,11 @@ function draw_heatmap(data) {
         .data(rows)
         .enter().append("text")
         .text(function (d) {
-            return "Row " + d;
+            return "Row " + (d+1);
         })
         .attr("x", 0)
         .attr("y", function (d, i) {
-            return (d + 1.5) * gridSize;
+            return (i + 1.5) * gridSize;
         })
         .style("text-anchor", "end")
         .attr("transform", "translate(-6," + gridSize / 1.5 + ")")
@@ -92,7 +92,7 @@ function draw_heatmap(data) {
         .attr("x", function (d, i) {
             return (i) * gridSize;
         })
-        .attr("y", 2 * gridSize)
+        .attr("y", 1 * gridSize)
 
         .style("text-anchor", "middle")
         .attr("transform", "translate(" + gridSize / 2 + ", -6)")
@@ -105,10 +105,10 @@ function draw_heatmap(data) {
         .data(data)
         .enter().append("rect")
         .attr("x", function (d) {
-            return (d.heatmap_col_index) * gridSize;
+            return (cols.indexOf(d.col)) * gridSize;
         }) //d.col >0? d.col-1 : 1
         .attr("y", function (d) {
-            return (d.row + 1.5) * gridSize;
+            return (rows.indexOf(d.row) + 1.5) * gridSize;
         })
         .attr("rx", 4)
         .attr("ry", 4)

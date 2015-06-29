@@ -797,9 +797,7 @@ function heatmap_selected_cells() {
     $j("table.active_sheet tr").each(function() {
         var heatmap_cells = $j(this).children("td.selected_cell");
         for(var i=0; i < heatmap_cells.size() ; i++){
-            if($j(this).index() > 0){
-                heatmap_data.push({heatmap_col_index: i ,row: $j(this).index()+1, col : heatmap_cells.eq(i).index(), value : heatmap_cells.eq(i).html() });
-            }
+                heatmap_data.push({row: $j(this).index(), col : heatmap_cells.eq(i).index(), value : heatmap_cells.eq(i).html() });
         }
 
     });
