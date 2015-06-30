@@ -26,9 +26,9 @@ module SpreadsheetHelper
   end
 
   def cell_link value, data_id
-    if Seek::Search::SearchTermStandardize.to_standardize?(value)
+    if Seek::Data::DataMatch.compound_name?(value)
       id_smiles_hash =  Seek::Data::CompoundsExtraction.get_compound_id_smiles_hash
-      standardized_value = Seek::Search::SearchTermStandardize.to_standardize(value)
+      standardized_value = Seek::Data::DataMatch.standardize_compound_name(value)
       smiles =  id_smiles_hash[standardized_value]
       if smiles
         if smiles == "hidden"
