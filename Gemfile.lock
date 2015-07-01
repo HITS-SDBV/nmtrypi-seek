@@ -102,7 +102,7 @@ GIT
 
 GIT
   remote: https://github.com/aina1205/rcdk.git
-  revision: 2221fd00068b009bbe9dbc91c9a574a5f9c09073
+  revision: 0ed375471bb43a60bbbd6ac05b7a5e8a8a654e0e
   specs:
     rcdk (0.3.0)
 
@@ -575,8 +575,6 @@ GEM
     sexp_processor (4.4.4)
     simple-spreadsheet-extractor (0.13.3)
       libxml-ruby (~> 2.6.0)
-      libxml-ruby (~> 2.6.0)
-      open4 (= 1.3.0)
       open4 (= 1.3.0)
     simplecov (0.9.1)
       docile (~> 1.1.0)
