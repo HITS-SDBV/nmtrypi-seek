@@ -50,7 +50,12 @@ module SpreadsheetHelper
         " " +
         smile_graph_link
      end.html_safe
-
+    elsif Seek::Data::DataMatch.uniprot_identifier?(value)
+      uniprot_url = "http://www.uniprot.org/uniprot/#{value}"
+      li_uniprot =content_tag(:li, "Link to UniProt",:class => "dynamic_menu_li",
+                              :onclick=> "javascript: window.open('#{uniprot_url.html_safe}', '_blank');").html_safe
+      link_to_uniprot = link_to_function value, {:class => "uniprot_link", :onclick=> "$j(this).trigger('context_menu', ['#{li_uniprot}']); return false;"}
+      link_to_uniprot.html_safe
     else
       auto_link(h(value), :html => {:target => "_blank"})
     end

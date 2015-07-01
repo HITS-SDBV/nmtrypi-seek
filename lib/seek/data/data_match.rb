@@ -18,6 +18,12 @@ module Seek
           content
         end
       end
+
+      def self.uniprot_identifier? content
+        content.to_s.match(/\A([OPQ][0-9][A-Z0-9]{3}[0-9]|[A-NR-Z][0-9]([A-Z][A-Z0-9]{2}[0-9]){1,2})\z/i) !=nil
+      end
+
     end
+
   end
 end
