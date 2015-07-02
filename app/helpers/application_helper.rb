@@ -207,7 +207,7 @@ module ApplicationHelper
 
   #selection of assets for new asset gadget
   def new_creatable_selection_list
-    creatable_options = Seek::Util.user_creatable_types.collect { |c| [c.name.underscore.humanize, c.name.underscore] }
+    creatable_options = Seek::Util.user_creatable_types.sort_by{|c|c.name.underscore}.collect { |c| [c.name.underscore.humanize, c.name.underscore] }
     creatable_options << ["#{t('data_file')} with sample", "data_file_with_sample"] if Seek::Config.sample_parser_enabled
     creatable_options
   end
