@@ -84,38 +84,51 @@ $j(document).ready(function ($) {
                 startRow = parseInt($(this).attr("row"));
                 startCol = parseInt($(this).attr("col"));
             }
-            var selected_cells = $("td.selected_cell"),
-                selected_headings = $("div.selected_heading");
 
-            select_cells(startCol, startRow, startCol, startRow, null);
-            if(evt.ctrlKey){
-                selected_cells.addClass("selected_cell");
-                selected_headings.addClass("selected_heading");
-            }
+            var selected = $(this).hasClass("selected_cell");
+
+           if(selected){
+               $(this).trigger("deselect");
+           }else{
+              $(this).trigger("select",[evt.ctrlKey]);
+           }
 
             return false; // prevent text selection
-        })
-        .dblclick(function (){
-            var row = parseInt($(this).attr("row"));
-            var col = parseInt($(this).attr("col"));
-
-            $("table.active_sheet tr td.cell[row="+row +"][col=" + col + "]").removeClass("selected_cell");
-
         })
         .mouseover(function (evt) {
             if (isMouseDown) {
                 endRow = parseInt($(this).attr("row"));
                 endCol = parseInt($(this).attr("col"));
-                var selected_cells = $("td.selected_cell"),
-                    selected_headings = $("div.selected_heading");
+                var selected = $(this).hasClass("selected_cell");
 
-                select_cells(startCol, startRow, endCol, endRow, null);
-                if(evt.ctrlKey){
-                    selected_cells.addClass("selected_cell");
-                    selected_headings.addClass("selected_heading");
+                if(!selected){
+
+                    $(this).addClass("selected_cell");
+                    select_cells(startCol, startRow, endCol, endRow, null, evt.ctrlKey);
                 }
             }
         })
+        .on("select", function(evt, ctrl_key){
+            $(this).addClass("selected_cell");
+            select_cells(startCol, startRow, startCol, startRow, null, ctrl_key);
+        })
+        .on("deselect", function(evt){
+            $(this).removeClass("selected_cell");
+            var row = parseInt($(this).attr("row"));
+            var col = parseInt($(this).attr("col"));
+           // console.log("deselect cell at row: " + row + ", col: "+ col);
+            var selected_cells_in_row =  $("table.active_sheet tr td.selected_cell[row="+ row +"]"),
+                selected_cells_in_col =  $("table.active_sheet tr td.selected_cell[col=" + col + "]");
+
+            if(selected_cells_in_row.length===0){
+                $("div.row_heading").slice(row-1, row).removeClass("selected_heading");
+            }
+
+            if(selected_cells_in_col.length===0){
+                $("div.col_heading").slice(col-1, col).removeClass("selected_heading");
+            }
+        })
+
     ;
 
     //Auto scrolling when selection box is dragged to the edge of the view
@@ -216,6 +229,7 @@ $j(document).ready(function ($) {
     //Resizable column/row headings
     //also makes them clickable to select all cells in that row/column
     $( "div.col_heading" )
+        .attr("row_selected", false)
         .resizable({
             minWidth: 20,
             handles: 'e',
@@ -228,23 +242,34 @@ $j(document).ready(function ($) {
         })
         .mousedown(function(evt){
             var col = $(this).index();
-            var last_row = $(this).parent().parent().parent().find("div.row_heading").size();
-            var selected_cells = $("td.selected_cell"),
-                selected_headings = $("div.selected_heading");
-            select_cells(col,1,col,last_row,null);
-            if(evt.ctrlKey){
-                selected_cells.addClass("selected_cell");
-                selected_headings.addClass("selected_heading");
-            }
-        })
-        .dblclick(function (){
-            var col = $(this).index();
-            $(this).removeClass("selected_heading");
-            $("table.active_sheet tr td.cell[col=" + col + "]").removeClass("selected_cell");
+                selected= $(this).attr("col_selected")==="true";
 
+            if(selected){
+                $(this).trigger("deselect");
+            }else{
+                $(this).trigger("select",[evt.ctrlKey]);
+            }
+
+            $(this).attr("col_selected", !selected);
+
+
+        })
+
+        .on("select", function(evt, ctrl_key){
+            $(this).addClass("selected_heading");
+            var col = $(this).index();
+            var last_row = $(this).parent().parent().parent().find("div.row_heading").size();
+            select_cells(col,1,col,last_row,null, ctrl_key);
+
+        })
+        .on("deselect", function(){
+            $(this).removeClass("selected_heading");
+            var col = $(this).index();
+            $("table.active_sheet tr td.selected_cell[col=" + col + "]").trigger("deselect");//removeClass("selected_cell");
         })
 ;
     $( "div.row_heading" )
+        .attr("row_selected", false)
         .resizable({
             minHeight: 15,
             handles: 's',
@@ -254,24 +279,25 @@ $j(document).ready(function ($) {
             }
         })
         .mousedown(function(evt){
-            var row = $(this).index() + 1;
-            var last_col = $(this).parent().parent().parent().find("div.col_heading").size();
-            var selected_cells = $("td.selected_cell"),
-                selected_headings = $("div.selected_heading");
-
-            select_cells(1,row,last_col,row,null);
-            if(evt.ctrlKey){
-                selected_cells.addClass("selected_cell");
-                selected_headings.addClass("selected_heading");
+            var selected= $(this).attr("row_selected") === "true";
+            if(selected){
+               $(this).trigger("deselect");
+            }else{
+              $(this).trigger("select", [evt.ctrlKey]);
             }
+            $(this).attr("row_selected", !selected);
+        })
+        .on("select", function(evt, ctrl_key){
+            var row = $(this).index() + 1,
+                last_col = $(this).parent().parent().parent().find("div.col_heading").size();
+            $(this).addClass("selected_heading");
+            select_cells(1,row,last_col,row,null, ctrl_key);
 
         })
-        .dblclick(function (){
-            var row = $(this).index()+1;
-            console.log("row index: "+ row);
+        .on("deselect", function(){
+            var row = $(this).index() + 1;
             $(this).removeClass("selected_heading");
-            $("table.active_sheet tr td.cell[row=" + row + "]").removeClass("selected_cell");
-
+            $("table.active_sheet tr td.cell[row=" + row + "]").trigger("deselect");
         })
     ;
 
@@ -555,11 +581,18 @@ function deselect_cells() {
 
 
 //Select cells in a specified area
-function select_cells(startCol, startRow, endCol, endRow, sheetNumber) {
+function select_cells(startCol, startRow, endCol, endRow, sheetNumber, ctrl_key) {
+
     var minRow = startRow;
     var minCol = startCol;
     var maxRow = endRow;
     var maxCol = endCol;
+
+    var mutiple_select = false;
+
+    if(ctrl_key){
+        mutiple_select = true;
+    }
 
     //To ensure minRow/minCol is always less than maxRow/maxCol
     // no matter which direction the box is dragged
@@ -576,13 +609,16 @@ function select_cells(startCol, startRow, endCol, endRow, sheetNumber) {
     var relativeMinRow = relative_rows[0];
     var relativeMaxRow = relative_rows[1];
 
-    //Deselect any cells and headings
-    $j(".selected_cell").removeClass("selected_cell");
-    $j(".selected_heading").removeClass("selected_heading");
+
+    if(!mutiple_select){
+        //Deselect any cells and headings
+        $j(".selected_cell").removeClass("selected_cell");
+        $j(".selected_heading").removeClass("selected_heading");
+    }
 
     //"Select" dragged cells
     $j("table.active_sheet tr").slice(relativeMinRow-1,relativeMaxRow).each(function() {
-        $j(this).children("td.cell:not(.selected_cell)").slice(minCol-1,maxCol).addClass("selected_cell");
+        $j(this).children("td.cell").slice(minCol-1,maxCol).addClass("selected_cell");
     });
 
     //"Select" dragged cells' column headings
