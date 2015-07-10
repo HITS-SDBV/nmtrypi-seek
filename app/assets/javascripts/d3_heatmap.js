@@ -23,7 +23,8 @@ function draw_heatmap(data) {
     set_heatmap_data(data);
     var rows = new Array(),
         cols = new Array(),
-        col_labels = new Array();
+        col_labels = new Array(),
+        row_labels= new Array();
     $j.each(data, function (i, json) {
         $j.each(json, function (key, val) {
             if (key === "row" && rows.indexOf(val) === -1) {
@@ -36,6 +37,7 @@ function draw_heatmap(data) {
                     //data.splice(i,1)
                 } else {
                     rows.push(val);
+                    row_labels.push(json["row_label"]);
                 }
             }
             if (key === "col" && cols.indexOf(val) === -1) {
@@ -67,10 +69,10 @@ function draw_heatmap(data) {
         .attr("transform", "translate(" + margin.left + "," + margin.top + ") " + "scale(1,1)");
 
     var rowLabels = svg.selectAll(".rowLabel")
-        .data(rows)
+       .data(row_labels)
         .enter().append("text")
         .text(function (d) {
-            return "Row " + (d+1);
+            return d;
         })
         .attr("x", 0)
         .attr("y", function (d, i) {
@@ -80,14 +82,18 @@ function draw_heatmap(data) {
         .attr("transform", "translate(-6," + gridSize / 1.5 + ")")
         .attr("class", function (d, i) {
             return ((i >= 0 && i <= rows.length) ? "rowLabel mono axis axis-workweek" : "rowLabel mono axis");
-        });
+        })
+        .append("title")
+         .text(function(d,i){
+           return  d;
+            });
 
     var colLabels = svg.selectAll(".colLabel")
         //.data(col_labels)
         .data(cols)
         .enter().append("text")
         .text(function (d) {
-            return "Col" + d;
+            return "Col_" + num2alpha(d);
         })
         .attr("x", function (d, i) {
             return (i) * gridSize;
@@ -96,7 +102,11 @@ function draw_heatmap(data) {
 
         .style("text-anchor", "middle")
         .attr("transform", "translate(" + gridSize / 2 + ", -6)")
-        .attr("class", "colLabel mono axis axis-worktime");
+        .attr("class", "colLabel mono axis axis-worktime")
+        .append("title")
+        .text(function(d,i){
+            return  "Column "+ num2alpha(d) + ": "+col_labels[i];
+        });
 //        .attr("dy",".78em")
 //        .call(wrap, x.rangeBand());
 
@@ -131,8 +141,9 @@ function draw_heatmap(data) {
     //doUpdate();
     update_heatmap( $j('#slide1').slider.limits());
 
-    heatMap.append("title").text(function (d) {
-        return ("Row: " + d.row + ", Col: " + d.col + ", Value: " + d.value);
+    heatMap.append("title").text(function (d,i) {
+
+        return (d.row_label + "( " + col_labels[i%col_labels.length] + ": " + d.value) +" )";
     });
 
 

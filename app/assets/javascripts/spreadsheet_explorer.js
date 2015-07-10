@@ -831,9 +831,16 @@ function deselect_heatmap_cells(col, totalRow, sheetNumber){
 function heatmap_selected_cells() {
     var heatmap_data= new Array();
     $j("table.active_sheet tr").each(function() {
+        var this_tr = $j(this);
+        var row_header_cell = this_tr.children("td").filter(function(){
+            return /^nmt[-_][a-zA-Z]+\d+/i.test($j(this).text()) == true
+        });
+
+
+        var row_label =row_header_cell.text();
         var heatmap_cells = $j(this).children("td.selected_cell");
         for(var i=0; i < heatmap_cells.size() ; i++){
-                heatmap_data.push({row: $j(this).index(), col : heatmap_cells.eq(i).index(), value : heatmap_cells.eq(i).html() });
+                heatmap_data.push({row_label: row_label,row: $j(this).index(), col : heatmap_cells.eq(i).index(), value : heatmap_cells.eq(i).text() });
         }
 
     });

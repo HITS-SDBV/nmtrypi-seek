@@ -47,7 +47,7 @@
               outHeight = 0;
       //Scaling
       matrixTransformVal = $j('#heatmap_matrix').attr("transform").match(/[\d\.\d]+/g);
-      //$j('text.legend').attr('style', 'visibility:hidden');
+      //$j('text.rowLabel').attr("style","opacity:0");
       matrixScaleY = matrixTransformVal[3] / 2;
       $j('#heatmap_matrix').removeAttr('transform');
       $j('#heatmap_matrix').attr('transform', 'translate(' + matrixTransformVal[0] +',' + matrixTransformVal[1]+ ') scale('+ matrixTransformVal[2]+ ',' + matrixScaleY + ' )' );
@@ -63,7 +63,9 @@
       //Scaling
       var matrixTransformVal = $j('#heatmap_matrix').attr("transform").match(/[\d\.\d]+/g);
       if(matrixTransformVal[3] <= .5) {  //Don't allow to zoom in than actual size
-          if(matrixTransformVal[3] >= .5){$j('text.legend').attr('style', 'visibility:show');}
+          if(matrixTransformVal[3] >= .5){
+          //$j('text.rowLabel').attr('style', 'opacity:1');}
+          }
           matrixScaleY = matrixTransformVal[3] * 2;
           $j('#heatmap_matrix').removeAttr('transform');
           $j('#heatmap_matrix').attr('transform', 'translate(' + matrixTransformVal[0] +',' + matrixTransformVal[1]+ ') scale('+ matrixTransformVal[2]+ ',' + matrixScaleY + ' )' );
