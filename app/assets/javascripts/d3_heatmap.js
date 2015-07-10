@@ -41,7 +41,8 @@ function draw_heatmap(data) {
                 }
             }
             if (key === "col" && cols.indexOf(val) === -1) {
-                cols.push(val)
+                cols.push(val);
+                col_labels.push(json["col_label"]);
             }
         });
     });
