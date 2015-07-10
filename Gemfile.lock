@@ -102,7 +102,7 @@ GIT
 
 GIT
   remote: https://github.com/aina1205/rcdk.git
-  revision: 20493c7cf52201fce92ac1b9a1af53bcc00e6143
+  revision: f2e3a6d756c5d7f68b80b21d914022991d959a21
   specs:
     rcdk (0.3.0)
 
