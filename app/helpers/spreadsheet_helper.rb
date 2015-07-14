@@ -26,9 +26,9 @@ module SpreadsheetHelper
   end
 
   def cell_link value, data_id
-    if Seek::Search::SearchTermStandardize.to_standardize?(value)
+    if Seek::Data::DataMatch.compound_name?(value)
       id_smiles_hash =  Seek::Data::CompoundsExtraction.get_compound_id_smiles_hash
-      standardized_value = Seek::Search::SearchTermStandardize.to_standardize(value)
+      standardized_value = Seek::Data::DataMatch.standardize_compound_name(value)
       smiles =  id_smiles_hash[standardized_value]
       if smiles
         if smiles == "hidden"
@@ -50,7 +50,19 @@ module SpreadsheetHelper
         " " +
         smile_graph_link
      end.html_safe
+    elsif Seek::Data::DataMatch.uniprot_identifier?(value)
+      uniprot_url = "http://www.uniprot.org/uniprot/#{value}"
+      string_db_url = "http://string-db.org/newstring_cgi/show_network_section.pl?identifier=#{value}"
+      li_uniprot =content_tag(:li, "Link to UniProt",:class => "dynamic_menu_li",
+                              :onclick=> "javascript: window.open('#{uniprot_url.html_safe}', '_blank');").html_safe
+      li_string =content_tag(:li, "Link to String DB",:class => "dynamic_menu_li",
 
+                              :onclick=> "javascript: window.open('#{string_db_url.html_safe}', '_blank');").html_safe
+      ## right click
+      #string_or_uniprot_link = link_to_function value, {:class => "uniprot_link", :oncontextmenu=> "$j(this).trigger('context_menu', ['#{li_uniprot}'+ '#{li_string}']); return false;"}
+      #left click
+      string_or_uniprot_link = link_to_function value, {:class => "uniprot_link", :onclick=> "$j(this).trigger('context_menu', ['#{li_uniprot}'+ '#{li_string}']); return false;"}
+      string_or_uniprot_link.html_safe
     else
       auto_link(h(value), :html => {:target => "_blank"})
     end

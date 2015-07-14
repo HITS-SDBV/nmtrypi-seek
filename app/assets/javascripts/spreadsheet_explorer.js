@@ -93,6 +93,9 @@ $j(document).ready(function ($) {
               $(this).trigger("select",[evt.ctrlKey]);
            }
 
+            if( $('#cell_menu').css("display") === "block"){
+                $('#cell_menu').hide();
+            }
             return false; // prevent text selection
         })
         .mouseover(function (evt) {
@@ -299,6 +302,16 @@ $j(document).ready(function ($) {
             $(this).removeClass("selected_heading");
             $("table.active_sheet tr td.cell[row=" + row + "]").trigger("deselect");
         })
+    ;
+   $("td a.uniprot_link")
+       .on("context_menu", function(evt, menu_content){
+           $('#cell_menu').css('top', $(this).position().top + $(this).height());
+           $('#cell_menu').css('left',$(this).position().left);
+           Element.update('cell_menu',menu_content);
+           if( $('#cell_menu').css("display") === "none"){
+               $('#cell_menu').show();
+           }
+       })
     ;
 
     adjust_container_dimensions();

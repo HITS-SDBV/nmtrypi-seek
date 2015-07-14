@@ -27,7 +27,7 @@ module Seek
               row_index = id_cell.attributes["row"]
               smile = smiles_cells.detect { |cell| cell.attributes["row"] == row_index }.try(:content)
               if id_cell && is_standard_compound_id?(id_cell.content) && !smile.blank?
-                standardized_compound_id = Seek::Search::SearchTermStandardize.to_standardize(id_cell.content)
+                standardized_compound_id = Seek::Data::DataMatch.standardize_compound_name(id_cell.content)
                 smile_or_hidden = data_file.can_download?(user) ? smile : "hidden"
                 id_smiles_hash[standardized_compound_id] = smile_or_hidden
               end
@@ -62,7 +62,7 @@ module Seek
       end
 
       def self.is_standard_compound_id? content
-        Seek::Search::SearchTermStandardize.to_standardize?(content)
+        Seek::Data::DataMatch.compound_name?(content)
       end
     end
   end
