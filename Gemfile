@@ -82,7 +82,7 @@ gem 'my_annotations', :git=>"https://github.com/myGrid/annotations.git"
 gem 'taverna-t2flow'
 gem "taverna-player", :git=>"https://github.com/myGrid/taverna-player.git", :branch => 'list-inputs'
 gem 'jquery-rails', '~> 3'
-gem 'jquery-ui-rails', '~>3'
+gem 'jquery-ui-rails', '~>5'
 gem "recaptcha"
 gem 'metainspector'
 gem 'mechanize'
@@ -91,6 +91,7 @@ gem 'mimemagic'
 gem 'datacite_doi_ify'
 gem 'rjb'
 gem 'rcdk', '0.3.0', :git => "https://github.com/aina1205/rcdk.git"
+gem "d3-rails"
 group :assets do
   gem 'turbo-sprockets-rails3'
   gem 'yui-compressor'

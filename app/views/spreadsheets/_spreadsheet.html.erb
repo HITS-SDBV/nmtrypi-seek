@@ -21,12 +21,17 @@
              wp_rows = generate_paginate_rows(sheet.rows, sheet_index, per_page)
           %>
       <div style="display:none" class="sheet_container curved" id="<%= ("spreadsheet_" + sheet_index.to_s) -%>">
-        <div class="corner_heading">&nbsp;</div>
+        <div class="corner_heading" style="text-align: center;">
+          <%#= check_box_tag "select_all_rows_#{sheet_index}", 1, false,{:onchange => "if(this.checked){selectAllRows(#{sheet_index}, this);}else{deselectAllRows(#{sheet_index}, this);}"} %>
+        </div>
         <div class="col_headings <%= "odd_heading" if sheet.last_col % 2 == 0 -%>">
           <div style="min-width:1000000px">
             <div class="col_heading_spacer">&nbsp;</div>
             <% sheet.columns.each_with_index do |col,c| -%>
-              <div style="<%= (("width:" + (col.width.to_f/31).to_i.to_s) + "px") unless col.width.nil? -%>" class="col_heading <%= "odd_heading" if c % 2 == 0  -%>"><%= to_alpha(col.index) -%></div>
+              <div style="<%= (("width:" + (col.width.to_f/31).to_i.to_s) + "px") unless col.width.nil? -%>" class="col_heading <%= "odd_heading" if c % 2 == 0  -%>">
+                <%#=  check_box_tag "selected_columns[]", col.index, false,{:class => "heatmap_column_#{sheet_index}", :onclick=> "if(this.checked){ $j(this).parent().trigger('selected');select_heatmap_cells(#{col.index}, #{wp_rows.count}, #{sheet_index});}else{$j(this).parent().trigger('deselected');deselect_heatmap_cells(#{col.index}, #{wp_rows.count}, #{sheet_index})}"} %> <%= to_alpha(col.index) -%>
+
+              </div>
             <% end -%>
             <br style=" clear:both"/>
           </div>
@@ -36,7 +41,11 @@
           <div class="row_headings <%= "odd_heading" if sheet.last_row % 2 == 0 -%>" style="float:left">
             <% wp_rows.each do |row| -%>
                 <% r = row.index  %>
-              <div <%= (sheet[r].nil? || sheet[r].height.nil?) ? "" : "style =\"height:"+sheet[r].height+"\"" -%> class="row_heading <%= "odd_heading" if r % 2 == 1 -%>"><%= r -%></div>
+              <div <%= (sheet[r].nil? || sheet[r].height.nil?) ? "" : "style =\"height:"+sheet[r].height+"\"" -%> class="row_heading <%= "odd_heading" if r % 2 == 1 -%>">
+                <%#=  check_box_tag "selected_rows[]", r, false,{:class => "heatmap_row_#{sheet_index}",
+                                                                :onchange=>"if(this.checked){$j(this).parent().trigger('selected');}else{$j(this).parent().trigger('deselected')}"} %>
+                <%= r -%>
+              </div>
             <% end -%>
             <div style="height: 20px">&nbsp;</div>
           </div>
@@ -109,5 +118,51 @@
         jumpToAnnotation(ann.id, ann.sheetNumber+1, ann.cellRange);
       <% end %>
   }
+
+  function selectAllRows(sheet_index, element) {
+      var row_checkboxes = $j(".heatmap_row_" + sheet_index);
+//              checked_rows = [],
+//              col_checkboxes = $j(".heatmap_column_" + sheet_index),
+//              checked_columns = [];
+      //Deselect any cells and headings
+     // $j(".selected_cell").removeClass("selected_cell");
+      //$j(".selected_heading").removeClass("selected_heading");
+
+
+//tick all row checkboxes
+      row_checkboxes.each(function(){
+          this.checked= true;
+          $j(this).parent(".row_heading").trigger("selected");
+      });
+
+//      $j.each(row_checkboxes, function (index, checkbox) {
+//         // checkbox.checked = true;
+//         // checked_rows.push(parseInt(checkbox.value));
+//          $j(checkbox).parent(".row_heading").trigger("selected");
+//      });
+
+      // select all rows of checked columns
+
+
+//      for (var col = 0; col < checked_columns.length; col++) {
+//          for (var row = 0; row < checked_rows.length; row++) {
+//              $j("table.active_sheet tr td.cell[row=" + checked_rows[row] + "][col=" + checked_columns[col] + "]").addClass("selected_cell");
+//          }
+//      }
+
+
+  }
+
+  function deselectAllRows(sheet_index, element) {
+      var row_checkboxes = $j(".heatmap_row_" + sheet_index);
+      row_checkboxes.each(function(){
+          this.checked = false;
+          $j(this).parent(".row_heading").trigger("deselected");
+      });
+  }
+  function sortNumber(a,b) {
+      return a - b;
+  }
+
 </script>
       
