@@ -57,7 +57,7 @@ class SearchController < ApplicationController
 
     downcase_query = @search_query.downcase
 
-    standardized_downcase_query = Seek::Search::SearchTermStandardize.to_standardize downcase_query
+    standardized_downcase_query = Seek::Data::DataMatch.standardize_compound_name downcase_query
 
     @results=[]
 

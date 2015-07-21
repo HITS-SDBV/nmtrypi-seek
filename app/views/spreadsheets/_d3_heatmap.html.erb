@@ -1,0 +1,114 @@
+<style>
+
+    .slide {
+        margin-top: 20px;
+        margin-left: 75px;
+        width: 512px;
+        background: red;
+    }
+    .slide-back {
+        position:absolute;
+        height:100%;
+        z-index: 1;
+    }
+</style>
+
+<div id="heatmap_container" class="spreadsheet_popup" style="max-width:600px ;max-height:600px;overflow: scroll;display: none">
+
+
+  <div class="spreadsheet_box_title">
+    <div style="float: left">Data heatmap</div>
+    <div style="float: right;"><a href="#" onclick="$j('#heatmap_container').hide(); return false;">Close</a></div>
+    <br style="clear:both"/>
+  </div>
+<div>
+  <button class="zoomin" type="button">+</button>
+  <button class="zoomout" type="button">--</button>
+</div>
+  <div>
+    <label for="amount">Screening (slider change):</label>
+    <input type="text" id="amount" readonly style="border:0; color:#f6931f; font-weight:bold;">
+  </div>
+
+  <div class="slide ui-slider ui-slider-horizontal ui-widget ui-widget-content ui-corner-all" id="slide1" transform="translate(0,0)"> </div>
+  <div id="heatmap" style=""></div>
+
+</div>
+
+<script type="text/javascript">
+  //http://wiki.jqueryui.com/w/page/12138059/Slider#specs
+  // range = true to avoid handles overlapping works only with two handels
+  var colors = [ 'green', 'yellow','red'];
+  var limits = [-100, 0, 50, 100];
+
+  $j('.zoomout').click(function(){
+      var matrixTransformVal = [],
+              matrixScaleY = 0,
+              outHeight = 0;
+      //Scaling
+      matrixTransformVal = $j('#heatmap_matrix').attr("transform").match(/[\d\.\d]+/g);
+      //$j('text.rowLabel').attr("style","opacity:0");
+      matrixScaleY = matrixTransformVal[3] / 2;
+      $j('#heatmap_matrix').removeAttr('transform');
+      $j('#heatmap_matrix').attr('transform', 'translate(' + matrixTransformVal[0] +',' + matrixTransformVal[1]+ ') scale('+ matrixTransformVal[2]+ ',' + matrixScaleY + ' )' );
+      console.log($j('#heatmap_matrix').attr("transform"));
+      //Height setting
+      $j('svg.grid').attr("height", $j('svg.grid').attr("height") / 2); // setting layer1 height
+  });
+
+  $j('.zoomin').click(function(){
+      var matrixTransformVal = [],
+              matrixScaleY = 0,
+              inHeight = 0;
+      //Scaling
+      var matrixTransformVal = $j('#heatmap_matrix').attr("transform").match(/[\d\.\d]+/g);
+      if(matrixTransformVal[3] <= .5) {  //Don't allow to zoom in than actual size
+          if(matrixTransformVal[3] >= .5){
+          //$j('text.rowLabel').attr('style', 'opacity:1');}
+          }
+          matrixScaleY = matrixTransformVal[3] * 2;
+          $j('#heatmap_matrix').removeAttr('transform');
+          $j('#heatmap_matrix').attr('transform', 'translate(' + matrixTransformVal[0] +',' + matrixTransformVal[1]+ ') scale('+ matrixTransformVal[2]+ ',' + matrixScaleY + ' )' );
+         console.log($j('#heatmap_matrix').attr("transform"));
+          //Height setting
+          $j('svg.grid').attr("height", $j('svg.grid').attr("height") * 2); // setting layer1 height
+      }
+  });
+    var doUpdate = function(event, ui) {
+
+        // Setting handle/span background color
+        $j('#slide1 .slide-back').remove();
+        $j($j('#slide1 span').get().reverse()).each(function(i) {
+           var  bgColor=colors.slice(0,colors.length-1).reverse()[i]
+            var range_div = $j('<div></div>').addClass('slide-back').width($j(this).position().left - 5).css('background', bgColor);
+            $j('#slide1').append(range_div);
+        });
+        // update limits label
+        $j( "#amount" ).val( $j('#slide1').slider.limits() );
+
+        update_heatmap( $j('#slide1').slider.limits());
+    };
+
+        // Creating custom slider
+        $j('#slide1').slider({
+            range: true,
+            change: doUpdate,
+            min: limits[0],
+            max: limits[limits.length - 1],
+            //range: true,
+            values: limits.slice(1, limits.length-1),
+            slide: doUpdate,
+            step: 0.1
+        });
+
+  $j('#slide1').slider.limits = function() {
+      var slider_limits = $j( "#slide1" ).slider("values"),
+          slider_min = $j( "#slide1" ).slider("option", "min"),
+              slider_max = $j( "#slide1" ).slider("option", "max");
+      slider_limits.splice(0,0,slider_min);
+      slider_limits.push(slider_max);
+      return slider_limits;
+  }
+
+    doUpdate();
+</script>

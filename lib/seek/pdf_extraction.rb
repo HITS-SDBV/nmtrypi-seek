@@ -67,7 +67,7 @@ module Seek
 
     def standardize_content content
       content.collect do |val|
-        standardized_underscored_value = Seek::Search::SearchTermStandardize.to_standardize(val)
+        standardized_underscored_value = Seek::Data::DataMatch.standardize_compound_name(val)
         standardized_value_underscore_prefix = standardized_underscored_value.split(/(\d+)/).first
         standardized_value_hyphen_prefix = standardized_value_underscore_prefix.split("_").join("-")
         [standardized_underscored_value, standardized_value_underscore_prefix, standardized_value_hyphen_prefix]

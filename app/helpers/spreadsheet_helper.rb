@@ -26,41 +26,60 @@ module SpreadsheetHelper
   end
 
   def cell_link value, data_id
-    if Seek::Search::SearchTermStandardize.to_standardize?(value)
+    if Seek::Data::DataMatch.compound_name?(value) # if it is a compound id/name
       id_smiles_hash =  Seek::Data::CompoundsExtraction.get_compound_id_smiles_hash
-
-      standardized_value = Seek::Search::SearchTermStandardize.to_standardize(value)
+      standardized_value = Seek::Data::DataMatch.standardize_compound_name(value)
       smiles =  id_smiles_hash[standardized_value]
-      if smiles
-        if smiles == "hidden"
+      if smiles # get the smiles
+        if smiles == "hidden" # is it hidden?
+          # show that it would be there, but is hidden
           html_options =  { :class => "disabled",:title=> "graph cannot be viewed as smiles is hidden!"}
           graph_url = "#"
         else
+          # create the url to the smiles graph
           html_options =  {:rel => "lightbox"}
           graph_url = compound_visualization_path({id: data_id,compound_id: standardized_value})
         end
+        # create the actual link
         smile_graph_link = image_tag_for_key("compound_formula", graph_url, 'View graph',html_options, nil)
       else
+        # there is no smiles
         smile_graph_link = "<img alt='None' class='none_text'>".html_safe
       end
-     full_info_link = link_to_remote_redbox("#{value}",
+     full_info_link = link_to_remote_redbox("summary report",
                                             { :url => compound_attributes_view_path(:id => data_id, :compound_id => value),
                                               :failure => "alert('Sorry, an error has occurred.'); RedBox.close();",
                                               :method => :get
                                             },
                                             {:id => "compound_attributes_view"
-                                            }
+                                            })
 
-     )
-     search_link = form_tag main_app.search_path, :html => {:style => 'display:inline;'} do
+      # the following code creates:
+      # a link that on click searches the SEEK for a given compound,
+      # a link to smiles graph
+      # a link to compound summary report
+
+     form_tag main_app.search_path, :html => {:style => 'display:inline;'} do
         hidden_field_tag(:search_query, value)  +
         hidden_field_tag(:search_type, "All")  +
         #link_to_function(image_tag(assets_path("famfamfam_silk/zoom.png")), "$(this).up('form').submit()") #+
         image_tag_for_key("show","$(this).up('form').submit()" , "search compound #{value}", nil, nil, :function) +
          " " +
-         smile_graph_link
+         smile_graph_link + full_info_link
      end.html_safe
-     (full_info_link + search_link).html_safe
+    elsif Seek::Data::DataMatch.uniprot_identifier?(value) # if it is an uniprot identifier
+      uniprot_url = "http://www.uniprot.org/uniprot/#{value}"
+      string_db_url = "http://string-db.org/newstring_cgi/show_network_section.pl?identifier=#{value}"
+      li_uniprot =content_tag(:li, "Link to UniProt",:class => "dynamic_menu_li",
+                              :onclick=> "javascript: window.open('#{uniprot_url.html_safe}', '_blank');").html_safe
+      li_string =content_tag(:li, "Link to String DB",:class => "dynamic_menu_li",
+
+                              :onclick=> "javascript: window.open('#{string_db_url.html_safe}', '_blank');").html_safe
+      ## right click
+      #string_or_uniprot_link = link_to_function value, {:class => "uniprot_link", :oncontextmenu=> "$j(this).trigger('context_menu', ['#{li_uniprot}'+ '#{li_string}']); return false;"}
+      #left click
+      string_or_uniprot_link = link_to_function value, {:class => "uniprot_link", :onclick=> "$j(this).trigger('context_menu', ['#{li_uniprot}'+ '#{li_string}']); return false;"}
+      string_or_uniprot_link.html_safe
     else
       auto_link(h(value), :html => {:target => "_blank"})
     end

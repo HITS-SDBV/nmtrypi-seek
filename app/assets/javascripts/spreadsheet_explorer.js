@@ -66,7 +66,7 @@ $j(document).ready(function ($) {
 
     //Cell selection
     $("table.sheet td.cell")
-        .mousedown(function () {
+        .mousedown(function (evt) {
             if(!isMouseDown) {
                 //Update the cell info box to contain either the value of the cell or the formula
                 // also make hovering over the info box display all the text.
@@ -85,18 +85,53 @@ $j(document).ready(function ($) {
                 startCol = parseInt($(this).attr("col"));
             }
 
-            select_cells(startCol, startRow, startCol, startRow, null);
+            var selected = $(this).hasClass("selected_cell");
 
+           if(selected){
+               $(this).trigger("deselect");
+           }else{
+              $(this).trigger("select",[evt.ctrlKey]);
+           }
+
+            if( $('#cell_menu').css("display") === "block"){
+                $('#cell_menu').hide();
+            }
             return false; // prevent text selection
         })
-        .mouseover(function (e) {
+        .mouseover(function (evt) {
             if (isMouseDown) {
                 endRow = parseInt($(this).attr("row"));
                 endCol = parseInt($(this).attr("col"));
+                var selected = $(this).hasClass("selected_cell");
 
-                select_cells(startCol, startRow, endCol, endRow, null);
+                if(!selected){
+
+                    $(this).addClass("selected_cell");
+                    select_cells(startCol, startRow, endCol, endRow, null, evt.ctrlKey);
+                }
             }
         })
+        .on("select", function(evt, ctrl_key){
+            $(this).addClass("selected_cell");
+            select_cells(startCol, startRow, startCol, startRow, null, ctrl_key);
+        })
+        .on("deselect", function(evt){
+            $(this).removeClass("selected_cell");
+            var row = parseInt($(this).attr("row"));
+            var col = parseInt($(this).attr("col"));
+           // console.log("deselect cell at row: " + row + ", col: "+ col);
+            var selected_cells_in_row =  $("table.active_sheet tr td.selected_cell[row="+ row +"]"),
+                selected_cells_in_col =  $("table.active_sheet tr td.selected_cell[col=" + col + "]");
+
+            if(selected_cells_in_row.length===0){
+                $("div.row_heading").slice(row-1, row).removeClass("selected_heading");
+            }
+
+            if(selected_cells_in_col.length===0){
+                $("div.col_heading").slice(col-1, col).removeClass("selected_heading");
+            }
+        })
+
     ;
 
     //Auto scrolling when selection box is dragged to the edge of the view
@@ -197,6 +232,7 @@ $j(document).ready(function ($) {
     //Resizable column/row headings
     //also makes them clickable to select all cells in that row/column
     $( "div.col_heading" )
+        .attr("row_selected", false)
         .resizable({
             minWidth: 20,
             handles: 'e',
@@ -207,13 +243,36 @@ $j(document).ready(function ($) {
                 }
             }
         })
-        .mousedown(function(){
+        .mousedown(function(evt){
+            var col = $(this).index();
+                selected= $(this).attr("col_selected")==="true";
+
+            if(selected){
+                $(this).trigger("deselect");
+            }else{
+                $(this).trigger("select",[evt.ctrlKey]);
+            }
+
+            $(this).attr("col_selected", !selected);
+
+
+        })
+
+        .on("select", function(evt, ctrl_key){
+            $(this).addClass("selected_heading");
             var col = $(this).index();
             var last_row = $(this).parent().parent().parent().find("div.row_heading").size();
-            select_cells(col,1,col,last_row,null);
+            select_cells(col,1,col,last_row,null, ctrl_key);
+
         })
-    ;
+        .on("deselect", function(){
+            $(this).removeClass("selected_heading");
+            var col = $(this).index();
+            $("table.active_sheet tr td.selected_cell[col=" + col + "]").trigger("deselect");//removeClass("selected_cell");
+        })
+;
     $( "div.row_heading" )
+        .attr("row_selected", false)
         .resizable({
             minHeight: 15,
             handles: 's',
@@ -222,11 +281,37 @@ $j(document).ready(function ($) {
                 $("table.active_sheet tr:eq("+$(this).index()+")").height(height).css('line-height', height-2 + "px");
             }
         })
-        .mousedown(function(){
-            var row = $(this).index() + 1;
-            var last_col = $(this).parent().parent().parent().find("div.col_heading").size();
-            select_cells(1,row,last_col,row,null);
+        .mousedown(function(evt){
+            var selected= $(this).attr("row_selected") === "true";
+            if(selected){
+               $(this).trigger("deselect");
+            }else{
+              $(this).trigger("select", [evt.ctrlKey]);
+            }
+            $(this).attr("row_selected", !selected);
         })
+        .on("select", function(evt, ctrl_key){
+            var row = $(this).index() + 1,
+                last_col = $(this).parent().parent().parent().find("div.col_heading").size();
+            $(this).addClass("selected_heading");
+            select_cells(1,row,last_col,row,null, ctrl_key);
+
+        })
+        .on("deselect", function(){
+            var row = $(this).index() + 1;
+            $(this).removeClass("selected_heading");
+            $("table.active_sheet tr td.cell[row=" + row + "]").trigger("deselect");
+        })
+    ;
+   $("td a.uniprot_link")
+       .on("context_menu", function(evt, menu_content){
+           $('#cell_menu').css('top', $(this).position().top + $(this).height());
+           $('#cell_menu').css('left',$(this).position().left);
+           Element.update('cell_menu',menu_content);
+           if( $('#cell_menu').css("display") === "none"){
+               $('#cell_menu').show();
+           }
+       })
     ;
 
     adjust_container_dimensions();
@@ -509,11 +594,18 @@ function deselect_cells() {
 
 
 //Select cells in a specified area
-function select_cells(startCol, startRow, endCol, endRow, sheetNumber) {
+function select_cells(startCol, startRow, endCol, endRow, sheetNumber, ctrl_key) {
+
     var minRow = startRow;
     var minCol = startCol;
     var maxRow = endRow;
     var maxCol = endCol;
+
+    var mutiple_select = false;
+
+    if(ctrl_key){
+        mutiple_select = true;
+    }
 
     //To ensure minRow/minCol is always less than maxRow/maxCol
     // no matter which direction the box is dragged
@@ -530,13 +622,16 @@ function select_cells(startCol, startRow, endCol, endRow, sheetNumber) {
     var relativeMinRow = relative_rows[0];
     var relativeMaxRow = relative_rows[1];
 
-    //Deselect any cells and headings
-    $j(".selected_cell").removeClass("selected_cell");
-    $j(".selected_heading").removeClass("selected_heading");
+
+    if(!mutiple_select){
+        //Deselect any cells and headings
+        $j(".selected_cell").removeClass("selected_cell");
+        $j(".selected_heading").removeClass("selected_heading");
+    }
 
     //"Select" dragged cells
     $j("table.active_sheet tr").slice(relativeMinRow-1,relativeMaxRow).each(function() {
-        $j(this).children("td.cell:not(.selected_cell)").slice(minCol-1,maxCol).addClass("selected_cell");
+        $j(this).children("td.cell").slice(minCol-1,maxCol).addClass("selected_cell");
     });
 
     //"Select" dragged cells' column headings
@@ -719,4 +814,59 @@ function displayRowsPerPage(){
     if (paginations.length > 0){
         $('rows_per_page').show();
     }
+}
+
+function select_heatmap_cells(col, totalRow, sheetNumber) {
+
+    $j("table.active_sheet tr").slice(0,totalRow).each(function() {
+        var count = $j(this).children("td.cell").size();
+        $j(this).children("td.cell")[col-1].className += " heatmap_cell";
+        if ( $j(this).children("td.cell")[col-1].className.indexOf("heatmap_cell") === -1){
+            $j(this).children("td.cell")[col-1].className += " heatmap_cell"
+        }
+    });
+
+    $j("table.active_sheet tr td.heatmap_cell:not(.selected_cell)").addClass("selected_cell");
+
+}
+
+function deselect_heatmap_cells(col, totalRow, sheetNumber){
+    $j("table.active_sheet tr").slice(0,totalRow).each(function() {
+        if ( $j(this).children("td.cell")[col-1].className.indexOf("heatmap_cell") != -1){
+            $j(this).children("td.cell")[col-1].className = $j(this).children("td.cell")[col-1].className.replace("heatmap_cell", "")
+            $j(this).children("td.cell")[col-1].className = $j(this).children("td.cell")[col-1].className.replace("selected_cell", "")
+        }
+    });
+
+    $j("table.active_sheet tr td.heatmap_cell:not(.selected_cell)").addClass("selected_cell");
+
+}
+function heatmap_selected_cells() {
+    var heatmap_data= new Array();
+    var col_header_cells =  $j("table.active_sheet tr").first().children("td");
+    $j("table.active_sheet tr").each(function () {
+        var this_tr = $j(this);
+        var row_header_cell = this_tr.children("td").filter(function () {
+            return /^nmt[-_][a-zA-Z]+\d+/i.test($j(this).text()) == true
+        });
+
+
+        var row_label = row_header_cell.text();
+        var heatmap_cells = $j(this).children("td.selected_cell");
+        for (var i = 0; i < heatmap_cells.size(); i++) {
+            var col_index = heatmap_cells.eq(i).index();
+            heatmap_data.push({
+                row_label: row_label,
+                col_label: col_header_cells.eq(col_index).text(),
+                row: $j(this).index(),
+                col: col_index,
+                value: heatmap_cells.eq(i).text()
+            });
+        }
+
+    });
+    draw_heatmap(heatmap_data);
+
+    $j('#heatmap_container').show();
+   doUpdate();
 }
