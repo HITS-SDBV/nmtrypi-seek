@@ -313,14 +313,14 @@ class DataFilesController < ApplicationController
   def compound_visualization
     compound_id = params[:compound_id]
     smiles =  Seek::Data::CompoundsExtraction.get_compound_id_smiles_hash[compound_id]
-    if smiles
+    if smiles && smiles!= "hidden"
       compounds_image_path = Seek::Config.temporary_filestore_path + '/image_assets/compounds'
       path_to_png  = compounds_image_path + "#{compound_id}.png"
       FileUtils.mkdir_p compounds_image_path unless File.exists? compounds_image_path
       RCDK::Util::Image.smiles_to_png smiles, path_to_png, 600, 600 unless File.exists?(path_to_png)
        send_file(path_to_png, :type => "image/png", :disposition => "inline", :filename => "#{compound_id}.png")
     else
-      send_file("app/assets/images/" + view_context.icon_filename_for_key("image"), :type => "image/png", :disposition => "inline", :filename => "#{compound_id}")
+      send_file("app/assets/images/" + view_context.icon_filename_for_key("compound_formula"), :type => "image/png", :disposition => "inline", :filename => "#{compound_id}")
     end
   end
   def clear_population bio_samples
