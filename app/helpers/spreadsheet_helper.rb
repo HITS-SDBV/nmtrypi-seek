@@ -26,31 +26,37 @@ module SpreadsheetHelper
   end
 
   def cell_link value, data_id
-    if Seek::Data::DataMatch.compound_name?(value)
+    if Seek::Data::DataMatch.compound_name?(value) # if it is a compound id/name
       id_smiles_hash =  Seek::Data::CompoundsExtraction.get_compound_id_smiles_hash
       standardized_value = Seek::Data::DataMatch.standardize_compound_name(value)
       smiles =  id_smiles_hash[standardized_value]
-      if smiles
-        if smiles == "hidden"
+      if smiles # get the smiles
+        if smiles == "hidden" # is it hidden?
+          # show that it would be there, but is hidden
           html_options =  { :class => "disabled",:title=> "graph cannot be viewed as smiles is hidden!"}
           graph_url = "#"
         else
+          # create the url to the smiles graph
           html_options =  {:rel => "lightbox"}
           graph_url = compound_visualization_path({id: data_id,compound_id: standardized_value})
         end
+        # create the actual link
         smile_graph_link = image_tag_for_key("compound_formula", graph_url, 'View graph',html_options, nil)
       else
+        # there is no smiles
         smile_graph_link = "<img alt='None' class='none_text'>".html_safe
       end
 
-     search_link = form_tag main_app.search_path, :html => {:style => 'display:inline;'} do
+      # the following code creates a link that on click searches the SEEK for a given compound and a link to smiles graph
+
+     form_tag main_app.search_path, :html => {:style => 'display:inline;'} do
         hidden_field_tag(:search_query, value)  +
         hidden_field_tag(:search_type, "All")  +
         link_to_function(value, "$(this).up('form').submit()") +
         " " +
         smile_graph_link
      end.html_safe
-    elsif Seek::Data::DataMatch.uniprot_identifier?(value)
+    elsif Seek::Data::DataMatch.uniprot_identifier?(value) # if it is an uniprot identifier
       uniprot_url = "http://www.uniprot.org/uniprot/#{value}"
       string_db_url = "http://string-db.org/newstring_cgi/show_network_section.pl?identifier=#{value}"
       li_uniprot =content_tag(:li, "Link to UniProt",:class => "dynamic_menu_li",
