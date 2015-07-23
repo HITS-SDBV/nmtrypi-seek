@@ -3,7 +3,7 @@ module Seek
     class CompoundsExtraction
 
       def self.get_compound_id_smiles_hash user=User.current_user
-        Rails.cache.fetch("#{DataFile.order('updated_at desc').first.content_blob.cache_key}-#{user.try(:cache_key)}-all-compound-id-smile-hash") do
+        Rails.cache.fetch("#{DataFile.order('updated_at desc').first.cache_key}-#{user.try(:cache_key)}-all-compound-id-smile-hash") do
           id_smiles_hash = {}
           DataFile.all.each do |df|
             id_smiles_hash.merge!(get_compound_id_smiles_hash_per_file(df, user)){ |key, v1, v2| [v1,v2].detect{|v| !v.blank? && v != "hidden"} || v1  }
@@ -14,7 +14,7 @@ module Seek
       end
 
       def self.get_compound_id_smiles_hash_per_file data_file, user=User.current_user
-        Rails.cache.fetch("#{data_file.content_blob.cache_key}-#{user.try(:cache_key)}-compound-id-smile-hash") do
+        Rails.cache.fetch("#{data_file.cache_key}-#{user.try(:cache_key)}-compound-id-smile-hash") do
           id_smiles_hash = {}
           #temporiably only excels
           if data_file.content_blob.is_extractable_spreadsheet?
@@ -40,9 +40,9 @@ module Seek
 
       def self.clear_cache
         User.all.each do |user|
-          Rails.cache.delete("#{DataFile.order('updated_at desc').first.content_blob.cache_key}-#{user.try(:cache_key)}-all-compound-id-smile-hash")
+          Rails.cache.delete("#{DataFile.order('updated_at desc').first.cache_key}-#{user.try(:cache_key)}-all-compound-id-smile-hash")
           DataFile.all.each do |df|
-            Rails.cache.delete("#{df.content_blob.cache_key}-#{user.try(:cache_key)}-compound-id-smile-hash")
+            Rails.cache.delete("#{df.cache_key}-#{user.try(:cache_key)}-compound-id-smile-hash")
           end
         end
       end
