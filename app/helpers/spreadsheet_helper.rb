@@ -27,80 +27,72 @@ module SpreadsheetHelper
 
   def cell_link value, data_file_id
     if Seek::Data::DataMatch.compound_name?(value) # if it is a compound id/name
-      id_smiles_hash =  Seek::Data::CompoundsExtraction.get_compound_id_smiles_hash
-      standardized_value = Seek::Data::DataMatch.standardize_compound_name(value)
-      smiles =  id_smiles_hash[standardized_value]
-      if smiles # get the smiles
-        if smiles == "hidden" # is it hidden?
-          # show that it would be there, but is hidden
-          html_options =  { :class => "disabled",:title=> "graph cannot be viewed as smiles is hidden!"}
-          graph_url = "#"
-        else
-          # create the url to the smiles graph
-          html_options =  {:rel => "lightbox"}
-          graph_url = compound_visualization_path({id: data_file_id,compound_id: standardized_value})
-        end
-        # create the actual link
-        smile_graph_link = image_tag_for_key("compound_formula", graph_url, 'View graph',html_options, nil)
-      else
-        # there is no smiles
-        smile_graph_link = "<img alt='None' class='none_text'>".html_safe
-      end
-     # full_info_link = link_to_remote_redbox("summary report",
-     #                                        { :url => compound_attributes_view_path(:id => data_file_id, :compound_id => value),
-     #                                          :failure => "alert('Sorry, an error has occurred.'); RedBox.close();",
-     #                                          :method => :get
-     #                                        },
-     #                                        {:id => "compound_attributes_view"
-     #                                        })
-
-      full_info_link = link_to  "summary report", compound_attributes_view_path(:id => data_file_id, :compound_id => value),{:target => "_blank"}
-
-      # the following code creates:
-      # a link that on click searches the SEEK for a given compound,
-      # a link to smiles graph
-      # a link to compound summary report
-
-     form_tag main_app.search_path, :html => {:style => 'display:inline;'} do
-        hidden_field_tag(:search_query, value)  +
-        hidden_field_tag(:search_type, "All")  +
-            link_to_function(value, "$(this).up('form').submit()") +
-         " " +
-         smile_graph_link + full_info_link
-     end.html_safe
+      compound_link data_file_id, value
     elsif Seek::Data::DataMatch.uniprot_identifier?(value) # if it is an uniprot identifier
-      uniprot_url = "http://www.uniprot.org/uniprot/#{value}"
-      string_db_url = "http://string-db.org/newstring_cgi/show_network_section.pl?identifier=#{value}"
-      li_uniprot =content_tag(:li, "Link to UniProt",:class => "dynamic_menu_li",
-                              :onclick=> "javascript: window.open('#{uniprot_url.html_safe}', '_blank');").html_safe
-      li_string =content_tag(:li, "Link to String DB",:class => "dynamic_menu_li",
-
-                              :onclick=> "javascript: window.open('#{string_db_url.html_safe}', '_blank');").html_safe
-      ## right click
-      #string_or_uniprot_link = link_to_function value, {:class => "uniprot_link", :oncontextmenu=> "$j(this).trigger('context_menu', ['#{li_uniprot}'+ '#{li_string}']); return false;"}
-      #left click
-      string_or_uniprot_link = link_to_function value, {:class => "uniprot_link", :onclick=> "$j(this).trigger('context_menu', ['#{li_uniprot}'+ '#{li_string}']); return false;"}
-      string_or_uniprot_link.html_safe
+      string_or_uniprot_link(value)
     else
       auto_link(h(value), :html => {:target => "_blank"})
     end
   end
 
-  def compound_structure_link(data_file_id, smiles, standardized_compound_id)
-    if smiles
-      if smiles == "hidden"
+  def compound_link data_file_id, value
+    id_smiles_hash = Seek::Data::CompoundsExtraction.get_compound_id_smiles_hash
+    standardized_value = Seek::Data::DataMatch.standardize_compound_name(value)
+    smiles = id_smiles_hash[standardized_value]
+    smile_graph_link = compound_structure_link(data_file_id, smiles, standardized_value)
+    compound_report_link = link_to "Compound summary report", compound_attributes_view_path(:id => data_file_id, :compound_id => value), {:target => "_blank"}
+
+    # creates context menus with links:
+    # a link that on click searches the SEEK for a given compound,
+    # a link to smiles graph
+    # a link to compound summary report
+
+    search_link = form_tag main_app.search_path, :html => {:style => 'display:inline;'} do
+          hidden_field_tag(:search_query, value) +
+          hidden_field_tag(:search_type, "All") +
+          link_to_function("Search in SEEK", "$(this).up('form').submit()",{:target => "_blank"})
+    end.html_safe
+
+    li_search = content_tag(:li, search_link, :class => "dynamic_menu_li").html_safe
+    li_smiles_graph = content_tag(:li, ("Compound structure " + smile_graph_link).html_safe, :class => "dynamic_menu_li").html_safe
+    li_report = content_tag(:li, compound_report_link, :class => "dynamic_menu_li").html_safe
+    link_list = "#{li_search} #{li_smiles_graph} #{li_report}"
+    link_to_function(value, {:class => "context_menu_link", :onclick => "$j(this).trigger('context_menu', ['#{link_list}']); return false;"}).html_safe
+  end
+
+  def string_or_uniprot_link(value)
+    uniprot_url = "http://www.uniprot.org/uniprot/#{value}"
+    string_db_url = "http://string-db.org/newstring_cgi/show_network_section.pl?identifier=#{value}"
+    li_uniprot =content_tag(:li, "Link to UniProt", :class => "dynamic_menu_li",
+                            :onclick => "javascript: window.open('#{uniprot_url.html_safe}', '_blank');").html_safe
+    li_string =content_tag(:li, "Link to String DB", :class => "dynamic_menu_li",
+
+                           :onclick => "javascript: window.open('#{string_db_url.html_safe}', '_blank');").html_safe
+    #left click
+    string_or_uniprot_link = link_to_function value, {:class => "context_menu_link", :onclick => "$j(this).trigger('context_menu', ['#{li_uniprot}'+ '#{li_string}']); return false;"}
+    string_or_uniprot_link.html_safe
+  end
+
+  def compound_structure_link(data_file_id, smiles, compound_id)
+    if smiles # get the smiles
+      if smiles == "hidden" # is it hidden?
+        # show that it would be there, but is hidden
         html_options = {:class => "disabled", :title => "graph cannot be viewed as smiles is hidden!"}
         graph_url = "#"
       else
+        # create the url to the smiles graph
         html_options = {:rel => "lightbox"}
-        graph_url = compound_visualization_path({id: data_file_id, compound_id: standardized_compound_id})
+        graph_url = compound_visualization_path({id: data_file_id, compound_id: compound_id})
       end
+      # create the actual link
       smile_graph_link = image_tag_for_key("compound_formula", graph_url, 'View graph', html_options, nil)
     else
+      # there is no smiles
       smile_graph_link = "<img alt='None' class='none_text'>".html_safe
     end
-    smile_graph_link
+    smile_graph_link.html_safe
   end
+
 
   # make general compounds attributes shown in the compound summary report configurable
   # and also hide the real attribute names in the source code which could be published on github.

@@ -303,7 +303,7 @@ $j(document).ready(function ($) {
             $("table.active_sheet tr td.cell[row=" + row + "]").trigger("deselect");
         })
     ;
-   $("td a.uniprot_link")
+   $("td a.context_menu_link")
        .on("context_menu", function(evt, menu_content){
            $('#cell_menu').css('top', $(this).position().top + $(this).height());
            $('#cell_menu').css('left',$(this).position().left);
