@@ -5,7 +5,7 @@ module Seek
 
       # compounds hash
       def self.get_compounds_hash user=User.current_user
-        Rails.cache.fetch("#{DataFile.order("updated_at desc").first.content_blob.cache_key}-#{user.try(:cache_key)}-compounds-hash-all") do
+        Rails.cache.fetch("#{DataFile.order("updated_at desc").first.cache_key}-#{user.try(:cache_key)}-compounds-hash-all") do
           compounds_hash = {}
           DataFile.all.each do |df|
             compounds_hash.merge!(get_compounds_hash_per_file(df, user)) { |compound_id, attr1, attr2| Hash(attr1).merge(Hash(attr2)) }
@@ -15,7 +15,7 @@ module Seek
       end
 
       def self.get_compounds_hash_per_file(data_file, user=User.current_user)
-        Rails.cache.fetch("#{data_file.content_blob.cache_key}-#{user.try(:cache_key)}-compounds-hash-per-file") do
+        Rails.cache.fetch("#{data_file.cache_key}-#{user.try(:cache_key)}-compounds-hash-per-file") do
           compounds_hash = {}
           if data_file.spreadsheet
             begin
@@ -59,7 +59,7 @@ module Seek
       end
 
       def self.get_compound_id_smiles_hash user=User.current_user
-        Rails.cache.fetch("#{DataFile.order('updated_at desc').first.content_blob.cache_key}-#{user.try(:cache_key)}-compound-id-smile-hash-all") do
+        Rails.cache.fetch("#{DataFile.order('updated_at desc').first.cache_key}-#{user.try(:cache_key)}-all-compound-id-smile-hash") do
           id_smiles_hash = {}
           DataFile.all.each do |df|
             id_smiles_hash.merge!(get_compound_id_smiles_hash_per_file(df, user)) { |key, v1, v2| [v1, v2].detect { |v| !v.blank? && v != "hidden" } || v1 }
@@ -70,7 +70,7 @@ module Seek
       end
 
       def self.get_compound_id_smiles_hash_per_file data_file, user=User.current_user
-        Rails.cache.fetch("#{data_file.content_blob.cache_key}-#{user.try(:cache_key)}-compound-id-smile-hash-per-file") do
+        Rails.cache.fetch("#{data_file.cache_key}-#{user.try(:cache_key)}-compound-id-smile-hash") do
           id_smiles_hash = {}
           #temporiably only excels
           if data_file.content_blob.is_extractable_spreadsheet?
@@ -82,7 +82,7 @@ module Seek
             compound_id_cells.each do |id_cell|
               row_index = id_cell.attributes["row"]
               smile = smiles_cells.detect { |cell| cell.attributes["row"] == row_index }.try(:content)
-              if id_cell && is_standard_compound_id?(id_cell.content) && !smile.blank?
+              if id_cell && Seek::Data::DataMatch.compound_name?(id_cell.content) && !smile.blank?
                 standardized_compound_id = Seek::Data::DataMatch.standardize_compound_name(id_cell.content)
                 smile_or_hidden = data_file.can_download?(user) ? smile : "hidden"
                 id_smiles_hash[standardized_compound_id] = smile_or_hidden
@@ -95,22 +95,17 @@ module Seek
 
       def self.clear_cache
         User.all.each do |user|
-          Rails.cache.delete("#{DataFile.order('updated_at desc').first.content_blob.cache_key}-#{user.try(:cache_key)}-compound-id-smile-hash-all")
+          Rails.cache.delete("#{DataFile.order("updated_at desc").first.cache_key}-#{user.try(:cache_key)}-compounds-hash-all")
+          Rails.cache.delete("#{DataFile.order('updated_at desc').first.cache_key}-#{user.try(:cache_key)}-all-compound-id-smile-hash")
+
           DataFile.all.each do |df|
-            Rails.cache.delete("#{df.content_blob.cache_key}-#{user.try(:cache_key)}-compound-id-smile-hash-per-file")
+            Rails.cache.delete("#{data_file.cache_key}-#{user.try(:cache_key)}-compounds-hash-per-file")
+            Rails.cache.delete("#{df.cache_key}-#{user.try(:cache_key)}-compound-id-smile-hash")
           end
         end
       end
 
       private
-
-      def self.report_attributes? attribute
-        report_attribute_keywords = ["structure","IUPAC.*Name","compound.*class","mass","mw", "smiles",
-                                     "final.*concentration","inhibition", "flag.*for.*interference","Inhibitory",
-                                     "CC50","IC50", "GI50", "TGI", "LC50", "A549", "hill.*slope",
-                                     "hidden"]
-           !attribute.blank? &&  report_attribute_keywords.detect{|attr| attribute.match(/#{attr}/i)}
-      end
       def self.get_column_cells doc, column_name
         head_cells = doc.find("//ss:sheet[@hidden='false' and @very_hidden='false']/ss:rows/ss:row/ss:cell").find_all { |cell| cell.content.gsub(/\s+/, " ").strip.match(/#{column_name}/i) }
         body_cells = []
@@ -119,14 +114,9 @@ module Seek
           head_col = head_cell.attributes["column"]
           body_cells = doc.find("//ss:sheet[@hidden='false' and @very_hidden='false']/ss:rows/ss:row/ss:cell[@column=#{head_col} and @row != 1]").find_all { |cell| !cell.content.blank? }
         end
-
         body_cells
-
       end
 
-      def self.is_standard_compound_id? content
-        Seek::Data::DataMatch.compound_name?(content)
-      end
     end
   end
 end
