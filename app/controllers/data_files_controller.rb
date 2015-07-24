@@ -325,12 +325,12 @@ class DataFilesController < ApplicationController
   end
 
   def compound_attributes_view
+      @data_file ||= DataFile.find(params["id"])
       compounds_hash = Seek::Data::CompoundsExtraction.get_compounds_hash
       @compound_id = params[:compound_id]
-      standardized_compound_id = Seek::Search::SearchTermStandardize.to_standardize(@compound_id)
+      standardized_compound_id = Seek::Data::DataMatch.standardize_compound_name(@compound_id)
 
       @compound_attributes = Hash(compounds_hash[standardized_compound_id])
-     render :compound_attributes_view,  :layout => false
   end
   def clear_population bio_samples
       specimens = Specimen.find_all_by_title bio_samples.instance_values["specimen_names"].values

@@ -14,6 +14,7 @@ config/environment_local.rb
 config/virtuoso_settings.yml
 config/initializers/taverna_server.rb
 config/sunspot.yml
+config/default_data/general_compounds_attributes.yml
 
 *.DS_Store
 log/*.log*

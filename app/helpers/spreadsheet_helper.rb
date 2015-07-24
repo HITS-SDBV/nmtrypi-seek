@@ -25,7 +25,7 @@ module SpreadsheetHelper
     end
   end
 
-  def cell_link value, data_id
+  def cell_link value, data_file_id
     if Seek::Data::DataMatch.compound_name?(value) # if it is a compound id/name
       id_smiles_hash =  Seek::Data::CompoundsExtraction.get_compound_id_smiles_hash
       standardized_value = Seek::Data::DataMatch.standardize_compound_name(value)
@@ -38,7 +38,7 @@ module SpreadsheetHelper
         else
           # create the url to the smiles graph
           html_options =  {:rel => "lightbox"}
-          graph_url = compound_visualization_path({id: data_id,compound_id: standardized_value})
+          graph_url = compound_visualization_path({id: data_file_id,compound_id: standardized_value})
         end
         # create the actual link
         smile_graph_link = image_tag_for_key("compound_formula", graph_url, 'View graph',html_options, nil)
@@ -46,13 +46,15 @@ module SpreadsheetHelper
         # there is no smiles
         smile_graph_link = "<img alt='None' class='none_text'>".html_safe
       end
-     full_info_link = link_to_remote_redbox("summary report",
-                                            { :url => compound_attributes_view_path(:id => data_id, :compound_id => value),
-                                              :failure => "alert('Sorry, an error has occurred.'); RedBox.close();",
-                                              :method => :get
-                                            },
-                                            {:id => "compound_attributes_view"
-                                            })
+     # full_info_link = link_to_remote_redbox("summary report",
+     #                                        { :url => compound_attributes_view_path(:id => data_file_id, :compound_id => value),
+     #                                          :failure => "alert('Sorry, an error has occurred.'); RedBox.close();",
+     #                                          :method => :get
+     #                                        },
+     #                                        {:id => "compound_attributes_view"
+     #                                        })
+
+      full_info_link = link_to  "summary report", compound_attributes_view_path(:id => data_file_id, :compound_id => value),{:target => "_blank"}
 
       # the following code creates:
       # a link that on click searches the SEEK for a given compound,
@@ -62,8 +64,7 @@ module SpreadsheetHelper
      form_tag main_app.search_path, :html => {:style => 'display:inline;'} do
         hidden_field_tag(:search_query, value)  +
         hidden_field_tag(:search_type, "All")  +
-        #link_to_function(image_tag(assets_path("famfamfam_silk/zoom.png")), "$(this).up('form').submit()") #+
-        image_tag_for_key("show","$(this).up('form').submit()" , "search compound #{value}", nil, nil, :function) +
+            link_to_function(value, "$(this).up('form').submit()") +
          " " +
          smile_graph_link + full_info_link
      end.html_safe
@@ -84,4 +85,35 @@ module SpreadsheetHelper
       auto_link(h(value), :html => {:target => "_blank"})
     end
   end
+
+  def compound_structure_link(data_file_id, smiles, standardized_compound_id)
+    if smiles
+      if smiles == "hidden"
+        html_options = {:class => "disabled", :title => "graph cannot be viewed as smiles is hidden!"}
+        graph_url = "#"
+      else
+        html_options = {:rel => "lightbox"}
+        graph_url = compound_visualization_path({id: data_file_id, compound_id: standardized_compound_id})
+      end
+      smile_graph_link = image_tag_for_key("compound_formula", graph_url, 'View graph', html_options, nil)
+    else
+      smile_graph_link = "<img alt='None' class='none_text'>".html_safe
+    end
+    smile_graph_link
+  end
+
+  # make general compounds attributes shown in the compound summary report configurable
+  # and also hide the real attribute names in the source code which could be published on github.
+  # so change general_compounds_attributes.yml on the production server with real attribute names
+  def general_compound_attributes
+    filepath = File.join(Rails.root, "config/default_data", "general_compounds_attributes.yml")
+    h = YAML.load(File.read(filepath))
+    h.values
+  end
+
+  def get_attribute_value compound_attributes_hash, compound_attribute
+    keyword = compound_attribute.singularize.split(" ").join(".*")
+    compound_attributes_hash.values.select { |hash_per_file| hash_per_file.detect { |k, v| v if k.match(/#{keyword}/i) } }.map { |h| h[h.keys.detect { |k| k.match(/#{keyword}/i) }] }.uniq
+  end
+
 end  

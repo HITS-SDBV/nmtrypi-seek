@@ -36,7 +36,7 @@ module Seek
                 compound_id_column = compound_id_cell.column
 
                 # cell content df.spreadsheet.sheets.first.rows[1].cells[1].value
-                sheet.actual_rows.select { |row| row.index > 1 && Seek::Search::SearchTermStandardize.to_standardize?(row.actual_cells.detect { |cell| cell.column == compound_id_column }.try(:value)) }.each do |row|
+                sheet.actual_rows.select { |row| row.index > 1 && Seek::Data::DataMatch.compound_name?(row.actual_cells.detect { |cell| cell.column == compound_id_column }.try(:value)) }.each do |row|
                   row_hash = {}
                   row.actual_cells.each do |cell|
                     attr_name = header_hash[cell.column]
@@ -48,8 +48,8 @@ module Seek
                 # get hash
                 grouped_attributes_by_compound_id = compound_attributes.group_by { |attr| attr[compound_id_cell.value] }
                 grouped_attributes_by_compound_id.each do |id, attr|
-                  standardized_compound_id = Seek::Search::SearchTermStandardize.to_standardize(id)
-                  compounds_hash[standardized_compound_id] = attr.first.reject { |attr_name, attr_value| attr_name == compound_id_cell.value }
+                  standardized_compound_id = Seek::Data::DataMatch.standardize_compound_name(id)
+                  compounds_hash[standardized_compound_id] = {"#{data_file.id}" => attr.first}#attr.first.select { |attr_name, attr_value| report_attributes?(attr_name) }
                 end
               end
             end
@@ -104,6 +104,13 @@ module Seek
 
       private
 
+      def self.report_attributes? attribute
+        report_attribute_keywords = ["structure","IUPAC.*Name","compound.*class","mass","mw", "smiles",
+                                     "final.*concentration","inhibition", "flag.*for.*interference","Inhibitory",
+                                     "CC50","IC50", "GI50", "TGI", "LC50", "A549", "hill.*slope",
+                                     "hidden"]
+           !attribute.blank? &&  report_attribute_keywords.detect{|attr| attribute.match(/#{attr}/i)}
+      end
       def self.get_column_cells doc, column_name
         head_cells = doc.find("//ss:sheet[@hidden='false' and @very_hidden='false']/ss:rows/ss:row/ss:cell").find_all { |cell| cell.content.gsub(/\s+/, " ").strip.match(/#{column_name}/i) }
         body_cells = []
