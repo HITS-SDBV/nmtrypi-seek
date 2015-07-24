@@ -99,6 +99,7 @@ module SpreadsheetHelper
   # so change general_compounds_attributes.yml on the production server with real attribute names
   def general_compound_attributes
     filepath = File.join(Rails.root, "config/default_data", "general_compounds_attributes.yml")
+    return Array.new  unless File.exist?(filepath)
     h = YAML.load(File.read(filepath))
     h.values
   end
