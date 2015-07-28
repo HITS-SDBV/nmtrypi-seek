@@ -28,7 +28,9 @@
     <% @compound_attributes.each do |file_id, file_headers| %>
         <%
            data_file = DataFile.where(id: file_id).first
-           data_file_title = data_file.try(:title) %>
+           data_file_title = data_file.try(:title)
+          if data_file.can_view?(User.current_user)
+        %>
         <li class="list-title"> <%= link_to data_file_title, data_file %></li>
         <li>
           <ul class="table">
@@ -43,7 +45,8 @@
             <% end %>
           </ul>
         </li>
-    <% end %>
+    <% end
+    end %>
   </ul>
 
 </div>
