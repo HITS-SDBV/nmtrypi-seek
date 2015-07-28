@@ -54,10 +54,11 @@ module SpreadsheetHelper
     end.html_safe
 
     li_search = content_tag(:li, search_link, :class => "dynamic_menu_li").html_safe
-    li_smiles_graph = content_tag(:li, ("Compound structure " + smile_graph_link).html_safe, :class => "dynamic_menu_li").html_safe
+    #li_smiles_graph = content_tag(:li, ("Compound structure " + smile_graph_link).html_safe, :class => "dynamic_menu_li").html_safe
     li_report = content_tag(:li, compound_report_link, :class => "dynamic_menu_li").html_safe
-    link_list = "#{li_search} #{li_smiles_graph} #{li_report}".gsub("'", %q(\\\'))
-    link_to_function(value, {:class => "context_menu_link", :onclick => "$j(this).trigger('context_menu', ['#{link_list}']); return false;"}).html_safe
+    link_list = "#{li_search}  #{li_report}".gsub("'", %q(\\\'))
+    value_link = link_to_function(value, {:class => "context_menu_link", :onclick => "$j(this).trigger('context_menu', ['#{link_list}']); return false;"}).html_safe
+    value_link + " " + smile_graph_link
   end
 
   def string_or_uniprot_link(value)
