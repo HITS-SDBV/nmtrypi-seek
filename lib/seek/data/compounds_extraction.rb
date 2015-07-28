@@ -94,7 +94,7 @@ module Seek
       end
 
       def self.clear_cache
-        User.all.each do |user|
+        (User.all+[nil]).each do |user|
           Rails.cache.delete("#{DataFile.order("updated_at desc").first.cache_key}-#{user.try(:cache_key)}-compounds-hash-all")
           Rails.cache.delete("#{DataFile.order('updated_at desc').first.cache_key}-#{user.try(:cache_key)}-all-compound-id-smile-hash")
 
