@@ -99,7 +99,7 @@ module Seek
           Rails.cache.delete("#{DataFile.order('updated_at desc').first.cache_key}-#{user.try(:cache_key)}-all-compound-id-smile-hash")
 
           DataFile.all.each do |df|
-            Rails.cache.delete("#{data_file.cache_key}-#{user.try(:cache_key)}-compounds-hash-per-file")
+            Rails.cache.delete("#{df.cache_key}-#{user.try(:cache_key)}-compounds-hash-per-file")
             Rails.cache.delete("#{df.cache_key}-#{user.try(:cache_key)}-compound-id-smile-hash")
           end
         end
