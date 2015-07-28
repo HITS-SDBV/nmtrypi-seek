@@ -11,9 +11,15 @@ namespace :seek_dev do
   desc "cache compounds hash"
   task :cache_compounds => :environment do
     (User.all + [nil]).each do |user|
+      Seek::Data::CompoundsExtraction.get_compounds_hash(user)
       Seek::Data::CompoundsExtraction.get_compound_id_smiles_hash(user)
     end
   end
+
+  task :clear_cache_compounds => :environment do
+    Seek::Data::CompoundsExtraction.clear_cache
+  end
+
   desc "populate datafile"
   task :populate_datafile => :environment do
     data_file_list = YAML.load(File.read(File.join(Rails.root, "config/default_data", "data_file_list.yml")))
