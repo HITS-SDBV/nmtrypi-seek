@@ -36,7 +36,8 @@
           <ul class="table">
             <% file_headers.each do |header, value| %>
                 <%  not_general_attribute = !(general_compound_attributes | ["compound ID"]).detect{|ga| header.match(/#{ga.singularize.split(" ").join(".*")}/i)}
-                   if not_general_attribute %>
+                    not_compound_id = !(header.match(/compound.*ID/i) || header.match(/\Acompound\Z/i))
+                   if not_general_attribute && not_compound_id%>
                 <li class="row">
                   <span> <%= header %>: </span>
                   <span class="<%= 'none_text' if value == 'hidden' %>"> <%= value %></span>
