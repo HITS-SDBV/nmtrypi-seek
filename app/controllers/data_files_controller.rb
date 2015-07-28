@@ -325,7 +325,6 @@ class DataFilesController < ApplicationController
   end
 
   def compound_attributes_view
-      @data_file ||= DataFile.find(params["id"])
       compounds_hash = Seek::Data::CompoundsExtraction.get_compounds_hash
       @compound_id = params[:compound_id]
       standardized_compound_id = Seek::Data::DataMatch.standardize_compound_name(@compound_id)
