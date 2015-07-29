@@ -40,7 +40,7 @@ module Seek
                   row_hash = {}
                   row.actual_cells.each do |cell|
                     attr_name = header_hash[cell.column]
-                    attr_value = !data_file.can_download?(User.current_user) && cell.column != compound_id_column ? "hidden" : cell.value
+                    attr_value = !data_file.can_download?(user) && cell.column != compound_id_column ? "hidden" : cell.value
                     row_hash[attr_name] = attr_value if !attr_name.blank?
                   end
                   compound_attributes << row_hash
