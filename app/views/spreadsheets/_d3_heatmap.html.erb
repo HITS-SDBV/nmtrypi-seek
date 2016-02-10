@@ -24,10 +24,8 @@
 <div>
   <button class="zoomin" type="button">+</button>
   <button class="zoomout" type="button">--</button>
-  <button id="generate">Save as SVG</button>
-  <script src="http://d3js.org/d3.v3.min.js"></script>
-  <script src="blob.js"></script>
-  <script src="FileSaver.js"></script>
+  <button class="generate">Save as SVG</button>
+<script src="http://d3js.org/d3.v3.min.js"></script>
 </div>
   <div>
     <label for="amount">Screening (slider change):</label>
@@ -43,13 +41,7 @@
   //http://wiki.jqueryui.com/w/page/12138059/Slider#specs
   // range = true to avoid handles overlapping works only with two handels
   var colors = [ 'green', 'yellow','red'];
-  
-// XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX  
-  var minH = get_min();
-  console.log("min from erb: ", minH)
   var limits = [-100, 0, 50, 100];
-  console.log($j('#heatmap_matrix').attr("transform"));
-// XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX  
 
   $j('.zoomout').click(function(){
       var matrixTransformVal = [],
@@ -84,6 +76,22 @@
           $j('svg.grid').attr("height", $j('svg.grid').attr("height") * 2); // setting layer1 height
       }
   });
+   $j('.export_svg').click(function() {
+       try {
+      		  var isFileSaverSupported = !!new Blob();
+		   } catch (e) {
+        	  alert("blob not supported, cannot export .svg file");
+       }
+       var html = d3.select("svg")
+		   .attr("title", "heatmap")
+	          .attr("version", 1.1)
+        	  .attr("xmlns", "http://www.w3.org/2000/svg")
+		   .node().parentNode.innerHTML;
+		   var blob = new Blob([html], {type: "image/xvg+xml"});
+		   saveAs(blob, "heatmap.svg");
+
+
+   });
     var doUpdate = function(event, ui) {
 
         // Setting handle/span background color
@@ -97,11 +105,9 @@
         $j( "#amount" ).val( $j('#slide1').slider.limits() );
 
         update_heatmap( $j('#slide1').slider.limits());
-
     };
 
         // Creating custom slider
-	//XXXX this is where we change it to MIN and MAX values
         $j('#slide1').slider({
             range: true,
             change: doUpdate,
