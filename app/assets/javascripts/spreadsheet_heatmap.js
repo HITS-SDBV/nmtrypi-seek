@@ -5,4 +5,3 @@
 //these two are needed for exporting the heatmap to an SVG file
 //= require blob
 //= require FileSaver
-

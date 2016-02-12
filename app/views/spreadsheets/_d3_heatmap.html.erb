@@ -24,7 +24,7 @@
 <div>
   <button class="zoomin" type="button">+</button>
   <button class="zoomout" type="button">--</button>
-  <button class="generate">Save as SVG</button>
+  <button class="export_svg">Save as SVG</button>
 <script src="http://d3js.org/d3.v3.min.js"></script>
 </div>
   <div>
@@ -41,7 +41,7 @@
   //http://wiki.jqueryui.com/w/page/12138059/Slider#specs
   // range = true to avoid handles overlapping works only with two handels
   var colors = [ 'green', 'yellow','red'];
-  var limits = [-100, 0, 50, 100];
+  var limits = [-10, 0, 50, 100];
 
   $j('.zoomout').click(function(){
       var matrixTransformVal = [],
@@ -92,6 +92,7 @@
 
 
    });
+
     var doUpdate = function(event, ui) {
 
         // Setting handle/span background color

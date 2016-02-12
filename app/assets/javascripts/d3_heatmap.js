@@ -73,8 +73,7 @@ function draw_heatmap(data) {
         .append("g")
         .attr("id", "heatmap_matrix")
         .attr("transform", "translate(" + margin.left + "," + margin.top + ") " + "scale(1,1)")
-	.attr("min", "-5")
-	.attr("max", "5");
+
     //Prints the row labels (from col 0)
     var rowLabels = svg.selectAll(".rowLabel")
        .data(row_labels)
@@ -137,43 +136,32 @@ function draw_heatmap(data) {
 
 
      var min =  d3.min(data, function (d) {
-        return parseFloat(d.value);
+        return Math.floor(parseFloat(d.value));
     }); 
-    console.log("min val from js: ", min);
-    max = d3.max(data, function (d) {
-        return parseFloat(d.value);
+     var max = d3.max(data, function (d) {
+        return Math.ceil(parseFloat(d.value));
     });
-    console.log("max val from js: ", max);
+    // this would only work if min/max were set on page initial load
+    //$j('#heatmap_matrix').attr('min', min)
+    //$j('#heatmap_matrix').attr('max', max)
 
-    $j('#heatmap_matrix').attr('min', min)
-    $j('#heatmap_matrix').attr('max', max)
     var delta = (max-min)/3.0  
-    var my_limits = [min, min+delta, max-delta ,max]
-    console.log(delta)
-    console.log(my_limits)
-    //$j('#slide1').slider("option",{min: (Number(min.toFixed(1))-0.1), max: (Number(max.toFixed(1))+0.1)});
+    var new_limits = [min, min+delta, max-delta ,max]
+    //console.log(new_limits)
+    $j('#slide1').slider("option",{min: min, max: max});
+    $j('#slide1').slider("option",{values: new_limits.slice(1, new_limits.length-1)});
+
+    // $j('#slide1').slider("option",{min: (Number(min.toFixed(1))-0.1), max: (Number(max.toFixed(1))+0.1)});
     //$j("#slide1").slider('values',0,min+1); // sets first handle (index 0) to 50
     //$j("#slide1").slider('values',1,max-1);
     //doUpdate();
-    update_heatmap( $j('#slide1').slider.limits(limits));
+    update_heatmap( $j('#slide1').slider.limits(new_limits));
 
     heatMap.append("title").text(function (d,i) {
 
         return (d.row_label + "( " + col_labels[i%col_labels.length] + ": " + d.value) +" )";
     });
-
-// XXXXXXXXXXXXX This is for exporting a SVG file
-// get a reference to our SVG object and add the SVG NS  
-//var svgGraph = d3.select('svg')
-//  .attr('xmlns', 'http://www.w3.org/2000/svg');
-//var svgXML = (new xmldom.XMLSerializer()).serializeToString(svgGraph[0][0]);
-//fs.writeFile('graph.svg', svgXML);
 }
-// XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-function get_min() {
-   return $j('#heatmap_matrix').attr('min');
-}
-
 
 function draw_slider(){
     // script for slider
