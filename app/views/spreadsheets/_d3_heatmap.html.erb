@@ -37,10 +37,12 @@
 
 </div>
 
+
 <script type="text/javascript">
   //http://wiki.jqueryui.com/w/page/12138059/Slider#specs
   // range = true to avoid handles overlapping works only with two handels
   var colors = [ 'green', 'yellow','red'];
+
   var limits = [-10, 0, 50, 100];
 
   $j('.zoomout').click(function(){
@@ -82,15 +84,50 @@
 		   } catch (e) {
         	  alert("blob not supported, cannot export .svg file");
        }
+
+     //insert legend to SVG
+     var color = d3.scale.ordinal()
+         .range(colors);
+     var legendRectWidth = 40;
+     var legendRectHeight = 20;
+     var offset = 200;
+     var legend = d3.select("svg").insert("g", ":first-child")
+         .attr("class", "legend")
+         .attr("x", 0) //width*0.2)
+         .attr("y", 0) //margin.left*2)
+     legend.selectAll('g').data(colors)
+         .enter()
+         .append('g')
+         .each(function(d, i) {
+           var g = d3.select(this);
+           g.append("rect")
+              // .attr("class", "legend")
+               .attr("x", offset+i*(legendRectWidth+1))
+               .attr("y", 0)
+               .attr("width", legendRectWidth)
+               .attr("height", legendRectHeight)
+               .style("fill", color)
+               .style("stroke", color)
+               //.style("stroke", function(d) {
+               //  d3.rgb(d.color).darker();
+               //})
+           g.append("text")
+               .attr("x", offset+i*(legendRectWidth+2))
+               .attr("y", 30)
+               .attr("height",30)
+               .attr("width",100)
+               //    .style("fill", color_hash[String(i)][1])
+               .text("> "+$j('#slide1').slider.limits()[i]);
+         });
        var html = d3.select("svg")
-		   .attr("title", "heatmap")
-	          .attr("version", 1.1)
-        	  .attr("xmlns", "http://www.w3.org/2000/svg")
-		   .node().parentNode.innerHTML;
+         .attr("title", "heatmap")
+         .attr("version", 1.1)
+         .attr("xmlns", "http://www.w3.org/2000/svg")
+         .node().parentNode.innerHTML;
 		   var blob = new Blob([html], {type: "image/xvg+xml"});
 		   saveAs(blob, "heatmap.svg");
-
-
+       //svg.remove(".legend")
+       d3.selectAll(".legend").remove()
    });
 
     var doUpdate = function(event, ui) {

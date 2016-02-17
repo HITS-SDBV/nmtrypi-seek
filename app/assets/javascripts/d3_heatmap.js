@@ -50,7 +50,7 @@ function draw_heatmap(data) {
             }
         });
     });
-    var margin = { top: 10, right: 0, bottom: 100, left: 100 },
+    var margin = { top: 25, right: 0, bottom: 100, left: 100 },
         gridSize = 38,
         legendElementWidth = gridSize * 2,
         buckets = 3,
@@ -74,6 +74,7 @@ function draw_heatmap(data) {
         .attr("id", "heatmap_matrix")
         .attr("transform", "translate(" + margin.left + "," + margin.top + ") " + "scale(1,1)")
 
+
     //Prints the row labels (from col 0)
     var rowLabels = svg.selectAll(".rowLabel")
        .data(row_labels)
@@ -94,7 +95,7 @@ function draw_heatmap(data) {
          .text(function(d,i){
            return  d;
             });
-
+    colLabelRotate = 270;
     var colLabels = svg.selectAll(".colLabel")
         //.data(col_labels)
         .data(cols)
@@ -108,7 +109,10 @@ function draw_heatmap(data) {
         .attr("y", 1 * gridSize)
 
         .style("text-anchor", "middle")
-        .attr("transform", "translate(" + gridSize / 2 + ", -6)")
+        .attr("transform", function (d, i){
+           return "translate(" + gridSize / 2 + ", -6) rotate("+colLabelRotate+","+ (i) * gridSize +"," + 1 * gridSize+ ")";
+        })
+        //.attr("transform", "translate(" + gridSize / 2 + ", -6)")
         .attr("class", "colLabel mono axis axis-worktime")
         .append("title")
         .text(function(d,i){
@@ -146,8 +150,9 @@ function draw_heatmap(data) {
     //$j('#heatmap_matrix').attr('max', max)
 
     var delta = (max-min)/3.0  
-    var new_limits = [min, min+delta, max-delta ,max]
-    //console.log(new_limits)
+    var new_limits = [min, d3.format(".1f")(min+delta,1), d3.format(".1g")(max-delta,1) ,max]
+    console.log(new_limits)
+    console.log(colors)
     $j('#slide1').slider("option",{min: min, max: max});
     $j('#slide1').slider("option",{values: new_limits.slice(1, new_limits.length-1)});
 
@@ -158,7 +163,6 @@ function draw_heatmap(data) {
     update_heatmap( $j('#slide1').slider.limits(new_limits));
 
     heatMap.append("title").text(function (d,i) {
-
         return (d.row_label + "( " + col_labels[i%col_labels.length] + ": " + d.value) +" )";
     });
 }
