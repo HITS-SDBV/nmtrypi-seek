@@ -92,7 +92,7 @@ function draw_heatmap(data) {
             return ((i >= 0 && i <= rows.length) ? "rowLabel mono axis axis-workweek" : "rowLabel mono axis");
         })
         .append("title")
-         .text(function(d,i){
+         .text(function(d){
            return  d;
             });
     colLabelRotate = 270;
