@@ -850,18 +850,20 @@ function heatmap_selected_cells() {
             return /^nmt[-_][a-zA-Z]+\d+/i.test($j(this).text()) == true
         });
 
-
         var row_label = row_header_cell.text();
         var heatmap_cells = $j(this).children("td.selected_cell");
         for (var i = 0; i < heatmap_cells.size(); i++) {
             var col_index = heatmap_cells.eq(i).index();
-            heatmap_data.push({
-                row_label: row_label,
-                col_label: col_header_cells.eq(col_index).text(),
-                row: $j(this).index(),
-                col: col_index,
-                value: heatmap_cells.eq(i).text()
-            });
+            var cell_value = heatmap_cells.eq(i);
+            if(cell_value[0].firstChild != null) {
+                heatmap_data.push({
+                    row_label: row_label,
+                    col_label: col_header_cells.eq(col_index).text(),
+                    row: $j(this).index(),
+                    col: col_index,
+                    value: cell_value.text() // heatmap_cells.eq(i).text()
+                });
+            }
         }
 
     });
