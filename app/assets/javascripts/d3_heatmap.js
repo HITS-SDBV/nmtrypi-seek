@@ -120,23 +120,61 @@ function draw_heatmap(data) {
         });
 //        .attr("dy",".78em")
 //        .call(wrap, x.rangeBand());
-
+    
+    //alternative waz to get the tip
+     svg.append("div")
+         .attr("id", "tooltip")
+         .attr("class", "hidden")
+         .append("span")
+            .style("color", "red")
+            .text("100")
 
      heatMap = svg.selectAll(".col")
         .data(data)
         .enter().append("rect")
-        .attr("x", function (d) {
-            return (cols.indexOf(d.col)) * gridSize;
-        }) //d.col >0? d.col-1 : 1
-        .attr("y", function (d) {
-            return (rows.indexOf(d.row) + 1.5) * gridSize;
+         .attr("x", function (d) {
+             return (cols.indexOf(d.col)) * gridSize;
+         }) //d.col >0? d.col-1 : 1
+         .attr("y", function (d) {
+             return (rows.indexOf(d.row) + 1.5) * gridSize;
+         })
+         .attr("rx", 4)
+         .attr("ry", 4)
+         .attr("class", "col bordered")
+         .attr("width", gridSize)
+         .attr("height", gridSize)
+         .style("fill", colors[0])
+
+        .on("mouseover", function(d) {
+           // var hovertext = d.row_label +" / " + d.col_label + " / " + d.value
+            prevFill = this.style.fill;
+            var nodeSelection = d3.select(this).style("opacity",'0.3').style("fill", "grey");
+            nodeSelection.select("text").style("visibility", "visible");
+    //nodeSelection.select("text").style("opacity",'1.0');
+
         })
-        .attr("rx", 4)
-        .attr("ry", 4)
-        .attr("class", "col bordered")
-        .attr("width", gridSize)
-        .attr("height", gridSize)
-        .style("fill", colors[0]);
+        .on("mouseout", function() {
+             var nodeSelection = d3.select(this).style("opacity",'1.0').style("fill", prevFill);
+             nodeSelection.select("text").style("opacity",'0.0');
+             //tooltip.style("visibility", "hidden");
+        })
+
+
+    // hovering text
+/*    var tooltip = svg.selectAll(".col")
+        .data(data)
+        .enter()
+        .append('g')
+        .append("text")
+        .attr("x", margin.left)
+        .attr("y",margin.top)
+        .style("visibility", "hidden")
+        //.text("tooltip text");
+        //.attr("background-color", "black")
+        .text(function (d,i) {
+            return d.row_label + ", Col_" + num2alpha(cols[i%col_labels.length]) +
+                " ( " + col_labels[i%col_labels.length] + "):" + d3.format(".2f")(d.value);
+        });*/
 
 
      var min =  d3.min(data, function (d) {
@@ -152,7 +190,6 @@ function draw_heatmap(data) {
     var delta = (max-min)/3.0  
     var new_limits = [min, d3.format(".1f")(min+delta,1), d3.format(".1g")(max-delta,1) ,max]
     console.log(new_limits)
-    console.log(colors)
     $j('#slide1').slider("option",{min: min, max: max});
     $j('#slide1').slider("option",{values: new_limits.slice(1, new_limits.length-1)});
 
@@ -163,7 +200,9 @@ function draw_heatmap(data) {
     update_heatmap( $j('#slide1').slider.limits(new_limits));
 
     heatMap.append("title").text(function (d,i) {
-        return (d.row_label + "( " + col_labels[i%col_labels.length] + ": " + d.value) +" )";
+        return (d.row_label + ", Col_" + num2alpha(cols[i%col_labels.length]) +
+            " ( " + col_labels[i%col_labels.length] + "): " + d3.format(".2f")(d.value));
+
     });
 }
 

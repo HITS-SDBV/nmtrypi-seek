@@ -45,7 +45,14 @@
   var colors = [ 'green', 'yellow','red'];
 
   var limits = [-10, 0, 50, 100];
-
+  $j('svg').hover(
+      function() {
+        console.log("over")
+        $(this).css("background-color", "pink")
+      },
+      function() {
+        $(this).css("background-color", "blue")
+      });
   $j('.zoomout').click(function(){
       var matrixTransformVal = [];
       //    matrixScaleY = 0,
@@ -55,10 +62,9 @@
       if(matrixTransformVal[3] >= 0.2) {
         //$j('text.rowLabel').attr("style","opacity:0");
         matrixScaleY = parseFloat(matrixTransformVal[3]) - 0.1;
-        console.log("matrix scale Y, matrix transform val 3: ", matrixScaleY, matrixTransformVal[3])
         $j('#heatmap_matrix').removeAttr('transform');
         $j('#heatmap_matrix').attr('transform', 'translate(' + matrixTransformVal[0] + ',' + matrixTransformVal[1] + ') scale(' + matrixTransformVal[2] + ',' + matrixScaleY + ' )');
-        console.log($j('#heatmap_matrix').attr("transform"));
+        //console.log($j('#heatmap_matrix').attr("transform"));
         //Height setting
         $j('svg.grid').attr("height", parseFloat($j('svg.grid').attr("height")) - 0.1); // setting layer1 height
       }
@@ -70,7 +76,6 @@
               //inHeight = 0;
       //Scaling
       var matrixTransformVal = $j('#heatmap_matrix').attr("transform").match(/[\d\.\d]+/g);
-      console.log("matrx transform val 3: "+matrixTransformVal[3])
 
       if(matrixTransformVal[3] <= 0.9) {  //Don't allow to zoom in than actual size
           if(matrixTransformVal[3] >= .5){
@@ -79,8 +84,7 @@
           matrixScaleY = parseFloat(matrixTransformVal[3]) + 0.1;
           $j('#heatmap_matrix').removeAttr('transform');
           $j('#heatmap_matrix').attr('transform', 'translate(' + matrixTransformVal[0] +',' + matrixTransformVal[1]+ ') scale('+ matrixTransformVal[2]+ ',' + matrixScaleY + ' )' );
-          console.log("matrix scale Y: "+matrixScaleY)
-          console.log($j('#heatmap_matrix').attr("transform"));
+          //console.log($j('#heatmap_matrix').attr("transform"));
           //Height setting
           $j('svg.grid').attr("height", parseFloat($j('svg.grid').attr("height")) + 0.1); // setting layer1 height
       }
