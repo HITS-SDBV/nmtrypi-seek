@@ -120,15 +120,18 @@ function draw_heatmap(data) {
         });
 //        .attr("dy",".78em")
 //        .call(wrap, x.rangeBand());
-    
-    //alternative waz to get the tip
-     svg.append("div")
-         .attr("id", "tooltip")
-         .attr("class", "hidden")
-         .append("span")
-            .style("color", "red")
-            .text("100")
 
+     var tip = d3.tip()
+        .attr('class', 'd3-tip')
+        .offset([-10, 0])
+        .html(function(d) {
+            return d.row_label + ", Col_" + num2alpha(cols[i%col_labels.length]) +
+            " ( " + col_labels[i%col_labels.length] + "): <span style='color:#ff810c'>"
+                + d3.format(".2f")(d.value)+ "</span>";
+         //return "<strong>Frequency:</strong> <span style='color:red'>" + d.frequency + "</span>";
+     })
+    // svg.selectAll("#heatmap_matrix").call(tip);
+    svg.call(tip)
      heatMap = svg.selectAll(".col")
         .data(data)
         .enter().append("rect")
@@ -144,37 +147,15 @@ function draw_heatmap(data) {
          .attr("width", gridSize)
          .attr("height", gridSize)
          .style("fill", colors[0])
-
-        .on("mouseover", function(d) {
-           // var hovertext = d.row_label +" / " + d.col_label + " / " + d.value
-            prevFill = this.style.fill;
-            var nodeSelection = d3.select(this).style("opacity",'0.3').style("fill", "grey");
-            nodeSelection.select("text").style("visibility", "visible");
-    //nodeSelection.select("text").style("opacity",'1.0');
-
+         .on("mouseover", function (d) {
+             prevFill = this.style.fill;
+             d3.select(this).style("opacity", '0.3').style("fill", "grey");
+             tip.show(d);
+         })
+        .on("mouseout", function (d) {
+            d3.select(this).style("opacity",'1.0').style("fill", prevFill);
+            tip.hide(d);
         })
-        .on("mouseout", function() {
-             var nodeSelection = d3.select(this).style("opacity",'1.0').style("fill", prevFill);
-             nodeSelection.select("text").style("opacity",'0.0');
-             //tooltip.style("visibility", "hidden");
-        })
-
-
-    // hovering text
-/*    var tooltip = svg.selectAll(".col")
-        .data(data)
-        .enter()
-        .append('g')
-        .append("text")
-        .attr("x", margin.left)
-        .attr("y",margin.top)
-        .style("visibility", "hidden")
-        //.text("tooltip text");
-        //.attr("background-color", "black")
-        .text(function (d,i) {
-            return d.row_label + ", Col_" + num2alpha(cols[i%col_labels.length]) +
-                " ( " + col_labels[i%col_labels.length] + "):" + d3.format(".2f")(d.value);
-        });*/
 
 
      var min =  d3.min(data, function (d) {
@@ -199,11 +180,10 @@ function draw_heatmap(data) {
     //doUpdate();
     update_heatmap( $j('#slide1').slider.limits(new_limits));
 
-    heatMap.append("title").text(function (d,i) {
-        return (d.row_label + ", Col_" + num2alpha(cols[i%col_labels.length]) +
-            " ( " + col_labels[i%col_labels.length] + "): " + d3.format(".2f")(d.value));
-
-    });
+    //heatMap.append("title").text(function (d,i) {
+    //    return (d.row_label + ", Col_" + num2alpha(cols[i%col_labels.length]) +
+    //        " ( " + col_labels[i%col_labels.length] + "): " + d3.format(".2f")(d.value));
+    //});
 }
 
 function draw_slider(){

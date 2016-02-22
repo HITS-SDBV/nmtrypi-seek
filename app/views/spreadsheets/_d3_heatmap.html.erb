@@ -6,12 +6,44 @@
         width: 512px;
         background: red;
     }
+
     .slide-back {
         position:absolute;
         position:absolute;
         height:100%;
         z-index: 1;
     }
+    /* tip for hovering bubbles over cells */
+    .d3-tip {
+      line-height: 1;
+      font-weight: bold;
+      padding: 3px;
+      background: rgba(0, 0, 0, 0.8);
+      color: #fff;
+      border-radius: 2px;
+      z-index: 40;
+    }
+
+    /* Creates a small triangle extender for the tooltip */
+    .d3-tip:after {
+      box-sizing: border-box;
+      display: inline;
+      font-size: 10px;
+      width: 100%;
+      line-height: 1;
+      color: rgba(0, 0, 0, 0.8);
+      content: "\25BC";
+      position: absolute;
+      text-align: center;
+    }
+
+    /* Style northward tooltips differently */
+    .d3-tip.n:after {
+      margin: -1px 0 0 0;
+      top: 100%;
+      left: 0;
+    }
+
 </style>
 
 <div id="heatmap_container" class="spreadsheet_popup" style="max-width:600px ;max-height:600px;overflow: scroll;display: none">
@@ -27,6 +59,7 @@
   <button class="zoomout" type="button">--</button>
   <button class="export_svg">Save as SVG</button>
 <script src="http://d3js.org/d3.v3.min.js"></script>
+<script src="http://labratrevenge.com/d3-tip/javascripts/d3.tip.v0.6.3.js"></script>
 </div>
   <div>
     <label for="amount">Screening (slider change):</label>
@@ -71,7 +104,7 @@
   });
 
   $j('.zoomin').click(function(){
-      var matrixTransformVal = [];
+      //var matrixTransformVal = [];
               //matrixScaleY = 0,
               //inHeight = 0;
       //Scaling
