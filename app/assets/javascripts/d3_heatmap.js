@@ -2,6 +2,8 @@
 //require('d3');
 //var xmldom = require('xmldom');
 
+// For creating d3-tip hovering bubbles
+//= require d3-tip
 var heatmap_data;
 
 //var colorScale;
