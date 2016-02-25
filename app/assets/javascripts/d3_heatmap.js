@@ -103,7 +103,7 @@ function draw_heatmap(data) {
         .data(cols)
         .enter().append("text")
         .text(function (d) {
-            return "Col_" + num2alpha(d);
+            return "Col_" + num2alpha(d+1);
         })
         .attr("x", function (d, i) {
             return (i) * gridSize;
@@ -123,15 +123,15 @@ function draw_heatmap(data) {
 //        .attr("dy",".78em")
 //        .call(wrap, x.rangeBand());
 
+    //former syntax: num2alpha(cols[(i+1)%col_labels.length])
      var tip = d3.tip()
         .attr('class', 'd3-tip')
         .offset([-10, 0])
-        .html(function(d) {
-            return d.row_label + ", Col_" + num2alpha(cols[i%col_labels.length]) +
-            " ( " + col_labels[i%col_labels.length] + "): <span style='color:#ff810c'>"
+        .html(function(d){
+            return d.row_label + ", Col_" + num2alpha(d.col+1) +
+            " ( " + d.col_label + "): <span style='color:#ff810c'>"
                 + d3.format(".2f")(d.value)+ "</span>";
-         //return "<strong>Frequency:</strong> <span style='color:red'>" + d.frequency + "</span>";
-     })
+     });
     // svg.selectAll("#heatmap_matrix").call(tip);
     svg.call(tip)
      heatMap = svg.selectAll(".col")
@@ -172,7 +172,7 @@ function draw_heatmap(data) {
 
     var delta = (max-min)/3.0  
     var new_limits = [min, d3.format(".1f")(min+delta,1), d3.format(".1g")(max-delta,1) ,max]
-    console.log(new_limits)
+    //console.log(new_limits)
     $j('#slide1').slider("option",{min: min, max: max});
     $j('#slide1').slider("option",{values: new_limits.slice(1, new_limits.length-1)});
 
@@ -182,10 +182,10 @@ function draw_heatmap(data) {
     //doUpdate();
     update_heatmap( $j('#slide1').slider.limits(new_limits));
 
-    //heatMap.append("title").text(function (d,i) {
-    //    return (d.row_label + ", Col_" + num2alpha(cols[i%col_labels.length]) +
-    //        " ( " + col_labels[i%col_labels.length] + "): " + d3.format(".2f")(d.value));
-    //});
+   /* heatMap.append("title").text(function (d,i) {
+        return (d.row_label + ", Col_" + num2alpha(cols[(i+1)%col_labels.length]) +
+            " ( " + col_labels[i%col_labels.length] + "): " + d3.format(".2f")(d.value));
+    });*/
 }
 
 function draw_slider(){
