@@ -75,38 +75,47 @@
   //http://wiki.jqueryui.com/w/page/12138059/Slider#specs
   // range = true to avoid handles overlapping works only with two handels
   var colors = [ 'green', 'yellow','red'];
-
+  var scaleIncrement = 0.1;
   var limits = [-10, 0, 50, 100];
-  $j('svg').hover(
+  var origHeight = 0;
+
+  /*$j('svg').hover(
       function() {
         console.log("over")
         $(this).css("background-color", "pink")
       },
       function() {
         $(this).css("background-color", "blue")
-      });
+      });*/
   $j('.zoomout').click(function(){
-      var matrixTransformVal = [];
-      //    matrixScaleY = 0,
-      //    outHeight = 0;
       //Scaling
-      matrixTransformVal = $j('#heatmap_matrix').attr("transform").match(/[\d\.\d]+/g);
+    if (origHeight == 0) {
+      origHeight = parseFloat($j('svg.grid').attr("height"));
+      console.log(origHeight);
+    }
+      var matrixTransformVal = $j('#heatmap_matrix').attr("transform").match(/[\d\.\d]+/g);
       console.log(matrixTransformVal);
       if(matrixTransformVal[3] >= 0.2) {
         //$j('text.rowLabel').attr("style","opacity:0");
-        matrixScaleY = parseFloat(matrixTransformVal[3]) - 0.1;
+        matrixScaleY = parseFloat(matrixTransformVal[3]) -scaleIncrement;
         $j('#heatmap_matrix').removeAttr('transform');
         $j('#heatmap_matrix').attr('transform', 'translate(' + matrixTransformVal[0] + ',' + matrixTransformVal[1] + ') scale(' + matrixTransformVal[2] + ',' + matrixScaleY + ' )');
         //console.log($j('#heatmap_matrix').attr("transform"));
         //Height setting
-        $j('svg.grid').attr("height", parseFloat($j('svg.grid').attr("height")) - 0.1); // setting layer1 height
+       // console.log("former height: "+ $j('svg.grid').attr("height")+" "+ scaleIncrement*origHeight);
+        var prevHeight = parseFloat($j('svg.grid').attr("height"));
+        $j('svg.grid').attr("height",  prevHeight - scaleIncrement*origHeight); // setting layer1 height
+       // console.log("current height: "+ $j('svg.grid').attr("height"));
+
       }
   });
 
   $j('.zoomin').click(function(){
-      //var matrixTransformVal = [];
-              //matrixScaleY = 0,
-              //inHeight = 0;
+    if (origHeight == 0) {
+      origHeight = parseFloat($j('svg.grid').attr("height"));
+      console.log(origHeight);
+    }
+
       //Scaling
       var matrixTransformVal = $j('#heatmap_matrix').attr("transform").match(/[\d\.\d]+/g);
 
@@ -114,12 +123,15 @@
           if(matrixTransformVal[3] >= .5){
           //$j('text.rowLabel').attr('style', 'opacity:1');}
           }
-          matrixScaleY = parseFloat(matrixTransformVal[3]) + 0.1;
+          matrixScaleY = parseFloat(matrixTransformVal[3]) + scaleIncrement;
           $j('#heatmap_matrix').removeAttr('transform');
           $j('#heatmap_matrix').attr('transform', 'translate(' + matrixTransformVal[0] +',' + matrixTransformVal[1]+ ') scale('+ matrixTransformVal[2]+ ',' + matrixScaleY + ' )' );
           //console.log($j('#heatmap_matrix').attr("transform"));
           //Height setting
-          $j('svg.grid').attr("height", parseFloat($j('svg.grid').attr("height")) + 0.1); // setting layer1 height
+          var prevHeight = parseFloat($j('svg.grid').attr("height"));
+       // console.log("former height: "+ $j('svg.grid').attr("height"), +" "+ scaleIncrement*origHeight);
+        $j('svg.grid').attr("height",  prevHeight+ scaleIncrement*origHeight); // setting layer1 height
+       // console.log("current height: "+ $j('svg.grid').attr("height"));
       }
   });
    $j('.export_svg').click(function() {
@@ -134,10 +146,13 @@
      var legendRectWidth = 60;
      var legendRectHeight = 20;
      var offset = 100;
+     var matrixTransformVal = $j('#heatmap_matrix').attr("transform").match(/[\d\.\d]+/g);
+    // $j('svg').attr("height", matrixTransformVal*$j(svg).attr("height")
      var legend = d3.select("svg").insert("g", ":first-child")
          .attr("class", "legend")
          .attr("x", 0) //width*0.2)
          .attr("y", 0) //margin.left*2)
+
      var legend_colors = colors//.concat("blue")
      var color = d3.scale.ordinal()
          .range(legend_colors);

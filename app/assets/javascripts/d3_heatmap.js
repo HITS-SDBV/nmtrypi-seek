@@ -68,6 +68,7 @@ function draw_heatmap(data) {
     //remove old svg
     d3.select("svg.grid")
         .remove();
+    origHeight = 0;
     var svg = d3.select("#heatmap").append("svg")
         .attr("width", width + margin.left + margin.right)
         .attr("height", height + margin.top + margin.bottom)
