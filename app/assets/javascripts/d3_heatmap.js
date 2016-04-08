@@ -1,7 +1,3 @@
-//require('fs');
-//require('d3');
-//var xmldom = require('xmldom');
-
 // For creating d3-tip hovering bubbles
 //= require d3-tip
 var heatmap_data;
@@ -42,7 +38,7 @@ function draw_heatmap(data) {
                     });
                     //data.splice(i,1)
                 } else {
-                    rows.push(val); 
+                    rows.push(val);
                     row_labels.push(json["row_label"]);
                 }
             }
@@ -63,8 +59,8 @@ function draw_heatmap(data) {
         width = heatMapWidth + margin.left + margin.right,
         height = heatMapHeight + margin.top + margin.bottom;
 
-  
-    
+
+
     //remove old svg
     d3.select("svg.grid")
         .remove();
@@ -163,7 +159,7 @@ function draw_heatmap(data) {
 
      var min =  d3.min(data, function (d) {
         return Math.floor(parseFloat(d.value));
-    }); 
+    });
      var max = d3.max(data, function (d) {
         return Math.ceil(parseFloat(d.value));
     });
@@ -171,7 +167,7 @@ function draw_heatmap(data) {
     //$j('#heatmap_matrix').attr('min', min)
     //$j('#heatmap_matrix').attr('max', max)
 
-    var delta = (max-min)/3.0  
+    var delta = (max-min)/3.0
     var new_limits = [min, d3.format(".1f")(min+delta,1), d3.format(".1g")(max-delta,1) ,max]
     //console.log(new_limits)
     $j('#slide1').slider("option",{min: min, max: max});
@@ -180,7 +176,6 @@ function draw_heatmap(data) {
     // $j('#slide1').slider("option",{min: (Number(min.toFixed(1))-0.1), max: (Number(max.toFixed(1))+0.1)});
     //$j("#slide1").slider('values',0,min+1); // sets first handle (index 0) to 50
     //$j("#slide1").slider('values',1,max-1);
-    //doUpdate();
     update_heatmap( $j('#slide1').slider.limits(new_limits));
 
    /* heatMap.append("title").text(function (d,i) {
@@ -307,5 +302,3 @@ function wrap(text, width) {
         }
     });
 }
-
-

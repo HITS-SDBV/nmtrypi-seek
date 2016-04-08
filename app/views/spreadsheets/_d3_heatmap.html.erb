@@ -9,7 +9,6 @@
 
     .slide-back {
         position:absolute;
-        position:absolute;
         height:100%;
         z-index: 1;
     }
@@ -91,10 +90,10 @@
       //Scaling
     if (origHeight == 0) {
       origHeight = parseFloat($j('svg.grid').attr("height"));
-      console.log(origHeight);
+      //console.log(origHeight);
     }
       var matrixTransformVal = $j('#heatmap_matrix').attr("transform").match(/[\d\.\d]+/g);
-      console.log(matrixTransformVal);
+      //console.log(matrixTransformVal);
       if(matrixTransformVal[3] >= 0.2) {
         //$j('text.rowLabel').attr("style","opacity:0");
         matrixScaleY = parseFloat(matrixTransformVal[3]) -scaleIncrement;
@@ -113,7 +112,7 @@
   $j('.zoomin').click(function(){
     if (origHeight == 0) {
       origHeight = parseFloat($j('svg.grid').attr("height"));
-      console.log(origHeight);
+      //console.log(origHeight);
     }
 
       //Scaling
