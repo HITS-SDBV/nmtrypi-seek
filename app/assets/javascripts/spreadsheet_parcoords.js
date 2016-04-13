@@ -1,6 +1,6 @@
 //= require d3
-//= require d3plus
 //= require colorbrewer.v1.min
+//= require d3.svg.multibrush.js
 //= require d3_parcoords
 //= require parcoords_maker
 

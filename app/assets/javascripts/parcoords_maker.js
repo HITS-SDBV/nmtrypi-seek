@@ -9,10 +9,11 @@ d3.parcoords = function(config) {
     brushed: false,
     mode: "default",
     rate: 20,
-    x_translate: -40,
+    x_translate: 0, //-40??
     y_translate: -60,
-    width: "1200",
+    width: "1400",
     height: "520",
+    wrapFont: '12px sans-serif',
     margin: { top: 30, right: 0, bottom: 12, left: 0 },
     color: "#069",
     composite: "source-over",
@@ -31,7 +32,6 @@ d3.parcoords = function(config) {
   selection = pc.selection = d3.select(selection);
   //__.width = selection[0][0].clientWidth;
   //__.height = selection[0][0].clientHeight;
-  console.log("pc width, height ==> ", __.width, __.height);
 
   // canvas data layers
   ["shadows", "marks", "foreground", "highlight"].forEach(function(layer) {
@@ -175,12 +175,10 @@ pc.autoscale = function() {
         .range([h()+1, 1]);
     },
     "number": function(k) {
-       //console.log("in autoscale: k==>",k)
-       // console.log("min array: ",d3.min(__.data));
         var newMin = d3.min(__.data, function(d) { return +d[k]; }) -10;
+        newMin = parseFloat(parseFloat(newMin).toFixed(2)).toString();
         __.minValues[k] = newMin;
 
-        console.log("newMin: ",k, newMin)
         return d3.scale.linear()
         //.domain(d3.extent(__.data, function(d) { return +d[k]; }))
         .domain([newMin, d3.max(__.data, function(d) { return +d[k]; })])
@@ -520,9 +518,9 @@ function paths(data, ctx) {
 function single_path(d, ctx) {
     //var arrMin = d3.min(__.data);
     //console.log(arrMin)
+    //take care of missing values - currently as min. value of axis
 	__.dimensions.map(function(p, i) {
-        if (d[p] == "") {
-            console.log("single path: ", p,  __.minValues[p] );
+        if (d[p] === undefined) {
             d[p] = __.minValues[p];
         }
         var yval = yscale[p](d[p]);
@@ -556,6 +554,50 @@ function flipAxisAndUpdatePCP(dimension, i) {
 
   pc.render();
   if (flags.shadows) paths(__.data, ctx.shadows);
+}
+
+function wrap(text) {
+  var dim = d3.selectAll("g.dimension");
+  var x0 = dim[0][0].getAttribute("transform").match(/\(.*\)/g)[0];
+  var x1 = dim[0][1].getAttribute("transform").match(/\(.*\)/g)[0];
+  var pxWidth = x1.substring(1, x1.length-1) - x0.substring(1, x0.length-1);
+  //console.log("pxWidth: ", pxWidth);
+  text.each(function() {
+    var text = d3.select(this),
+        words = text.text().split(/\s+/).reverse(),
+        word,
+        line = [],
+        lineNumber = 0,
+        lineHeight = 1.1, // ems
+        y = text.attr("y"),
+        dy = parseFloat(text.attr("dy")) || 0,
+        tspan = text.text(null).append("tspan").attr("x", 0).attr("y", y).attr("dy", dy + "em");
+    while (word = words.pop()) {
+      line.push(word);
+      tspan.text(line.join(" "));
+      //console.log("width: ", tspan.text().width())
+      //if (tspan.node().getComputedTextLength() > width) { //this returns 0
+      //compute by pixel length, which we get from g.dimension width calc
+      if (tspan.text().width() > pxWidth) {
+        line.pop();
+        tspan.text(line.join(" "));
+        line = [word];
+        tspan = text.append("tspan").attr("x", 0).attr("y", y).attr("dy", ++lineNumber * lineHeight + dy + "em").text(word);
+      }
+    }
+  });
+}
+
+String.prototype.width = function(font) {
+  var f = font || wrapFont,
+      o = $j('<div>' + this + '</div>')
+            .css({'position': 'absolute', 'float': 'left', 'white-space': 'nowrap', 'visibility': 'hidden', 'font': f})
+            .appendTo($('body')),
+      w = o.width();
+
+  o.remove();
+
+  return w;
 }
 
 function rotateLabels() {
@@ -598,27 +640,25 @@ function rotateLabels() {
           "text-anchor": "middle",
           "y": 0,
           "x": 0,
-          //"transform": "translate("+__.x_translate+","+__.y_translate +")) rotate(" + __.dimensionTitleRotation + ")",
+          "dy": 0,
+          //"transform": "translate("+__.x_translate+","+__.y_translate +") rotate(" + __.dimensionTitleRotation + ")",
           "class": "label"
       })
-      .each(function(d){
-          d3plus.textwrap()
-              .height(120)
-              .width(15)
-              .container(d3.select(this))
-              //.rotate(-90)
-              .align("middle")
-              .draw()
-          //d3.selectAll("tspan")
-          //    .attr("class", "label")
-      })
+      .call(wrap)
+      // .each(function(d){
+      //     d3plus.textwrap()
+      //         .height(120)
+      //         .width(50)
+      //         .container(d3.select(this))
+      //         //.rotate(-90)
+      //         .align("middle")
+      //         .draw()
+      // })
       .attr("transform", "translate("+__.x_translate+","+__.y_translate +") rotate(" + __.dimensionTitleRotation + ")")
-      //.call(wrap, 50)
-
       .on("dblclick", flipAxisAndUpdatePCP)
       .on("wheel", rotateLabels);
-  //d3.selectAll(".label").call(wrap, 50);
 
+      //d3.selectAll("text.label").call(wrap, 10);
 
 
 
@@ -964,321 +1004,322 @@ pc.brushMode = function(mode) {
     selected: selected
   }
 })();
-// brush mode: 2D-strums
-// bl.ocks.org/syntagmatic/5441022
-
-(function() {
-  var strums = {},
-      strumRect;
-
-  function drawStrum(strum, activePoint) {
-    var svg = pc.selection.select("svg").select("g#strums"),
-        id = strum.dims.i,
-        points = [strum.p1, strum.p2],
-        line = svg.selectAll("line#strum-" + id).data([strum]),
-        circles = svg.selectAll("circle#strum-" + id).data(points),
-        drag = d3.behavior.drag();
-
-    line.enter()
-      .append("line")
-      .attr("id", "strum-" + id)
-      .attr("class", "strum");
-
-    line
-      .attr("x1", function(d) { return d.p1[0]; })
-      .attr("y1", function(d) { return d.p1[1]; })
-      .attr("x2", function(d) { return d.p2[0]; })
-      .attr("y2", function(d) { return d.p2[1]; })
-      .attr("stroke", "black")
-      .attr("stroke-width", 2);
-
-    drag
-      .on("drag", function(d, i) {
-        var ev = d3.event;
-        i = i + 1;
-        strum["p" + i][0] = Math.min(Math.max(strum.minX + 1, ev.x), strum.maxX);
-        strum["p" + i][1] = Math.min(Math.max(strum.minY, ev.y), strum.maxY);
-        drawStrum(strum, i - 1);
-      })
-      .on("dragend", onDragEnd());
-
-    circles.enter()
-      .append("circle")
-      .attr("id", "strum-" + id)
-      .attr("class", "strum");
-
-    circles
-      .attr("cx", function(d) { return d[0]; })
-      .attr("cy", function(d) { return d[1]; })
-      .attr("r", 5)
-      .style("opacity", function(d, i) {
-        return (activePoint !== undefined && i === activePoint) ? 0.8 : 0;
-      })
-      .on("mouseover", function() {
-        d3.select(this).style("opacity", 0.8);
-      })
-      .on("mouseout", function() {
-        d3.select(this).style("opacity", 0);
-      })
-      .call(drag);
-  }
-
-  function dimensionsForPoint(p) {
-    var dims = { i: -1, left: undefined, right: undefined };
-    __.dimensions.some(function(dim, i) {
-      if (xscale(dim) < p[0]) {
-        var next = __.dimensions[i + 1];
-        dims.i = i;
-        dims.left = dim;
-        dims.right = next;
-        return false;
-      }
-      return true;
-    });
-
-    if (dims.left === undefined) {
-      // Event on the left side of the first axis.
-      dims.i = 0;
-      dims.left = __.dimensions[0];
-      dims.right = __.dimensions[1];
-    } else if (dims.right === undefined) {
-      // Event on the right side of the last axis
-      dims.i = __.dimensions.length - 1;
-      dims.right = dims.left;
-      dims.left = __.dimensions[__.dimensions.length - 2];
-    }
-
-    return dims;
-  }
-
-  function onDragStart() {
-    // First we need to determine between which two axes the sturm was started.
-    // This will determine the freedom of movement, because a strum can
-    // logically only happen between two axes, so no movement outside these axes
-    // should be allowed.
-    return function() {
-      var p = d3.mouse(strumRect[0][0]),
-          dims = dimensionsForPoint(p),
-          strum = {
-            p1: p,
-            dims: dims,
-            minX: xscale(dims.left),
-            maxX: xscale(dims.right),
-            minY: 0,
-            maxY: h()
-          };
-
-      strums[dims.i] = strum;
-      strums.active = dims.i;
-
-      // Make sure that the point is within the bounds
-      strum.p1[0] = Math.min(Math.max(strum.minX, p[0]), strum.maxX);
-      strum.p1[1] = p[1] - __.margin.top;
-      strum.p2 = strum.p1.slice();
-    };
-  }
-
-  function onDrag() {
-    return function() {
-      var ev = d3.event,
-          strum = strums[strums.active];
-
-      // Make sure that the point is within the bounds
-      strum.p2[0] = Math.min(Math.max(strum.minX + 1, ev.x), strum.maxX);
-      strum.p2[1] = Math.min(Math.max(strum.minY, ev.y - __.margin.top), strum.maxY);
-      drawStrum(strum, 1);
-    };
-  }
-
-  function containmentTest(strum, width) {
-    var p1 = [strum.p1[0] - strum.minX, strum.p1[1] - strum.minX],
-        p2 = [strum.p2[0] - strum.minX, strum.p2[1] - strum.minX],
-        m1 = 1 - width / p1[0],
-        b1 = p1[1] * (1 - m1),
-        m2 = 1 - width / p2[0],
-        b2 = p2[1] * (1 - m2);
-
-    // test if point falls between lines
-    return function(p) {
-      var x = p[0],
-          y = p[1],
-          y1 = m1 * x + b1,
-          y2 = m2 * x + b2;
-
-      if (y > Math.min(y1, y2) && y < Math.max(y1, y2)) {
-        return true;
-      }
-
-      return false;
-    };
-  }
-
-  function selected() {
-    var ids = Object.getOwnPropertyNames(strums),
-        brushed = __.data;
-
-    // Get the ids of the currently active strums.
-    ids = ids.filter(function(d) {
-      return !isNaN(d);
-    });
-
-    function crossesStrum(d, id) {
-      var strum = strums[id],
-          test = containmentTest(strum, strums.width(id)),
-          d1 = strum.dims.left,
-          d2 = strum.dims.right,
-          y1 = yscale[d1],
-          y2 = yscale[d2],
-          point = [y1(d[d1]) - strum.minX, y2(d[d2]) - strum.minX];
-      return test(point);
-    }
-
-    if (ids.length === 0) { return brushed; }
-
-    return brushed.filter(function(d) {
-      switch(brush.predicate) {
-      case "AND":
-        return ids.every(function(id) { return crossesStrum(d, id); });
-      case "OR":
-        return ids.some(function(id) { return crossesStrum(d, id); });
-      default:
-        throw "Unknown brush predicate " + __.brushPredicate;
-      }
-    });
-  }
-
-  function removeStrum() {
-    var strum = strums[strums.active],
-        svg = pc.selection.select("svg").select("g#strums");
-
-    delete strums[strums.active];
-    strums.active = undefined;
-    svg.selectAll("line#strum-" + strum.dims.i).remove();
-    svg.selectAll("circle#strum-" + strum.dims.i).remove();
-  }
-
-  function onDragEnd() {
-    return function() {
-      var brushed = __.data,
-          strum = strums[strums.active];
-
-      // Okay, somewhat unexpected, but not totally unsurprising, a mousclick is
-      // considered a drag without move. So we have to deal with that case
-      if (strum && strum.p1[0] === strum.p2[0] && strum.p1[1] === strum.p2[1]) {
-        removeStrum(strums);
-      }
-
-      brushed = selected(strums);
-      strums.active = undefined;
-      __.brushed = brushed;
-      pc.render();
-      events.brushend.call(pc, __.brushed);
-    };
-  }
-
-  function brushReset(strums) {
-    return function() {
-      var ids = Object.getOwnPropertyNames(strums).filter(function(d) {
-        return !isNaN(d);
-      });
-
-      ids.forEach(function(d) {
-        strums.active = d;
-        removeStrum(strums);
-      });
-      onDragEnd(strums)();
-    };
-  }
-
-  function install() {
-    var drag = d3.behavior.drag();
-
-    // Map of current strums. Strums are stored per segment of the PC. A segment,
-    // being the area between two axes. The left most area is indexed at 0.
-    strums.active = undefined;
-    // Returns the width of the PC segment where currently a strum is being
-    // placed. NOTE: even though they are evenly spaced in our current
-    // implementation, we keep for when non-even spaced segments are supported as
-    // well.
-    strums.width = function(id) {
-      var strum = strums[id];
-
-      if (strum === undefined) {
-        return undefined;
-      }
-
-      return strum.maxX - strum.minX;
-    };
-
-    pc.on("axesreorder.strums", function() {
-      var ids = Object.getOwnPropertyNames(strums).filter(function(d) {
-        return !isNaN(d);
-      });
-
-      // Checks if the first dimension is directly left of the second dimension.
-      function consecutive(first, second) {
-        var length = __.dimensions.length;
-        return __.dimensions.some(function(d, i) {
-          return (d === first)
-            ? i + i < length && __.dimensions[i + 1] === second
-            : false;
-        });
-      }
-
-      if (ids.length > 0) { // We have some strums, which might need to be removed.
-        ids.forEach(function(d) {
-          var dims = strums[d].dims;
-          strums.active = d;
-          // If the two dimensions of the current strum are not next to each other
-          // any more, than we'll need to remove the strum. Otherwise we keep it.
-          if (!consecutive(dims.left, dims.right)) {
-            removeStrum(strums);
-          }
-        });
-        onDragEnd(strums)();
-      }
-    });
-
-    // Add a new svg group in which we draw the strums.
-    pc.selection.select("svg").append("g")
-      .attr("id", "strums")
-      .attr("transform", "translate(" + __.margin.left + "," + __.margin.top + ")");
-
-    // Install the required brushReset function
-    pc.brushReset = brushReset(strums);
-
-    drag
-      .on("dragstart", onDragStart(strums))
-      .on("drag", onDrag(strums))
-      .on("dragend", onDragEnd(strums));
-
-    // NOTE: The styling needs to be done here and not in the css. This is because
-    //       for 1D brushing, the canvas layers should not listen to
-    //       pointer-events.
-    strumRect = pc.selection.select("svg").insert("rect", "g#strums")
-      .attr("id", "strum-events")
-      .attr("x", __.margin.left)
-      .attr("y", __.margin.top)
-      .attr("width", w())
-      .attr("height", h() + 2)
-      .style("opacity", 0)
-      .call(drag);
-  }
-
-  brush.modes["2D-strums"] = {
-    install: install,
-    uninstall: function() {
-      pc.selection.select("svg").select("g#strums").remove();
-      pc.selection.select("svg").select("rect#strum-events").remove();
-      pc.on("axesreorder.strums", undefined);
-      delete pc.brushReset;
-
-      strumRect = undefined;
-    },
-    selected: selected
-  };
-
-}());
+// // brush mode: 2D-strums
+// // bl.ocks.org/syntagmatic/5441022
+//
+// (function() {
+//   var strums = {},
+//       strumRect;
+//
+//   function drawStrum(strum, activePoint) {
+//     var offset_x = 0;
+//     var svg = pc.selection.select("svg").select("g#strums"),
+//         id = strum.dims.i,
+//         points = [strum.p1, strum.p2],
+//         line = svg.selectAll("line#strum-" + id).data([strum]),
+//         circles = svg.selectAll("circle#strum-" + id).data(points),
+//         drag = d3.behavior.drag();
+//     console.log(strum.p1, strum.p2);
+//     line.enter()
+//       .append("line")
+//       .attr("id", "strum-" + id)
+//       .attr("class", "strum");
+//
+//     line
+//       .attr("x1", function(d) { console.log(d); return d.p1[0]-offset_x; })
+//       .attr("y1", function(d) { return d.p1[1]; })
+//       .attr("x2", function(d) { return d.p2[0]-offset_x; })
+//       .attr("y2", function(d) { return d.p2[1]; })
+//       .attr("stroke", "black")
+//       .attr("stroke-width", 2);
+//
+//     drag
+//       .on("drag", function(d, i) {
+//         var ev = d3.event;
+//         i = i + 1;
+//         strum["p" + i][0] = Math.min(Math.max(strum.minX + 1, ev.x), strum.maxX);
+//         strum["p" + i][1] = Math.min(Math.max(strum.minY, ev.y), strum.maxY);
+//         drawStrum(strum, i - 1);
+//       })
+//       .on("dragend", onDragEnd());
+//
+//     circles.enter()
+//       .append("circle")
+//       .attr("id", "strum-" + id)
+//       .attr("class", "strum");
+//
+//     circles
+//       .attr("cx", function(d) { return d[0]-offset_x; })
+//       .attr("cy", function(d) { return d[1]; })
+//       .attr("r", 5)
+//       .style("opacity", function(d, i) {
+//         return (activePoint !== undefined && i === activePoint) ? 0.8 : 0;
+//       })
+//       .on("mouseover", function() {
+//         d3.select(this).style("opacity", 0.8);
+//       })
+//       .on("mouseout", function() {
+//         d3.select(this).style("opacity", 0);
+//       })
+//       .call(drag);
+//   }
+//
+//   function dimensionsForPoint(p) {
+//     var dims = { i: -1, left: undefined, right: undefined };
+//     __.dimensions.some(function(dim, i) {
+//       if (xscale(dim) < p[0]) {
+//         var next = __.dimensions[i + 1];
+//         dims.i = i;
+//         dims.left = dim;
+//         dims.right = next;
+//         return false;
+//       }
+//       return true;
+//     });
+//
+//     if (dims.left === undefined) {
+//       // Event on the left side of the first axis.
+//       dims.i = 0;
+//       dims.left = __.dimensions[0];
+//       dims.right = __.dimensions[1];
+//     } else if (dims.right === undefined) {
+//       // Event on the right side of the last axis
+//       dims.i = __.dimensions.length - 1;
+//       dims.right = dims.left;
+//       dims.left = __.dimensions[__.dimensions.length - 2];
+//     }
+//
+//     return dims;
+//   }
+//
+//   function onDragStart() {
+//     // First we need to determine between which two axes the sturm was started.
+//     // This will determine the freedom of movement, because a strum can
+//     // logically only happen between two axes, so no movement outside these axes
+//     // should be allowed.
+//     return function() {
+//       var p = d3.mouse(strumRect[0][0]),
+//           dims = dimensionsForPoint(p),
+//           strum = {
+//             p1: p,
+//             dims: dims,
+//             minX: xscale(dims.left),
+//             maxX: xscale(dims.right),
+//             minY: 0,
+//             maxY: h()
+//           };
+//
+//       strums[dims.i] = strum;
+//       strums.active = dims.i;
+//
+//       // Make sure that the point is within the bounds
+//       strum.p1[0] = Math.min(Math.max(strum.minX, p[0]), strum.maxX);
+//       strum.p1[1] = p[1] - __.margin.top;
+//       strum.p2 = strum.p1.slice();
+//     };
+//   }
+//
+//   function onDrag() {
+//     return function() {
+//       var ev = d3.event,
+//           strum = strums[strums.active];
+//
+//       // Make sure that the point is within the bounds
+//       strum.p2[0] = Math.min(Math.max(strum.minX + 1, ev.x), strum.maxX);
+//       strum.p2[1] = Math.min(Math.max(strum.minY, ev.y - __.margin.top), strum.maxY);
+//       drawStrum(strum, 1);
+//     };
+//   }
+//
+//   function containmentTest(strum, width) {
+//     var p1 = [strum.p1[0] - strum.minX, strum.p1[1] - strum.minX],
+//         p2 = [strum.p2[0] - strum.minX, strum.p2[1] - strum.minX],
+//         m1 = 1 - width / p1[0],
+//         b1 = p1[1] * (1 - m1),
+//         m2 = 1 - width / p2[0],
+//         b2 = p2[1] * (1 - m2);
+//
+//     // test if point falls between lines
+//     return function(p) {
+//       var x = p[0],
+//           y = p[1],
+//           y1 = m1 * x + b1,
+//           y2 = m2 * x + b2;
+//
+//       if (y > Math.min(y1, y2) && y < Math.max(y1, y2)) {
+//         return true;
+//       }
+//
+//       return false;
+//     };
+//   }
+//
+//   function selected() {
+//     var ids = Object.getOwnPropertyNames(strums),
+//         brushed = __.data;
+//
+//     // Get the ids of the currently active strums.
+//     ids = ids.filter(function(d) {
+//       return !isNaN(d);
+//     });
+//
+//     function crossesStrum(d, id) {
+//       var strum = strums[id],
+//           test = containmentTest(strum, strums.width(id)),
+//           d1 = strum.dims.left,
+//           d2 = strum.dims.right,
+//           y1 = yscale[d1],
+//           y2 = yscale[d2],
+//           point = [y1(d[d1]) - strum.minX, y2(d[d2]) - strum.minX];
+//       return test(point);
+//     }
+//
+//     if (ids.length === 0) { return brushed; }
+//
+//     return brushed.filter(function(d) {
+//       switch(brush.predicate) {
+//       case "AND":
+//         return ids.every(function(id) { return crossesStrum(d, id); });
+//       case "OR":
+//         return ids.some(function(id) { return crossesStrum(d, id); });
+//       default:
+//         throw "Unknown brush predicate " + __.brushPredicate;
+//       }
+//     });
+//   }
+//
+//   function removeStrum() {
+//     var strum = strums[strums.active],
+//         svg = pc.selection.select("svg").select("g#strums");
+//
+//     delete strums[strums.active];
+//     strums.active = undefined;
+//     svg.selectAll("line#strum-" + strum.dims.i).remove();
+//     svg.selectAll("circle#strum-" + strum.dims.i).remove();
+//   }
+//
+//   function onDragEnd() {
+//     return function() {
+//       var brushed = __.data,
+//           strum = strums[strums.active];
+//
+//       // Okay, somewhat unexpected, but not totally unsurprising, a mousclick is
+//       // considered a drag without move. So we have to deal with that case
+//       if (strum && strum.p1[0] === strum.p2[0] && strum.p1[1] === strum.p2[1]) {
+//         removeStrum(strums);
+//       }
+//
+//       brushed = selected(strums);
+//       strums.active = undefined;
+//       __.brushed = brushed;
+//       pc.render();
+//       events.brushend.call(pc, __.brushed);
+//     };
+//   }
+//
+//   function brushReset(strums) {
+//     return function() {
+//       var ids = Object.getOwnPropertyNames(strums).filter(function(d) {
+//         return !isNaN(d);
+//       });
+//
+//       ids.forEach(function(d) {
+//         strums.active = d;
+//         removeStrum(strums);
+//       });
+//       onDragEnd(strums)();
+//     };
+//   }
+//
+//   function install() {
+//     var drag = d3.behavior.drag();
+//
+//     // Map of current strums. Strums are stored per segment of the PC. A segment,
+//     // being the area between two axes. The left most area is indexed at 0.
+//     strums.active = undefined;
+//     // Returns the width of the PC segment where currently a strum is being
+//     // placed. NOTE: even though they are evenly spaced in our current
+//     // implementation, we keep for when non-even spaced segments are supported as
+//     // well.
+//     strums.width = function(id) {
+//       var strum = strums[id];
+//
+//       if (strum === undefined) {
+//         return undefined;
+//       }
+//
+//       return strum.maxX - strum.minX;
+//     };
+//
+//     pc.on("axesreorder.strums", function() {
+//       var ids = Object.getOwnPropertyNames(strums).filter(function(d) {
+//         return !isNaN(d);
+//       });
+//
+//       // Checks if the first dimension is directly left of the second dimension.
+//       function consecutive(first, second) {
+//         var length = __.dimensions.length;
+//         return __.dimensions.some(function(d, i) {
+//           return (d === first)
+//             ? i + i < length && __.dimensions[i + 1] === second
+//             : false;
+//         });
+//       }
+//
+//       if (ids.length > 0) { // We have some strums, which might need to be removed.
+//         ids.forEach(function(d) {
+//           var dims = strums[d].dims;
+//           strums.active = d;
+//           // If the two dimensions of the current strum are not next to each other
+//           // any more, than we'll need to remove the strum. Otherwise we keep it.
+//           if (!consecutive(dims.left, dims.right)) {
+//             removeStrum(strums);
+//           }
+//         });
+//         onDragEnd(strums)();
+//       }
+//     });
+//
+//     // Add a new svg group in which we draw the strums.
+//     pc.selection.select("svg").append("g")
+//       .attr("id", "strums")
+//       .attr("transform", "translate(" + __.margin.left + "," + __.margin.top + ")");
+//
+//     // Install the required brushReset function
+//     pc.brushReset = brushReset(strums);
+//
+//     drag
+//       .on("dragstart", onDragStart(strums))
+//       .on("drag", onDrag(strums))
+//       .on("dragend", onDragEnd(strums));
+//
+//     // NOTE: The styling needs to be done here and not in the css. This is because
+//     //       for 1D brushing, the canvas layers should not listen to
+//     //       pointer-events.
+//     strumRect = pc.selection.select("svg").insert("rect", "g#strums")
+//       .attr("id", "strum-events")
+//       .attr("x", __.margin.left)
+//       .attr("y", __.margin.top)
+//       .attr("width", w())
+//       .attr("height", h() + 2)
+//       .style("opacity", 0)
+//       .call(drag);
+//   }
+//
+//   brush.modes["2D-strums"] = {
+//     install: install,
+//     uninstall: function() {
+//       pc.selection.select("svg").select("g#strums").remove();
+//       pc.selection.select("svg").select("rect#strum-events").remove();
+//       pc.on("axesreorder.strums", undefined);
+//       delete pc.brushReset;
+//
+//       strumRect = undefined;
+//     },
+//     selected: selected
+//   };
+//
+// }());
 
 
 // brush mode: 1D-Axes with multiple extents
@@ -1317,7 +1358,7 @@ pc.brushMode = function(mode) {
                     return b[0] <= d[p] && d[p] <= b[1]
                 },
                 "string": function(d,p,dimension,b) {
-                    return b[0] <= d[p] && d[p] <= b[1]
+                    return b[0] <= yscale[p](d[p]) && yscale[p](d[p]) <= b[1]
                 }
             };
 

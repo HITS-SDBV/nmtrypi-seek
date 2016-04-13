@@ -16,9 +16,21 @@ var color_range_rg;
 var color_set;
 //var heatMap = d3.select("#heatmap").selectAll(".col");
 
-
 function initialize(data, textLength){
     parcoord_data = data;
+
+    //parse data, keep numbers up to 2 decimal points
+    //there's must be a shorter way in javascript to do this
+    for(var i=0; i<data.length; i++) {
+      for(var prop in parcoord_data[i]){
+        //should be faster comparison than isNan
+        if (parcoord_data[i][prop] == +parcoord_data[i][prop]) {
+          //toFixed returns a string, use a second parseFloat to remove trailing zeroes ("100.00" ==> "100")
+          parcoord_data[i][prop] = parseFloat(parseFloat(parcoord_data[i][prop]).toFixed(2)).toString();
+        }
+      }
+    }
+
     color_range_rg = [ "#74a92c", "#f33"]; //red-green
     //['#fc8d59','#ffffbf','#91bfdb'];// (red-white-blue)
     //['#fc8d59','#ffffbf','#91cf60']; //(red-yellow-green)
@@ -28,7 +40,8 @@ function initialize(data, textLength){
     // set parallel coordinates
     graph = d3.parcoords()('#parcoords_plot')
        .data(parcoord_data)
-       .margin({ top: 100, left: 8 * textLength, bottom: 40, right: 0 })
+       .margin({ top: 130, left: 8 * textLength, bottom: 40, right: 0 })
+    //   .margin({ top: 100, left: 0, bottom: 40, right: 0 })
        .alpha(0.6)
        //.mode("queue")
        //.composite("darker") //darken
@@ -65,6 +78,7 @@ function draw_parallel_coord(data) {
              .attr("text-decoration", "overline")
              .attr("transform", "translate(" + graph.width()/2 + "," + (graph.height()-5) + ")");;
 
+
  // set the initial coloring based on the 2nd column
      update_colors(d3.keys(parcoord_data[0])[1]);
 
@@ -97,14 +111,14 @@ function draw_parallel_coord(data) {
       graph.brushMode(this.value);
       switch(this.value) {
           case 'None':
-              d3.select("#pStrums").style("visibility", "hidden");
+    //          d3.select("#pStrums").style("visibility", "hidden");
               d3.select("#lblPredicate").style("visibility", "hidden");
               d3.select("#sltPredicate").style("visibility", "hidden");
               d3.select("#btnReset").style("visibility", "hidden");
               break;
-          case '2D-strums':
-              d3.select("#pStrums").style("visibility", "visible");
-              break;
+          // case '2D-strums':
+          //     d3.select("#pStrums").style("visibility", "visible");
+          //     break;
           default:
               d3.select("#pStrums").style("visibility", "hidden");
               d3.select("#lblPredicate").style("visibility", "visible");
@@ -250,7 +264,8 @@ function addTooltip(clicked, clickedCenPts){
             // not clean at all!
             var x = clickedCenPts[i][j][0] - margins.left;
             var y = clickedCenPts[i][j][1] - margins.top;
-            clickedDataSet.push([x, y, text]);
+            //console.log("text ",text, parseFloat(text).toFixed(2));
+            clickedDataSet.push([x, y,text]);// parseFloat(parseFloat(text).toFixed(2)).toString()]);
         }
     };
 
