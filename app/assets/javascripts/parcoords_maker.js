@@ -589,7 +589,7 @@ function wrap(text) {
 }
 
 String.prototype.width = function(font) {
-  var f = font || wrapFont,
+  var f = font || __.wrapFont,
       o = $j('<div>' + this + '</div>')
             .css({'position': 'absolute', 'float': 'left', 'white-space': 'nowrap', 'visibility': 'hidden', 'font': f})
             .appendTo($('body')),
