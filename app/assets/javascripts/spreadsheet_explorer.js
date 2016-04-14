@@ -907,7 +907,6 @@ function selection_for_parcoords() {
         }
         if (sel_data[row_i]) row_i++;
     });
-    console.log("sel_data: ", sel_data)
     return sel_data;
 }
 

@@ -1,20 +1,9 @@
 
-/*function update_heatmap(values) {
-    var colorScale = d3.scale.quantile()
-        .domain(values)
-        .range(colors);
-    heatMap.style("fill", function (d) {
-        //console.log("cell value: " + d.value);
-        return colorScale(d.value);
-    });
-}*/
-
 
 var parcoord_data;
 var graph;
 var color_range_rg;
 var color_set;
-//var heatMap = d3.select("#heatmap").selectAll(".col");
 
 function initialize(data, textLength){
     parcoord_data = data;
@@ -56,8 +45,6 @@ function initialize(data, textLength){
 } //end initialize
 
 function draw_parallel_coord(data) {
-    console.log("selected data: ",data)
-
      // collect text for first column to adjust left margin
      var firstCell = data.map(function(d){return d3.values(d)[0]});
      // find the longest text size in the first row to adjust left margin
@@ -65,7 +52,6 @@ function draw_parallel_coord(data) {
      firstCell.forEach(function(d){
         if (d.length > textLength) textLength = d.length;
      });
-     console.log("text length: ",textLength);
      initialize(data, textLength);
 
 
@@ -221,7 +207,7 @@ function isOnLine(startPt, endPt, testPt, tol){
     var Dx = x2 - x1;
     var Dy = y2 - y1;
     var delta = Math.abs(Dy*x0 - Dx*y0 - x1*y2+x2*y1)/Math.sqrt(Math.pow(Dx, 2) + Math.pow(Dy, 2));
-    //console.log(delta);
+
     if (delta <= tol) return true;
     return false;
 }
@@ -255,17 +241,13 @@ function addTooltip(clicked, clickedCenPts){
 
     // get all the values into a single list
     // I'm pretty sure there is a better way to write this is Javascript
-  //  console.log("add tooltip clicked", clicked)
     for (var i=0; i<clicked.length; i++){
-   //     console.log("clicked i ", clicked[i]);
-
         for (var j=0; j<clickedCenPts[i].length; j++){
             var text = d3.values(clicked[i])[j];
             // not clean at all!
             var x = clickedCenPts[i][j][0] - margins.left;
             var y = clickedCenPts[i][j][1] - margins.top;
-            //console.log("text ",text, parseFloat(text).toFixed(2));
-            clickedDataSet.push([x, y,text]);// parseFloat(parseFloat(text).toFixed(2)).toString()]);
+            clickedDataSet.push([x, y,text]);
         }
     };
 
@@ -273,7 +255,6 @@ function addTooltip(clicked, clickedCenPts){
     var fontSize = 14;
     var padding = 2;
     var rectHeight = fontSize + 2 * padding; //based on font size
-   // console.log("clickedDataSet in AddTooltip: ", clickedDataSet)
     graph.svg.selectAll("rect[id='tooltip']")
             .data(clickedDataSet).enter()
             .append("rect")
@@ -308,9 +289,6 @@ function getClickedLines(mouseClick){
 
     // find centriod points
     var graphCentPts = getCentroids(activeData);
- //   console.log("inClickedLines:");
- //   console.log("active data: ", activeData)
- //   console.log("graphCents: ", graphCentPts)
     if (graphCentPts.length==0) return false;
 
     // find between which axes the point is
@@ -333,11 +311,9 @@ function highlightLineOnClick(mouseClick, drawTooltip){
     var clickedCenPts = [];
 
     clickedData = getClickedLines(mouseClick);
-//    console.log("highlightLineOnClick clickedData ", clickedData)
     if (clickedData && clickedData[0].length!=0){
         clicked = clickedData[0];
         clickedCenPts = clickedData[1];
-      //  console.log("highlightLineOnClick: clickedCenPts ", clickedCenPts)
         // highlight clicked line
         graph.highlight(clicked);
 
@@ -381,8 +357,7 @@ $j(document).ready(function () {
       //d3.select('svg').selectAll('rect').remove();
       var svg_selection = document.querySelector('svg');
       var svgString = new XMLSerializer().serializeToString(svg_selection);
-      console.log(svgString)
-      if (svgString === svgString1) console.log("svg strings are equal!");
+      //if (svgString === svgString1) console.log("svg strings are equal!");
       //var blob = new Blob([svgString], {type: "image/svg+xml;charset=utf-8"});
       //saveAs(blob, "with_inline.svg");
 
@@ -403,8 +378,8 @@ $j(document).ready(function () {
 
       newCanvas.width = svgW;
       newCanvas.height = svgH;
-      console.log("svg sizes: ", svgW, svgH);
-      console.log("canvas sizes: ", canW, canH);
+      // console.log("svg sizes: ", svgW, svgH);
+      // console.log("canvas sizes: ", canW, canH);
 
       //var popup = window.open("");
       // popup.document.write(newCanvas);

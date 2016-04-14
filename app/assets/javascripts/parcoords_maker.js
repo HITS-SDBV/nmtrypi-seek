@@ -396,7 +396,6 @@ function compute_cluster_centroids(d) {
 }
 
 function compute_centroids(row) {
-   // console.log("computing centroids", row)
 	var centroids = [];
 
 	var p = __.dimensions;
@@ -561,7 +560,6 @@ function wrap(text) {
   var x0 = dim[0][0].getAttribute("transform").match(/\(.*\)/g)[0];
   var x1 = dim[0][1].getAttribute("transform").match(/\(.*\)/g)[0];
   var pxWidth = x1.substring(1, x1.length-1) - x0.substring(1, x0.length-1);
-  //console.log("pxWidth: ", pxWidth);
   text.each(function() {
     var text = d3.select(this),
         words = text.text().split(/\s+/).reverse(),
@@ -575,7 +573,6 @@ function wrap(text) {
     while (word = words.pop()) {
       line.push(word);
       tspan.text(line.join(" "));
-      //console.log("width: ", tspan.text().width())
       //if (tspan.node().getComputedTextLength() > width) { //this returns 0
       //compute by pixel length, which we get from g.dimension width calc
       if (tspan.text().width() > pxWidth) {
