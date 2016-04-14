@@ -126,13 +126,19 @@ function draw_parallel_coord(data) {
 
 //   //from here: tooltip code + highlighting
 // update color and font weight of chart based on axis selection
-// modified from here: https://syntagmatic.github.io/parallel-coordinates/
+// modified from here: http://bl.ocks.org/mostaphaRoudsari/b4e090bb50146d88aec4
 function update_colors(dimension) {
     // change the fonts to bold
     graph.svg.selectAll(".dimension")
             .style("font-weight", "normal")
             .filter(function(d) { return d == dimension; })
             .style("font-weight", "bold");
+   //the above works in standalones but not in SEEK, therefore we add bold
+   //in the text label 
+    graph.svg.selectAll('text.label')
+        .style("font-weight", "normal")
+        .filter(function(d) { return d == dimension; })
+        .style("font-weight", "bold");
 
     // change color of lines
     // set domain+range of color scale
