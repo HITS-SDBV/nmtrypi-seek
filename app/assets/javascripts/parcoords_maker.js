@@ -44,7 +44,7 @@ d3.parcoords = function(config) {
     y_translate: -60,
     width: "1400",
     height: "520",
-    wrapFont: '12px sans-serif', //default font for label width calculation 
+    wrapFont: '12px sans-serif', //default font for label width calculation
     deltaPx: 10,    //substract from allowed pixel width when computing label wrap length
     margin: { top: 30, right: 0, bottom: 12, left: 0 },
     color: "#069",
@@ -551,7 +551,8 @@ function single_path(d, ctx) {
     //console.log(arrMin)
     //take care of missing values - currently as min. value of axis
 	__.dimensions.map(function(p, i) {
-        if (d[p] === undefined) {
+        if (d[p] == "NaN") {
+        //  console.log("in single_path: ", p, __.minValues[p]);
             d[p] = __.minValues[p];
         }
         var yval = yscale[p](d[p]);

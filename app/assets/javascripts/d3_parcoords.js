@@ -10,8 +10,11 @@ function initialize(data, textLength){
 
     //parse data, keep numbers up to 2 decimal points
     //there's must be a shorter way in javascript to do this
+    //var col_names = {}
     for(var i=0; i<data.length; i++) {
       for(var prop in parcoord_data[i]){
+        //keep a list for all possible axes names to track missing elements
+      //  if (col_names[prop] === undefined) col_names[prop] = 1;
         //should be faster comparison than isNan
         if (parcoord_data[i][prop] == +parcoord_data[i][prop]) {
           //toFixed returns a string, use a second parseFloat to remove trailing zeroes ("100.00" ==> "100")
@@ -19,6 +22,16 @@ function initialize(data, textLength){
         }
       }
     }
+
+    // //assign "" to empty cells, otherwise tooltip labels are messed up for lines with missing values
+    // for(var i=0; i<data.length; i++) {
+    //   for (var key in col_names) {
+    //     if (parcoord_data[i][key] === undefined) {
+    //        parcoord_data[i][key] = "";
+    //        console.log(parcoord_data[i]);
+    //     }
+    //   }
+    // }
 
     color_range_rg = [ "#74a92c", "#f33"]; //red-green
     //['#fc8d59','#ffffbf','#91bfdb'];// (red-white-blue)
@@ -134,7 +147,7 @@ function update_colors(dimension) {
             .filter(function(d) { return d == dimension; })
             .style("font-weight", "bold");
    //the above works in standalones but not in SEEK, therefore we add bold
-   //in the text label 
+   //in the text label
     graph.svg.selectAll('text.label')
         .style("font-weight", "normal")
         .filter(function(d) { return d == dimension; })
@@ -241,7 +254,7 @@ function cleanTooltip(){
 
 function addTooltip(clicked, clickedCenPts){
 
-    // sdd tooltip to multiple clicked lines
+    // add tooltip to multiple clicked lines
     var clickedDataSet = [];
     var margins = graph.margin()
 
@@ -250,7 +263,6 @@ function addTooltip(clicked, clickedCenPts){
     for (var i=0; i<clicked.length; i++){
         for (var j=0; j<clickedCenPts[i].length; j++){
             var text = d3.values(clicked[i])[j];
-            // not clean at all!
             var x = clickedCenPts[i][j][0] - margins.left;
             var y = clickedCenPts[i][j][1] - margins.top;
             clickedDataSet.push([x, y,text]);

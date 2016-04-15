@@ -894,15 +894,20 @@ function selection_for_parcoords() {
         for (var j = 0; j < heatmap_cells.size(); j++) {
             var col_index = heatmap_cells.eq(j).index(); //col
             var cell_value = heatmap_cells.eq(j);
+            //up to here, the code was the same as in heatmap selection. but now
+            //generate a different object
             var col_label = col_header_cells.eq(col_index).text();
-            //console.log("col_label: ", col_label);
-            if(cell_value[0].firstChild != null && col_label != cell_value.text()) {
+          //  console.log("col_label: ", col_label);
+
+          //  if(cell_value[0].firstChild != null && col_label != cell_value.text()) {
+          //keep empty cells
+            if(col_label != cell_value.text()) {
                 if (sel_data[row_i] == null) {
-                  sel_data.push({});
+                  sel_data.push({});  //initialize row object
                 };
 
                 sel_data[row_i][col_label] = cell_value.text();
-                //console.log(row_i, $j(this).index(), col_index, cell_value.text());
+                //console.log(row_i, col_label, cell_value.text());
             }
         }
         if (sel_data[row_i]) row_i++;
