@@ -1548,10 +1548,8 @@ ActiveRecord::Schema.define(:version => 20141204122730) do
   add_index "taggings", ["tag_id"], :name => "index_taggings_on_tag_id"
   add_index "taggings", ["taggable_id", "taggable_type", "context"], :name => "index_taggings_on_taggable_id_and_taggable_type_and_context"
 
-  if not table_exists?(:tags)
-    create_table "tags", :force => true do |t|
-      t.string "name"
-    end
+  create_table "tags", :force => true do |t|
+    t.string "name"
   end
 
   create_table "taverna_player_interactions", :force => true do |t|
