@@ -197,6 +197,7 @@ function without(arr, item) {
   return arr.filter(function(elem) { return item.indexOf(elem) === -1; })
 };
 pc.autoscale = function() {
+    //console.log(__.data)
   // yscale
   var defaultScales = {
     "date": function(k) {
@@ -551,7 +552,7 @@ function single_path(d, ctx) {
     //console.log(arrMin)
     //take care of missing values - currently as min. value of axis
 	__.dimensions.map(function(p, i) {
-        if (d[p] == "NaN") {
+        if ( (d[p] === undefined) || (d[p] == "NaN")  || (d[p] == "") ) {
         //  console.log("in single_path: ", p, __.minValues[p]);
             d[p] = __.minValues[p];
         }

@@ -10,28 +10,30 @@ function initialize(data, textLength){
 
     //parse data, keep numbers up to 2 decimal points
     //there's must be a shorter way in javascript to do this
-    //var col_names = {}
+    var col_names = {}
     for(var i=0; i<data.length; i++) {
       for(var prop in parcoord_data[i]){
         //keep a list for all possible axes names to track missing elements
-      //  if (col_names[prop] === undefined) col_names[prop] = 1;
+        if (col_names[prop] === undefined) col_names[prop] = 1;
         //should be faster comparison than isNan
         if (parcoord_data[i][prop] == +parcoord_data[i][prop]) {
+        //if (! isNaN(parcoord_data[i][prop])) {
           //toFixed returns a string, use a second parseFloat to remove trailing zeroes ("100.00" ==> "100")
           parcoord_data[i][prop] = parseFloat(parseFloat(parcoord_data[i][prop]).toFixed(2)).toString();
         }
       }
     }
 
-    // //assign "" to empty cells, otherwise tooltip labels are messed up for lines with missing values
-    // for(var i=0; i<data.length; i++) {
-    //   for (var key in col_names) {
-    //     if (parcoord_data[i][key] === undefined) {
-    //        parcoord_data[i][key] = "";
-    //        console.log(parcoord_data[i]);
-    //     }
-    //   }
-    // }
+     //assign "" to empty cells, otherwise tooltip labels are messed up for lines with missing values
+     for(var i=0; i<data.length; i++) {
+       for (var key in col_names) {
+           console.log(key, i, parcoord_data[i][key])
+         if (parcoord_data[i][key] === undefined || ( parcoord_data[i][key] == "NaN") ) {
+            parcoord_data[i][key] = "";
+            console.log("found NaN or undefined", parcoord_data[i]);
+         }
+       }
+     }
 
     color_range_rg = [ "#74a92c", "#f33"]; //red-green
     //['#fc8d59','#ffffbf','#91bfdb'];// (red-white-blue)
@@ -449,7 +451,7 @@ $j(document).ready(function () {
   */
   function inlineAllStyles() {
       var svg_style, selector
-      var cssText = 'spreadsheet_parcoords.css';
+      var cssText = 'spreadsheet_parcoords';
 
       for (var i = 0; i <= document.styleSheets.length - 1; i++) {
           //loop through your stylesheets
