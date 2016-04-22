@@ -27,10 +27,10 @@ function initialize(data, textLength){
      //assign "" to empty cells, otherwise tooltip labels are messed up for lines with missing values
      for(var i=0; i<data.length; i++) {
        for (var key in col_names) {
-           console.log(key, i, parcoord_data[i][key])
+//           console.log(key, i, parcoord_data[i][key])
          if (parcoord_data[i][key] === undefined || ( parcoord_data[i][key] == "NaN") ) {
             parcoord_data[i][key] = "";
-            console.log("found NaN or undefined", parcoord_data[i]);
+ //           console.log("found NaN or undefined", parcoord_data[i]);
          }
        }
      }
@@ -417,8 +417,7 @@ $j(document).ready(function () {
           //context[0].drawImage(img, -35, -100, graph.width(), graph.height() );
           for (var i = 1; i < canvas_list.length; i++) {
               //context[0].drawImage(canvas_list[i],0,0);
-              ctx.drawImage(canvas_list[i], svgW - canW, 100);
-          }
+              ctx.drawImage(canvas_list[i], svgW - canW,  graph.margin().top)}
           //var dataURL = context[0].canvas.toDataURL("image/png");
           var dataURL = ctx.canvas.toDataURL("image/png");
           document.querySelector('#png_container').innerHTML = '<img src="' + dataURL + '"/>';

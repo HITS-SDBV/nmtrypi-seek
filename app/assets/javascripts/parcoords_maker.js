@@ -197,7 +197,7 @@ function without(arr, item) {
   return arr.filter(function(elem) { return item.indexOf(elem) === -1; })
 };
 pc.autoscale = function() {
-    //console.log(__.data)
+   // console.log(__.data)
   // yscale
   var defaultScales = {
     "date": function(k) {
@@ -220,6 +220,9 @@ pc.autoscale = function() {
     "string": function(k) {
       var counts = {},
           domain = [];
+      //var newMin = d3.min(__.data, function(d) { return +d[k]; }) -10;
+      //  newMin = parseFloat(parseFloat(newMin).toFixed(2)).toString();
+      //  __.minValues[k] = newMin;
 
       // Let's get the count for each value so that we can sort the domain based
       // on the number of items for each value.
