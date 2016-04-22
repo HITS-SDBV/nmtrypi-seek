@@ -50,7 +50,7 @@
 
   <div class="spreadsheet_box_title">
     <div style="float: left">Data heatmap</div>
-    <div style="float: right;"><a href="#" onclick="$j('#heatmap_container').hide(); return false;">Close</a></div>
+    <div style="float: right;"><a href="#" onclick="cleanup_heatmap_plot(); return false;">Close</a></div>
     <br style="clear:both"/>
   </div>
 <div>
@@ -71,6 +71,12 @@
 
 
 <script type="text/javascript">
+
+  function cleanup_heatmap_plot() {
+    d3.selectAll('svg').remove();
+    $j('#heatmap_container').hide();
+  }
+
   //http://wiki.jqueryui.com/w/page/12138059/Slider#specs
   // range = true to avoid handles overlapping works only with two handels
   var colors = [ 'green', 'yellow','red'];
