@@ -77,7 +77,7 @@ function draw_parallel_coord(data) {
              .text(instructions)
              .attr("text-anchor", "middle")
              .attr("text-decoration", "overline")
-             .attr("transform", "translate(" + graph.width()/2 + "," + (graph.height()-5) + ")");;
+             .attr("transform", "translate(" + graph.width()/2 + "," + (graph.height()) + ")");;
 
 
  // set the initial coloring based on the 2nd column

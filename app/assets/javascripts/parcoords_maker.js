@@ -44,6 +44,7 @@ d3.parcoords = function(config) {
     y_translate: -60,
     width: "1400",
     height: "520",
+    missingAxisOffset: "30",
     wrapFont: '12px sans-serif', //default font for label width calculation
     deltaPx: 10,    //substract from allowed pixel width when computing label wrap length
     margin: { top: 30, right: 0, bottom: 12, left: 0 },
@@ -99,6 +100,7 @@ var events = d3.dispatch.apply(this,["render", "resize", "highlight", "brush", "
     dragging = {},
     line = d3.svg.line(),
     axis = d3.svg.axis().orient("left").ticks(5),
+    haxis = d3.svg.axis().orient("bottom"),
     g, // groups for axes, brushes
     ctx = {},
     canvas = {},
@@ -208,7 +210,7 @@ pc.autoscale = function() {
         .range([h()+1, 1]);
     },
     "number": function(k) {
-        var newMin = d3.min(__.data, function(d) { return +d[k]; }) -10;
+        var newMin = d3.min(__.data, function(d) { return +d[k]; });
         newMin = parseFloat(parseFloat(newMin).toFixed(2)).toString();
         __.minValues[k] = newMin;
 
@@ -269,7 +271,7 @@ pc.autoscale = function() {
       .style("margin-top", __.margin.top + "px")
       .style("margin-left", __.margin.left + "px")
       .attr("width", w()+2)
-      .attr("height", h()+2);
+      .attr("height", h()+(+__.missingAxisOffset));
 
   // default styles, needs to be set when canvas width changes
   ctx.foreground.strokeStyle = __.color;
@@ -538,7 +540,7 @@ function color_path(d, i, ctx) {
 
 // draw many polylines of the same color
 function paths(data, ctx) {
-	ctx.clearRect(-1, -1, w() + 2, h() + 2);
+	ctx.clearRect(-1, -1, w() + 2, h() + (+__.missingAxisOffset));
 	ctx.beginPath();
 	data.forEach(function(d) {
 		if (__.bundleDimension === null || (__.bundlingStrength === 0 && __.smoothness == 0)) {
@@ -553,13 +555,15 @@ function paths(data, ctx) {
 function single_path(d, ctx) {
     //var arrMin = d3.min(__.data);
     //console.log(arrMin)
-    //take care of missing values - currently as min. value of axis
 	__.dimensions.map(function(p, i) {
+        var yval;
         if ( (d[p] === undefined) || (d[p] == "NaN")  || (d[p] == "") ) {
         //  console.log("in single_path: ", p, __.minValues[p]);
-            d[p] = __.minValues[p];
+        //    d[p] = __.minValues[p];
+            yval = h()+(__.missingAxisOffset-1);
+        } else {
+            yval = yscale[p](d[p]);
         }
-        var yval = yscale[p](d[p]);
 		if (i == 0) {
 			ctx.moveTo(position(p), yval);//yscale[p](d[p]));
 		} else {
@@ -576,7 +580,7 @@ function path_highlight(d, i) {
 	return color_path(d, i, ctx.highlight);
 };
 pc.clear = function(layer) {
-  ctx[layer].clearRect(0,0,w()+2,h()+2);
+  ctx[layer].clearRect(0,0,w()+2,h()+(+__.missingAxisOffset));
   return this;
 };
 function flipAxisAndUpdatePCP(dimension, i) {
@@ -667,8 +671,8 @@ function rotateLabels() {
       .attr("transform", "translate(0,0)")
       .each(function(d) { d3.select(this).call(axis.scale(yscale[d])); })
       .append("svg:text")
-
-       .text(function(d) {
+      .attr("transform", "translate("+__.x_translate+","+__.y_translate +") rotate(" + __.dimensionTitleRotation + ")")
+      .text(function(d) {
            return d in __.dimensionTitles ? __.dimensionTitles[d] : d;  // dimension display names
       })
       .attr({
@@ -695,6 +699,24 @@ function rotateLabels() {
 
       //d3.selectAll("text.label").call(wrap, 10);
 
+
+    //create scale for missing values axis
+    var firstPC_Xoffset = xscale(__.dimensions[0]);
+    haxisScale = d3.scale.linear()
+        .domain([0, __.dimensions.length])
+        .range([0 , xscale(__.dimensions[__.dimensions.length -1]) - firstPC_Xoffset ]);
+
+    pc.svg.append("svg:g") //g element to group missing values related elements
+        .attr("transform", "translate(0," + ( (+h())+(+__.missingAxisOffset) ) + ")")//XXX TO DO: generalize this
+        .append("svg:g")   //g element for the axis itself
+        .attr("id","haxis")
+        .attr("class", "axis") //this will give it the same CSS properties as the vertical axes
+        .attr("transform",  "translate("+firstPC_Xoffset +")")
+        //.call(haxis.scale(haxisScale).tickFormat(""))  //no tick labels
+        .call(haxis.scale(haxisScale).tickValues([]))  //no ticks and no tick labels
+      .append("svg:text")
+        .attr("transform","translate(-"+(+firstPC_Xoffset-1)+", 2)")
+        .text("Missing Values")
 
 
 
