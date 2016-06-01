@@ -77,6 +77,10 @@ module Seek
             xml = data_file.spreadsheet_xml
             doc = LibXML::XML::Parser.string(xml).parse
             doc.root.namespaces.default_prefix="ss"
+
+            #doc.find("//ss:sheet")
+            #if s["hidden"] == "false" && s["very_hidden"] == "false"
+
             compound_id_cells = get_column_cells doc, "compound"
             smiles_cells = get_column_cells doc, "smile"
             compound_id_cells.each do |id_cell|
@@ -85,7 +89,10 @@ module Seek
               if id_cell && Seek::Data::DataMatch.compound_name?(id_cell.content) && !smile.blank?
                 standardized_compound_id = Seek::Data::DataMatch.standardize_compound_name(id_cell.content)
                 smile_or_hidden = data_file.can_download?(user) ? smile : "hidden"
-                id_smiles_hash[standardized_compound_id] = smile_or_hidden
+                #do not override if it already exists in the database
+                unless id_smiles_hash.key?(standardized_compound_id)
+                  id_smiles_hash[standardized_compound_id] = smile_or_hidden
+                end
               end
             end
           end
@@ -117,6 +124,16 @@ module Seek
         body_cells
       end
 
+      # def self.get_column_cells_from_sheet s, column_name
+      #   head_cells = s.find("./ss:rows/ss:row/ss:cell").find_all { |cell| cell.content.gsub(/\s+/, " ").strip.match(/#{column_name}/i) }
+      #   body_cells = []
+      #   unless head_cells.blank?
+      #     head_cell = head_cells[0]
+      #     head_col = head_cell.attributes["column"]
+      #     body_cells = s.find("./ss:rows/ss:row/ss:cell[@column=#{head_col} and @row != 1]").find_all { |cell| !cell.content.blank? }
+      #   end
+      #   body_cells
+      # end
     end
   end
 end
