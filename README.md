@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/hits-sdbv/nmtrypi-seek.svg?branch=master)](https://travis-ci.org/hits-sdbv/nmtrypi-seek)
+[![Build Status](https://travis-ci.org/HITS-SDBV/nmtrypi-seek.svg?branch=master)](https://travis-ci.org/HITS-SDBV/nmtrypi-seek)
 
 # SEEK
 
