@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/hits-sdbv/nmtrypi-seek.svg?branch=master)](https://travis-ci.org/hits-sdbv/nmtrypi-seek)
+
 # SEEK
 
 ## License
