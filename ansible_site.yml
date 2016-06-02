@@ -1,0 +1,10 @@
+---
+- include: vagrant/ansible/site_ruby.yml
+
+- hosts: [all]
+  tasks:
+  - name: bundle install
+    command: /bin/bash -lc "rvm @`cat .ruby-gemset` --create do bundle install"
+    args:
+      chdir: /project 
+#      executable: /bin/bash

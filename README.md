@@ -38,6 +38,18 @@ For details about other distributions and installing on Mac OS X please visit:
 
 The latest versions of these documents are also [included](doc).
 
+## development environment with vagrant
+
+You can use the provided vagrant environment to develop in the project:
+<pre>
+cd vagrant
+vagrant --extra-vars-file=../ansible_vars.yml --ansible-playbook=../ansible_site.yml up
+vagrant ssh
+</pre>
+
+You are in the virtual machine and you can find this project mounted in /project
+You can start eclipse with `sw/eclipse/4.5/eclipse/eclipse`
+
 ## Contacting Us
 
 For details about how to contact us, to raise bugs or offer suggestion, please visit [Contacting Us](http://seek4science.org/contact)
