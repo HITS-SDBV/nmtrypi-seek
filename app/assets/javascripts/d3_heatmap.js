@@ -5,7 +5,7 @@ var heatmap_data;
 //var colorScale;
 //var colors = colorbrewer.YlGnBu[9];  //["#ffffd9","#edf8b1","#c7e9b4","#7fcdbb","#41b6c4","#1d91c0","#225ea8","#253494","#081d58"]; // alternatively colorbrewer.YlGnBu[9]
 var heatMap = d3.select("#heatmap").selectAll(".col");
-
+var skip_col = ["compound id", "compound"];
 
 function set_heatmap_data(data){
     heatmap_data = data;
@@ -29,22 +29,27 @@ function draw_heatmap(data) {
         row_labels= new Array();
     $j.each(data, function (i, json) {
         $j.each(json, function (key, val) {
-            if (key === "row" && rows.indexOf(val) === -1) {
-                if (val === 0 && col_labels.indexOf(val) === -1) {
-                    col_labels.push(json.value);
-                    //remove first row-header
-                    data = $j.grep(data, function (jjson) {
-                        return jjson != json
-                    });
-                    //data.splice(i,1)
-                } else {
-                    rows.push(val);
-                    row_labels.push(json["row_label"]);
+            //ignore cells with compound id as recorded data/label cells
+            if (skip_col.indexOf(json.col_label.toLowerCase()) === -1) {
+                if (key === "row" && rows.indexOf(val) === -1) {
+                    if (val === 0 && col_labels.indexOf(val) === -1) {
+
+                        //col_labels.push(json.value);
+                        //remove first row-header, do not include compound id column in presented data
+                        data = $j.grep(data, function (jjson) {
+                            return (jjson != json && skip_col.indexOf(jjson.col_label.toLowerCase()) === -1)
+                        });
+                        // data.splice(i,1)
+
+                    } else {
+                        rows.push(val);
+                        row_labels.push(json["row_label"]);
+                    }
                 }
-            }
-            if (key === "col" && cols.indexOf(val) === -1) {
-                cols.push(val);
-                col_labels.push(json["col_label"]);
+                if (key === "col" && cols.indexOf(val) === -1 && col_labels.indexOf(val) === -1){
+                    col_labels.push(json["col_label"]);
+                    cols.push(val);
+                }
             }
         });
     });
@@ -159,17 +164,16 @@ function draw_heatmap(data) {
 
      var min =  d3.min(data, function (d) {
         return Math.floor(parseFloat(d.value));
-    });
+    }) -1;
      var max = d3.max(data, function (d) {
         return Math.ceil(parseFloat(d.value));
-    });
+    }) + 1;
     // this would only work if min/max were set on page initial load
     //$j('#heatmap_matrix').attr('min', min)
     //$j('#heatmap_matrix').attr('max', max)
 
     var delta = (max-min)/3.0
     var new_limits = [min, d3.format(".1f")(min+delta,1), d3.format(".1g")(max-delta,1) ,max]
-    //console.log(new_limits)
     $j('#slide1').slider("option",{min: min, max: max});
     $j('#slide1').slider("option",{values: new_limits.slice(1, new_limits.length-1)});
 
