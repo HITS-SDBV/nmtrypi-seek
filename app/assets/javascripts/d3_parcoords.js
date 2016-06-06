@@ -4,14 +4,16 @@ var parcoord_data;
 var graph;
 var color_range_rg;
 var color_set;
+var MAX_ROWS = 50;
+var DEFAULT_HEIGHT = 520;
+var H_OFFSET = 10;
 
 function initialize(data, textLength){
     parcoord_data = data;
-
+    var data_length = data.length;
     //parse data, keep numbers up to 2 decimal points
-    //there's must be a shorter way in javascript to do this
     var col_names = {}
-    for(var i=0; i<data.length; i++) {
+    for(var i=0; i<data_length; i++) {
       for(var prop in parcoord_data[i]){
         //keep a list for all possible axes names to track missing elements
         if (col_names[prop] === undefined) col_names[prop] = 1;
@@ -25,12 +27,11 @@ function initialize(data, textLength){
     }
 
      //assign "" to empty cells, otherwise tooltip labels are messed up for lines with missing values
-     for(var i=0; i<data.length; i++) {
+     for(var i=0; i<data_length; i++) {
        for (var key in col_names) {
 //           console.log(key, i, parcoord_data[i][key])
          if (parcoord_data[i][key] === undefined || ( parcoord_data[i][key] == "NaN") ) {
             parcoord_data[i][key] = "";
- //           console.log("found NaN or undefined", parcoord_data[i]);
          }
        }
      }
@@ -40,12 +41,14 @@ function initialize(data, textLength){
     //['#fc8d59','#ffffbf','#91cf60']; //(red-yellow-green)
     color_set = d3.scale.linear()
                .range(color_range_rg);
-
+    
+    pcHeight = data_length < MAX_ROWS ? DEFAULT_HEIGHT : (data_length / MAX_ROWS) * DEFAULT_HEIGHT;
     // set parallel coordinates
     graph = d3.parcoords()('#parcoords_plot')
        .data(parcoord_data)
        .margin({ top: 130, left: 8 * textLength, bottom: 40, right: 0 })
     //   .margin({ top: 100, left: 0, bottom: 40, right: 0 })
+       .height(pcHeight)
        .alpha(0.6)
        //.mode("queue")
        //.composite("darker") //darken
@@ -71,13 +74,15 @@ function draw_parallel_coord(data) {
 
 
  // add instruction text
-     var instructions = "-Drag around axis to begin brush / Click axis to clear brush / Click a label to color data based on axis values / Hover on each line to highlight."
-     d3.select(".pcButtons").append("p")
-             .attr("id", "instructions").append("text")
-             .text(instructions)
-             .attr("text-anchor", "middle")
-             .attr("text-decoration", "overline")
-             .attr("transform", "translate(" + graph.width()/2 + "," + (graph.height()) + ")");;
+     var instructions = "-Drag around axis to begin brush / Click axis to clear brush / Click a label to color data based on axis values / Hover on each line to highlight.";
+     d3.select(".pcButtons")
+         .style("margin-top", (graph.height()+H_OFFSET).toString()+"px")
+         .append("p")
+         .attr("id", "instructions").append("text")
+         .text(instructions)
+         .attr("text-anchor", "middle")
+         .attr("text-decoration", "overline")
+         .attr("transform", "translate(" + graph.width()/2 + "," + (graph.height()) + ")");;
 
 
  // set the initial coloring based on the 2nd column

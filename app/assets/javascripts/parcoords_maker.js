@@ -591,7 +591,7 @@ function flipAxisAndUpdatePCP(dimension, i) {
     .transition()
       .duration(1100)
       .call(axis.scale(yscale[dimension]));
-
+  brushUpdated(brush.modes[brush.mode].selected());
   pc.render();
   if (flags.shadows) paths(__.data, ctx.shadows);
 }
