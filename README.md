@@ -47,6 +47,14 @@ vagrant --extra-vars-file=../ansible_vars.yml --ansible-playbook=../ansible_site
 vagrant ssh
 </pre>
 
+If the provision process appears to be hanging (e.g. does not make progress) you can temrinate the process (Ctrl+C) and provision again:
+<pre>
+vagrant halt
+vagrant --extra-vars-file=../ansible_vars.yml --ansible-playbook=../ansible_site.yml up --provision
+</pre>
+This will restart the provisioning process - and ansible will take care of finishing unfinished steps.
+
+
 You are in the virtual machine and you can find this project mounted in /project
 You can start eclipse with `sw/eclipse/4.5/eclipse/eclipse`
 

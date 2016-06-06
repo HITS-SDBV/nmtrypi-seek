@@ -18,3 +18,18 @@ package_list_eclipse:
 
 rvm1_rubies:
   - ruby-2.1.5
+
+mysql_databases:
+  - name:  seek_development
+    state: present
+  - name:  seek_test
+    state: present
+  - name:  seek_production
+    state: present
+
+mysql_users:
+  - name:     "mysqluser"
+    password: "mysqlpassword"
+    priv:     "seek%.*:ALL"
+    host:     "localhost"
+    state:    present

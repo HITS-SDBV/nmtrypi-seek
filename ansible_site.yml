@@ -7,4 +7,17 @@
     command: /bin/bash -lc "rvm @`cat .ruby-gemset` --create do bundle install"
     args:
       chdir: /project 
-#      executable: /bin/bash
+
+- hosts: [mysql]
+  roles:
+    - role: geerlingguy.mysql
+      become: yes
+  tasks:
+    - name: copy database config
+      copy:
+        src:  /project/config/database.default.yml
+        dest: /project/config/database.yml
+    - name: rake db:setup
+      command: /bin/bash -lc "rvm @`cat .ruby-gemset` do rake db:setup"
+      args:
+        chdir: /project
