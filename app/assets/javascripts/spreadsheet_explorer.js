@@ -1,3 +1,7 @@
+//these two are needed for exporting the heatmap to an SVG file
+//= require blob
+//= require FileSaver
+
 function annotation_source(id, type, name, url) {
     this.id = id;
     this.type = type;
@@ -815,7 +819,7 @@ function displayRowsPerPage(){
         $('rows_per_page').show();
     }
 }
-
+/*
 function select_heatmap_cells(col, totalRow, sheetNumber) {
 
     $j("table.active_sheet tr").slice(0,totalRow).each(function() {
@@ -841,8 +845,9 @@ function deselect_heatmap_cells(col, totalRow, sheetNumber){
     $j("table.active_sheet tr td.heatmap_cell:not(.selected_cell)").addClass("selected_cell");
 
 }
-function heatmap_selected_cells() {
-    var heatmap_data= new Array();
+*/
+function plotting_selected_cells() {
+    var sel_data= new Array();
     var col_header_cells =  $j("table.active_sheet tr").first().children("td");
     $j("table.active_sheet tr").each(function () {
         var this_tr = $j(this);
@@ -850,23 +855,80 @@ function heatmap_selected_cells() {
             return /^nmt[-_][a-zA-Z]+\d+/i.test($j(this).text()) == true
         });
 
-
         var row_label = row_header_cell.text();
         var heatmap_cells = $j(this).children("td.selected_cell");
         for (var i = 0; i < heatmap_cells.size(); i++) {
             var col_index = heatmap_cells.eq(i).index();
-            heatmap_data.push({
-                row_label: row_label,
-                col_label: col_header_cells.eq(col_index).text(),
-                row: $j(this).index(),
-                col: col_index,
-                value: heatmap_cells.eq(i).text()
-            });
+            var cell_value = heatmap_cells.eq(i);
+            if(cell_value[0].firstChild != null) {
+                sel_data.push({
+                    row_label: row_label,
+                    col_label: col_header_cells.eq(col_index).text(),
+                    row: $j(this).index(),
+                    col: col_index,
+                    value: cell_value.text() // heatmap_cells.eq(i).text()
+                });
+            }
         }
 
     });
-    draw_heatmap(heatmap_data);
+    return sel_data;
+}
 
+/* create the suitable structure for parallel coordinates:
+  An array of objects, each representing a row in the table, and containing
+  a value for every column in a hash format "col label: value"
+  TO DO 1: account for missing columns? (give it a "" value)
+  TO DO 2: account for missing column headers (use col_N)
+*/
+function selection_for_parcoords() {
+    var sel_data= new Array();
+    var col_header_cells =  $j("table.active_sheet tr").first().children("td");
+    //loop by rows
+    var row_i = 0;  //row counter for inserted rows
+    $j("table.active_sheet tr").each(function () {
+        var this_tr = $j(this);
+        var row_header_cell = this_tr.children("td").filter(function () {
+            return /^nmt[-_][a-zA-Z]+\d+/i.test($j(this).text()) == true
+        });
+        var row_label = row_header_cell.text();
+        var heatmap_cells = $j(this).children("td.selected_cell");
+
+        //loop by (selected) columns, first row of each col might be a header
+        for (var j = 0; j < heatmap_cells.size(); j++) {
+            var col_index = heatmap_cells.eq(j).index(); //col
+            var cell_value = heatmap_cells.eq(j);
+            //up to here, the code was the same as in heatmap selection. but now
+            //generate a different object
+            var col_label = col_header_cells.eq(col_index).text();
+          //  console.log("col_label: ", col_label);
+
+          //  if(cell_value[0].firstChild != null && col_label != cell_value.text()) {
+          //keep empty cells
+            if(col_label != cell_value.text()) {
+                if (sel_data[row_i] == null) {
+                  sel_data.push({});  //initialize row object
+                };
+
+                sel_data[row_i][col_label] = cell_value.text();
+                //console.log(row_i, col_label, cell_value.text());
+            }
+        }
+        if (sel_data[row_i]) row_i++;
+    });
+    return sel_data;
+}
+
+function heatmap_plot(){
+    var heatmap_data = plotting_selected_cells();
+    draw_heatmap(heatmap_data);
     $j('#heatmap_container').show();
-   doUpdate();
+    doUpdate();
+}
+
+function parallel_coord_plot(){
+    var parcoord_data = selection_for_parcoords();
+    draw_parallel_coord(parcoord_data);
+    $j('#parcoords_container').show();
+    //doUpdate();
 }
