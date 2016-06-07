@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/HITS-SDBV/nmtrypi-seek.svg?branch=master)](https://travis-ci.org/HITS-SDBV/nmtrypi-seek)
+
 # SEEK
 
 ## License
@@ -35,6 +37,26 @@ For details about other distributions and installing on Mac OS X please visit:
 [Other distributions guide](http://seek4science.org/sites/default/files/seekdocs/doc/OTHER-DISTRIBUTIONS.html)
 
 The latest versions of these documents are also [included](doc).
+
+## development environment with vagrant
+
+You can use the provided vagrant environment to develop in the project:
+<pre>
+cd vagrant
+vagrant --extra-vars-file=../ansible_vars.yml --ansible-playbook=../ansible_site.yml up
+vagrant ssh
+</pre>
+
+If the provision process appears to be hanging (e.g. does not make progress) you can temrinate the process (Ctrl+C) and provision again:
+<pre>
+vagrant halt
+vagrant --extra-vars-file=../ansible_vars.yml --ansible-playbook=../ansible_site.yml up --provision
+</pre>
+This will restart the provisioning process - and ansible will take care of finishing unfinished steps.
+
+
+You are in the virtual machine and you can find this project mounted in /project
+You can start eclipse with `sw/eclipse/4.5/eclipse/eclipse`
 
 ## Contacting Us
 

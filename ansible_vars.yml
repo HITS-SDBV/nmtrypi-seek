@@ -1,0 +1,35 @@
+---
+java_product: jdk # jdk vs jre required due to rjb gem
+java_version: 8
+java_shell_profile: true
+
+eclipse_distro: mars 
+eclipse_package: php
+eclipse_plugins:
+  - aptana_studio
+
+package_list_eclipse:
+  - name: firefox
+  - name: libcurl4-gnutls-dev # for curb gem
+  - name: libxml++2.6-dev # for libxml-ruby gem
+  - name: libmysqlclient-dev # for mysql gem
+  - name: libpq-dev # for pq gem
+  - name: libmagick++-dev # for rmagick gem
+
+rvm1_rubies:
+  - ruby-2.1.5
+
+mysql_databases:
+  - name:  seek_development
+    state: present
+  - name:  seek_test
+    state: present
+  - name:  seek_production
+    state: present
+
+mysql_users:
+  - name:     "mysqluser"
+    password: "mysqlpassword"
+    priv:     "seek%.*:ALL"
+    host:     "localhost"
+    state:    present
