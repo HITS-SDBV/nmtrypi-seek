@@ -12,12 +12,36 @@
   roles:
     - role: geerlingguy.mysql
       become: yes
+
+- hosts: [all]
+  vars:
+    seek_initd:
+      - delayed_job-seek
+      - soffice
+      - solr-seek
+    www_user: vagrant
+    seek_project_root: /project
+    rails_env: development
   tasks:
+    - name: bundle install
+      command: /bin/bash -lc "cd {{ seek_project_root }} && bundle install"
     - name: copy database config
       copy:
         src:  /project/config/database.default.yml
         dest: /project/config/database.yml
     - name: rake db:setup
-      command: /bin/bash -lc "rvm @`cat .ruby-gemset` do rake db:setup"
-      args:
-        chdir: /project
+      command: /bin/bash -lc "cd {{ seek_project_root }} && rake db:setup"
+    - name: copy initd scripts for services
+      become: yes
+      template:
+        src:  "/project/script/initd/{{ item }}.tpl"
+        dest: "/etc/init.d/{{ item }}"
+        mode: 0751
+      with_items: "{{ seek_initd }}"
+    - name: enable and start services
+      become: yes
+      service:
+        name: "{{ item }}"
+        enabled: yes
+        state: started
+      with_items: "{{ seek_initd }}"
