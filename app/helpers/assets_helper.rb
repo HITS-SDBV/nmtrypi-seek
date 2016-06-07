@@ -226,7 +226,8 @@ module AssetsHelper
         if key == 'Project' || key == 'Institution'
           res[:hidden_count] = 0
         elsif key == 'Person'
-          if Seek::Config.is_virtualliver && User.current_user.nil?
+          #if Seek::Config.is_virtualliver && User.current_user.nil?
+          if User.current_user.nil?
             res[:items] = []
             res[:hidden_count] = total_count
           else

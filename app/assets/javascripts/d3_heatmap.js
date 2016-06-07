@@ -1,9 +1,11 @@
+// For creating d3-tip hovering bubbles
+//= require d3-tip
 var heatmap_data;
 
 //var colorScale;
 //var colors = colorbrewer.YlGnBu[9];  //["#ffffd9","#edf8b1","#c7e9b4","#7fcdbb","#41b6c4","#1d91c0","#225ea8","#253494","#081d58"]; // alternatively colorbrewer.YlGnBu[9]
 var heatMap = d3.select("#heatmap").selectAll(".col");
-
+var skip_col = ["compound id", "compound"];
 
 function set_heatmap_data(data){
     heatmap_data = data;
@@ -27,26 +29,31 @@ function draw_heatmap(data) {
         row_labels= new Array();
     $j.each(data, function (i, json) {
         $j.each(json, function (key, val) {
-            if (key === "row" && rows.indexOf(val) === -1) {
-                if (val === 0 && col_labels.indexOf(val) === -1) {
-                    col_labels.push(json.value);
-                    //remove first row-header
-                    data = $j.grep(data, function (jjson) {
-                        return jjson != json
-                    });
-                    //data.splice(i,1)
-                } else {
-                    rows.push(val);
-                    row_labels.push(json["row_label"]);
+            //ignore cells with compound id as recorded data/label cells
+            if (skip_col.indexOf(json.col_label.toLowerCase()) === -1) {
+                if (key === "row" && rows.indexOf(val) === -1) {
+                    if (val === 0 && col_labels.indexOf(val) === -1) {
+
+                        //col_labels.push(json.value);
+                        //remove first row-header, do not include compound id column in presented data
+                        data = $j.grep(data, function (jjson) {
+                            return (jjson != json && skip_col.indexOf(jjson.col_label.toLowerCase()) === -1)
+                        });
+                        // data.splice(i,1)
+
+                    } else {
+                        rows.push(val);
+                        row_labels.push(json["row_label"]);
+                    }
                 }
-            }
-            if (key === "col" && cols.indexOf(val) === -1) {
-                cols.push(val);
-                col_labels.push(json["col_label"]);
+                if (key === "col" && cols.indexOf(val) === -1 && col_labels.indexOf(val) === -1){
+                    col_labels.push(json["col_label"]);
+                    cols.push(val);
+                }
             }
         });
     });
-    var margin = { top: 10, right: 0, bottom: 100, left: 100 },
+    var margin = { top: 25, right: 0, bottom: 100, left: 100 },
         gridSize = 38,
         legendElementWidth = gridSize * 2,
         buckets = 3,
@@ -58,17 +65,21 @@ function draw_heatmap(data) {
         height = heatMapHeight + margin.top + margin.bottom;
 
 
+
     //remove old svg
     d3.select("svg.grid")
         .remove();
+    origHeight = 0;
     var svg = d3.select("#heatmap").append("svg")
         .attr("width", width + margin.left + margin.right)
         .attr("height", height + margin.top + margin.bottom)
         .attr("class", "grid")
         .append("g")
         .attr("id", "heatmap_matrix")
-        .attr("transform", "translate(" + margin.left + "," + margin.top + ") " + "scale(1,1)");
+        .attr("transform", "translate(" + margin.left + "," + margin.top + ") " + "scale(1,1)")
 
+
+    //Prints the row labels (from col 0)
     var rowLabels = svg.selectAll(".rowLabel")
        .data(row_labels)
         .enter().append("text")
@@ -85,16 +96,16 @@ function draw_heatmap(data) {
             return ((i >= 0 && i <= rows.length) ? "rowLabel mono axis axis-workweek" : "rowLabel mono axis");
         })
         .append("title")
-         .text(function(d,i){
+         .text(function(d){
            return  d;
             });
-
+    colLabelRotate = 270;
     var colLabels = svg.selectAll(".colLabel")
         //.data(col_labels)
         .data(cols)
         .enter().append("text")
         .text(function (d) {
-            return "Col_" + num2alpha(d);
+            return "Col_" + num2alpha(d+1);
         })
         .attr("x", function (d, i) {
             return (i) * gridSize;
@@ -102,7 +113,10 @@ function draw_heatmap(data) {
         .attr("y", 1 * gridSize)
 
         .style("text-anchor", "middle")
-        .attr("transform", "translate(" + gridSize / 2 + ", -6)")
+        .attr("transform", function (d, i){
+           return "translate(" + gridSize / 2 + ", -6) rotate("+colLabelRotate+","+ (i) * gridSize +"," + 1 * gridSize+ ")";
+        })
+        //.attr("transform", "translate(" + gridSize / 2 + ", -6)")
         .attr("class", "colLabel mono axis axis-worktime")
         .append("title")
         .text(function(d,i){
@@ -111,43 +125,67 @@ function draw_heatmap(data) {
 //        .attr("dy",".78em")
 //        .call(wrap, x.rangeBand());
 
-
+    //former syntax: num2alpha(cols[(i+1)%col_labels.length])
+     var tip = d3.tip()
+        .attr('class', 'd3-tip')
+        .offset([-10, 0])
+        .html(function(d){
+            return d.row_label + ", Col_" + num2alpha(d.col+1) +
+            " ( " + d.col_label + "): <span style='color:#ff810c'>"
+                + d3.format(".2f")(d.value)+ "</span>";
+     });
+    // svg.selectAll("#heatmap_matrix").call(tip);
+    svg.call(tip)
      heatMap = svg.selectAll(".col")
         .data(data)
         .enter().append("rect")
-        .attr("x", function (d) {
-            return (cols.indexOf(d.col)) * gridSize;
-        }) //d.col >0? d.col-1 : 1
-        .attr("y", function (d) {
-            return (rows.indexOf(d.row) + 1.5) * gridSize;
+         .attr("x", function (d) {
+             return (cols.indexOf(d.col)) * gridSize;
+         }) //d.col >0? d.col-1 : 1
+         .attr("y", function (d) {
+             return (rows.indexOf(d.row) + 1.5) * gridSize;
+         })
+         .attr("rx", 4)
+         .attr("ry", 4)
+         .attr("class", "col bordered")
+         .attr("width", gridSize)
+         .attr("height", gridSize)
+         .style("fill", colors[0])
+         .on("mouseover", function (d) {
+             prevFill = this.style.fill;
+             d3.select(this).style("opacity", '0.3').style("fill", "grey");
+             tip.show(d);
+         })
+        .on("mouseout", function (d) {
+            d3.select(this).style("opacity",'1.0').style("fill", prevFill);
+            tip.hide(d);
         })
-        .attr("rx", 4)
-        .attr("ry", 4)
-        .attr("class", "col bordered")
-        .attr("width", gridSize)
-        .attr("height", gridSize)
-        .style("fill", colors[0]);
 
 
-   var min =  d3.min(data, function (d) {
-        return parseFloat(d.value);
-    }),
-       max = d3.max(data, function (d) {
-        return parseFloat(d.value);
-    });
+     var min =  d3.min(data, function (d) {
+        return Math.floor(parseFloat(d.value));
+    }) -1;
+     var max = d3.max(data, function (d) {
+        return Math.ceil(parseFloat(d.value));
+    }) + 1;
+    // this would only work if min/max were set on page initial load
+    //$j('#heatmap_matrix').attr('min', min)
+    //$j('#heatmap_matrix').attr('max', max)
 
-    //$j('#slide1').slider("option",{min: (Number(min.toFixed(1))-0.1), max: (Number(max.toFixed(1))+0.1)});
+    var delta = (max-min)/3.0
+    var new_limits = [min, d3.format(".1f")(min+delta,1), d3.format(".1g")(max-delta,1) ,max]
+    $j('#slide1').slider("option",{min: min, max: max});
+    $j('#slide1').slider("option",{values: new_limits.slice(1, new_limits.length-1)});
+
+    // $j('#slide1').slider("option",{min: (Number(min.toFixed(1))-0.1), max: (Number(max.toFixed(1))+0.1)});
     //$j("#slide1").slider('values',0,min+1); // sets first handle (index 0) to 50
     //$j("#slide1").slider('values',1,max-1);
-    //doUpdate();
-    update_heatmap( $j('#slide1').slider.limits());
+    update_heatmap( $j('#slide1').slider.limits(new_limits));
 
-    heatMap.append("title").text(function (d,i) {
-
-        return (d.row_label + "( " + col_labels[i%col_labels.length] + ": " + d.value) +" )";
-    });
-
-
+   /* heatMap.append("title").text(function (d,i) {
+        return (d.row_label + ", Col_" + num2alpha(cols[(i+1)%col_labels.length]) +
+            " ( " + col_labels[i%col_labels.length] + "): " + d3.format(".2f")(d.value));
+    });*/
 }
 
 function draw_slider(){
@@ -238,11 +276,13 @@ function filter_heatmap_data(threshold){
    // console.log(filtered_data)
    draw_heatmap(filtered_data)
 }
+
+
 function wrap(text, width) {
     console.log("text=" + text + ", width=" + width)
     text.each(function () {
         console.log(d3.select(this))
-        var text = d3.select(this),
+         text = d3.select(this),
             words = text.text().split(/\s+/).reverse(),
             word,
             line = [],
@@ -266,5 +306,3 @@ function wrap(text, width) {
         }
     });
 }
-
-
