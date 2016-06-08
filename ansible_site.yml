@@ -14,14 +14,6 @@
       become: yes
 
 - hosts: [all]
-  vars:
-    seek_initd:
-      - delayed_job-seek
-      - soffice
-      - solr-seek
-    www_user: vagrant
-    seek_project_root: /project
-    rails_env: development
   tasks:
     - name: bundle install
       command: /bin/bash -lc "cd {{ seek_project_root }} && bundle install"
@@ -45,3 +37,19 @@
         enabled: yes
         state: started
       with_items: "{{ seek_initd }}"
+
+- hosts: [nginx]
+  roles:
+    - role: geerlingguy.nginx
+      become: yes
+
+- hosts: [passenger]
+  roles:
+    - role: geerlingguy.passenger
+      become: yes
+
+#  tasks:
+#    - name: install passenger gem
+#      command: /bin/bash -lc "cd {{ seek_project_root }} && gem install passenger"
+#    - name: install passenger nginx module
+#      command: /bin/bash -lc "cd {{ seek_project_root }} && rvmsudo passenger-install-nginx-module"

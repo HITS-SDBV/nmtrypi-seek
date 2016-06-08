@@ -33,3 +33,30 @@ mysql_users:
     priv:     "seek%.*:ALL"
     host:     "localhost"
     state:    present
+
+# seek specific variables
+seek_initd:
+  - delayed_job-seek
+  - soffice
+  - solr-seek
+www_user: vagrant
+seek_project_root: /project
+rails_env: development
+
+# nginx setup
+nginx_remove_default_vhost: true
+passenger_ruby: /home/vagrant/sw/rvm/gems/ruby-2.1.5@seek-0-22/wrappers/ruby
+passenger_server_name: seek.local
+passenger_app_root: "{{ seek_project_root }}/public"
+passenger_app_env: "{{ rails_env }}"
+
+
+#nginx_vhosts:
+#  - listen: "80 default_server"
+#    server_name: "seek.local"
+#    root: "{{ seek_project_root }}/public"
+#    error_log:   /var/log/nginx/seek/error.log
+#    access_log:  /var/log/nginx/seek/access.log
+#    extra_parameters: |
+#      passenger_enabled on;
+#      passenger_app_env {{ rails_env }};
