@@ -112,12 +112,14 @@ $j(document).ready(function ($) {
 
                     $(this).addClass("selected_cell");
                     select_cells(startCol, startRow, endCol, endRow, null, evt.ctrlKey);
+                    // put in input field
                 }
             }
         })
         .on("select", function(evt, ctrl_key){
             $(this).addClass("selected_cell");
             select_cells(startCol, startRow, startCol, startRow, null, ctrl_key);
+            //put in input field
         })
         .on("deselect", function(evt){
             $(this).removeClass("selected_cell");
@@ -222,16 +224,63 @@ $j(document).ready(function ($) {
         })
     ;
 
-    //Select cells that are typed in
+    //Select cells that are typed in the input field (triggered by 'enter' or special button)
+    // ',' separates different selections,  '!' separates location(sheets) from chosen range, ':' separates edges of range(A1:C20)
+    //possible forms:
+    // 1. [file1:]sheet1!A1:C10,sheet2!B3:J90, ...
+    // 2. sheet1:sheet4!A1:C10, ....
+    function select_typed_input(selection_text) {
+        var active_sheet = $("div.active_sheet");
+        var active_sheet_number = active_sheet[0].id.split('_')[1];
+        var selections_arr = selection_text.split(',');
+        deselect_cells();
+        $('#selection_data').val(selection_text);
+
+        for (single_sel of selections_arr) {
+            console.log("single_set: ", single_sel);
+            //loc_element[0] = sheet information, could be multiple sheets, one sheet, or none (default: active_sheet)
+            //loc_element[1] = range of cells, unless previous doesn't exist.
+            var loc_element = single_sel.split('!');
+
+            //sheet not specified, only range is given.
+            if (loc_element.length == 1) {
+                console.log("use active sheet ", active_sheet_number)
+                select_range(loc_element[0], active_sheet_number);
+            } else {
+                locations = loc_element[0].split(':');
+                // one sheet
+                if (locations.length == 1) {
+                    console.log("use one sheet");
+                    //$j('div.sheet#spreadsheet_1')
+                    var sheetNum = locations[0].match(/\d+/)[0];
+                    console.log("sheet num: ", sheetNum);
+                    //select_range(loc_element[1], sheetNum );
+
+                //choose same range for multiple sheets, as in form #2.
+                } else {
+                    console.log("use multiple sheets")
+                    //additively choose given range for any of the specified locations
+
+                }
+            }
+
+        }
+
+    }
+
+    //Select cells that are typed in when the 'Enter' key is pressed while in the input field
     $('input#selection_data')
         .keyup(function(e) {
             if(e.keyCode == 13) {
-                var active_sheet = $j("div.active_sheet");
-                var active_sheet_number = active_sheet.id.split('_')[1];
-                select_range($(this).val(), active_sheet_number);
+                select_typed_input($('#selection_data').val());
             }
         })
     ;
+
+    //Select cells that are typed in when clicking on the "apply selection" button
+    $('#applySelection').click(function() {
+        select_typed_input($('#selection_data').val());
+    });
 
     //Resizable column/row headings
     //also makes them clickable to select all cells in that row/column
@@ -605,10 +654,10 @@ function select_cells(startCol, startRow, endCol, endRow, sheetNumber, ctrl_key)
     var maxRow = endRow;
     var maxCol = endCol;
 
-    var mutiple_select = false;
+    var multiple_select = false;
 
     if(ctrl_key){
-        mutiple_select = true;
+        multiple_select = true;
     }
 
     //To ensure minRow/minCol is always less than maxRow/maxCol
@@ -627,7 +676,7 @@ function select_cells(startCol, startRow, endCol, endRow, sheetNumber, ctrl_key)
     var relativeMaxRow = relative_rows[1];
 
 
-    if(!mutiple_select){
+    if(!multiple_select){
         //Deselect any cells and headings
         $j(".selected_cell").removeClass("selected_cell");
         $j(".selected_heading").removeClass("selected_heading");
@@ -644,7 +693,9 @@ function select_cells(startCol, startRow, endCol, endRow, sheetNumber, ctrl_key)
     //"Select" dragged cells' row headings
     $j("div.active_sheet").parent().find("div.row_headings div.row_heading").slice(relativeMinRow-1,relativeMaxRow).addClass("selected_heading");
 
-    //Update the selection display e.g A3:B2
+
+    //The following does not work when combined with (multiple) input text selections or multiple click and drag selections
+    //or selection across sheets. fix when selections are done and move to post_selection_updates()
     var selection = "";
     selection += (num2alpha(minCol).toString() + minRow.toString());
 
@@ -658,6 +709,12 @@ function select_cells(startCol, startRow, endCol, endRow, sheetNumber, ctrl_key)
 
     //Show selection-dependent controls
     $j('.requires_selection').show();
+}
+
+function post_selection_updates() {
+    //Update the selection display (mini selection or entire ?)
+    //Update cell coverage in annotation form
+    //Show selection-dependent controls
 }
 
 function activateSheet(sheet, sheetTab) {
