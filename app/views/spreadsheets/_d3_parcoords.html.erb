@@ -30,25 +30,25 @@
     <!--<button class="zoomin" type="button">+</button>-->
     <!--<button class="zoomout" type="button">&#45;&#45;</button>-->
     <div class = "pcButtons">
-      <label for="sltBrushMode">Brush mode:</label>
+      <label for="sltBrushMode">Filtering Modes per Column: </label>
       <select id="sltBrushMode">
       </select>
-      <label id="lblPredicate" for="sltPredicate">Predicate:</label>
+      <label id="lblPredicate" for="sltPredicate">Match Conditions:</label>
       <select id="sltPredicate">
-          <option>AND</option>
-          <option>OR</option>
+          <option>ALL</option>
+          <option>ANY</option>
       </select>
-      <button id="btnReset">Reset Brushes</button>
+      <button id="btnReset">Reset Filters</button>
   <!--    <button class="export_svg">Save as SVG</button>
       <button class="export_pdf">Save as PDF</button>-->
       <button id="export" class="export">Export PNG</button>
+  <!--    <button id="pcHelp" onclick="show_instructions(); return false;">Help</button>-->
     </div>
   </div>
 </div>
 
 
 <script type="text/javascript">
-
 function cleanup_parcoord_plot() {
   d3.selectAll('canvas').remove();
   d3.selectAll('svg').remove();

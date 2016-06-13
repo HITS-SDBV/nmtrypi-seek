@@ -715,7 +715,7 @@ function rotateLabels() {
         //.call(haxis.scale(haxisScale).tickFormat(""))  //no tick labels
         .call(haxis.scale(haxisScale).tickValues([]))  //no ticks and no tick labels
       .append("svg:text")
-        .attr("transform","translate(-"+(+firstPC_Xoffset-1)+", 2)")
+        .attr("transform","translate(-"+(+firstPC_Xoffset-1)+", -10)")
         .text("Missing Values")
 
 
@@ -867,7 +867,7 @@ var brush = {
     }
   },
   mode: "None",
-  predicate: "AND",
+  predicate: "ALL",
   currentMode: function() {
     return this.modes[this.mode];
   }
@@ -888,7 +888,7 @@ function brushPredicate(predicate) {
   if (!arguments.length) { return brush.predicate; }
 
   predicate = String(predicate).toUpperCase();
-  if (predicate !== "AND" && predicate !== "OR") {
+  if (predicate !== "ALL" && predicate !== "ANY") {
     throw "Invalid predicate " + predicate;
   }
 
@@ -935,7 +935,7 @@ pc.brushMode = function(mode) {
   return pc;
 };
 
-// brush mode: 1D-Axes
+// brush mode: 1D-range
 
 (function() {
   var brushes = {};
@@ -973,11 +973,11 @@ pc.brushMode = function(mode) {
     return __.data
       .filter(function(d) {
         switch(brush.predicate) {
-        case "AND":
+        case "ALL":
           return actives.every(function(p, dimension) {
             return within[__.types[p]](d,p,dimension);
           });
-        case "OR":
+        case "ANY":
           return actives.some(function(p, dimension) {
             return within[__.types[p]](d,p,dimension);
           });
@@ -1050,7 +1050,7 @@ pc.brushMode = function(mode) {
     return pc;
   }
 
-  brush.modes["1D-axes"] = {
+  brush.modes["Single range"] = {
     install: install,
     uninstall: function() {
       g.selectAll(".brush").remove();
@@ -1235,9 +1235,9 @@ pc.brushMode = function(mode) {
 //
 //     return brushed.filter(function(d) {
 //       switch(brush.predicate) {
-//       case "AND":
+//       case "ALL":
 //         return ids.every(function(id) { return crossesStrum(d, id); });
-//       case "OR":
+//       case "ANY":
 //         return ids.some(function(id) { return crossesStrum(d, id); });
 //       default:
 //         throw "Unknown brush predicate " + __.brushPredicate;
@@ -1379,7 +1379,7 @@ pc.brushMode = function(mode) {
 // }());
 
 
-// brush mode: 1D-Axes with multiple extents
+// brush mode: 1D-range with multiple extents
 // requires d3.svg.multibrush
 
 (function() {
@@ -1422,13 +1422,13 @@ pc.brushMode = function(mode) {
             return __.data
                 .filter(function(d) {
                     switch(brush.predicate) {
-                        case "AND":
+                        case "ALL":
                             return actives.every(function(p, dimension) {
                                 return extents[dimension].some(function(b) {
                                     return within[__.types[p]](d,p,dimension,b);
                                 });
                             });
-                        case "OR":
+                        case "ANY":
                             return actives.some(function(p, dimension) {
                                 return extents[dimension].some(function(b) {
                                     return within[__.types[p]](d,p,dimension,b);
@@ -1526,7 +1526,7 @@ pc.brushMode = function(mode) {
             return pc;
         }
 
-        brush.modes["1D-axes-multi"] = {
+        brush.modes["Multiple ranges"] = {
             install: install,
             uninstall: function() {
                 g.selectAll(".brush").remove();
