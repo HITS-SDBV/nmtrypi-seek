@@ -226,46 +226,39 @@ $j(document).ready(function ($) {
 
     //Select cells that are typed in the input field (triggered by 'enter' or special button)
     // ',' separates different selections,  '!' separates location(sheets) from chosen range, ':' separates edges of range(A1:C20)
-    //possible forms:
-    // 1. [file1:]sheet1!A1:C10,sheet2!B3:J90, ...
+    //possible forms: future addition: [file1:]
+    // 1. sheet1!A1:C10,sheet2!B3:J90, ...
     // 2. sheet1:sheet4!A1:C10, ....
     function select_typed_input(selection_text) {
         var active_sheet = $("div.active_sheet");
         var active_sheet_number = active_sheet[0].id.split('_')[1];
-        var selections_arr = selection_text.split(',');
+        var selections_arr = selection_text.replace(/\s+/g,'').split(',');
         deselect_cells();
+        var multiple = true;
+        var from_input = true;
         $('#selection_data').val(selection_text);
 
         for (single_sel of selections_arr) {
-            console.log("single_set: ", single_sel);
+            console.log("single_sel: ", single_sel);
+
             //loc_element[0] = sheet information, could be multiple sheets, one sheet, or none (default: active_sheet)
             //loc_element[1] = range of cells, unless previous doesn't exist.
             var loc_element = single_sel.split('!');
 
-            //sheet not specified, only range is given.
+            //if no sheet specified, select given range on active sheet
             if (loc_element.length == 1) {
-                console.log("use active sheet ", active_sheet_number)
-                select_range(loc_element[0], active_sheet_number);
+                select_range(loc_element[0], active_sheet_number, multiple, from_input);
+
+            //sheet(s) were specified i.e "sheet1:sheet3"
             } else {
                 locations = loc_element[0].split(':');
-                // one sheet
-                if (locations.length == 1) {
-                    console.log("use one sheet");
-                    //$j('div.sheet#spreadsheet_1')
-                    var sheetNum = locations[0].match(/\d+/)[0];
-                    console.log("sheet num: ", sheetNum);
-                    //select_range(loc_element[1], sheetNum );
-
-                //choose same range for multiple sheets, as in form #2.
-                } else {
-                    console.log("use multiple sheets")
-                    //additively choose given range for any of the specified locations
-
+                //iterate on sheets to select the typed range on each
+                for (var i=0;i<locations.length;i++) {
+                    var sheetNum = locations[i].match(/\d+/)[0];
+                    select_range(loc_element[1], sheetNum, multiple, from_input);
                 }
             }
-
-        }
-
+        } //done with a string of a single selection
     }
 
     //Select cells that are typed in when the 'Enter' key is pressed while in the input field
@@ -612,7 +605,9 @@ function jumpToAnnotation(id, sheet, range) {
         cells.position().top);
 }
 
-function select_range(range, sheetNumber) {
+/* from_text: indicates if coming from typed_input_selection, to keep the typed selection in the input field.
+*/
+function select_range(range, sheetNumber, multiple=false, from_text=false) {
     var coords = explodeCellRange(range);
     var startCol = coords[0],
         startRow = coords[1],
@@ -620,18 +615,27 @@ function select_range(range, sheetNumber) {
         endRow = coords[3];
 
     if(startRow && startCol && endRow && endCol)
-        select_cells(startCol, startRow, endCol, endRow, sheetNumber);
+        ordered_minMax_RC = select_cells(startCol, startRow, endCol, endRow, sheetNumber, multiple, from_text);
 
-    var relative_rows = relativeRows(startRow, endRow, sheetNumber);
-    var relativeMinRow = relative_rows[0];
-    var relativeMaxRow = relative_rows[1];
+    //scroll to selection only if the selection was made on the active sheet
+    if ($j("div.active_sheet")[0].id.split('_')[1] == sheetNumber) {
+        //Important to keep track of real min/max for the scrolling effect.
+        startRow = ordered_minMax_RC[0];
+        endRow   = ordered_minMax_RC[1];
+        startCol = ordered_minMax_RC[2];
+        endCol   = ordered_minMax_RC[3];
 
-    //Scroll to selected cells
-    var row = $j("table.active_sheet tr").slice((relativeMinRow-1),relativeMaxRow).first();
-    var cell = row.children("td.cell").slice(startCol-1,endCol).first();
+        var relative_rows = relativeRows(startRow, endRow, sheetNumber);
+        var relativeMinRow = relative_rows[0];
+        var relativeMaxRow = relative_rows[1];
 
-    $j('div.active_sheet').scrollTop(row.position().top + $j('div.active_sheet').scrollTop() - 500);
-    $j('div.active_sheet').scrollLeft(cell.position().left + $j('div.active_sheet').scrollLeft() - 500);
+        //Scroll to selected cells
+        var row = $j("table.active_sheet tr").slice((relativeMinRow - 1), relativeMaxRow).first();
+        var cell = row.children("td.cell").slice(startCol - 1, endCol).first();
+
+        $j('div.active_sheet').scrollTop(row.position().top + $j('div.active_sheet').scrollTop() - 500);
+        $j('div.active_sheet').scrollLeft(cell.position().left + $j('div.active_sheet').scrollLeft() - 500);
+    }
 }
 
 function deselect_cells() {
@@ -647,7 +651,7 @@ function deselect_cells() {
 
 
 //Select cells in a specified area
-function select_cells(startCol, startRow, endCol, endRow, sheetNumber, ctrl_key) {
+function select_cells(startCol, startRow, endCol, endRow, sheetNumber, ctrl_key, from_text=false) {
 
     var minRow = startRow;
     var minCol = startCol;
@@ -682,33 +686,37 @@ function select_cells(startCol, startRow, endCol, endRow, sheetNumber, ctrl_key)
         $j(".selected_heading").removeClass("selected_heading");
     }
 
-    //"Select" dragged cells
-    $j("table.active_sheet tr").slice(relativeMinRow-1,relativeMaxRow).each(function() {
+    //"Select" dragged/typed cells - instead of using "table.active_sheet tr", use:  $j('div.sheet#spreadsheet_1 table tr')
+//    $j("table.active_sheet tr").slice(relativeMinRow-1,relativeMaxRow).each(function() {
+    $j("div.sheet#spreadsheet_"+sheetNumber+" table tr").slice(relativeMinRow-1,relativeMaxRow).each(function() {
         $j(this).children("td.cell").slice(minCol-1,maxCol).addClass("selected_cell");
     });
 
-    //"Select" dragged cells' column headings
-    $j("div.active_sheet").parent().parent().find("div.col_headings div.col_heading").slice(minCol-1,maxCol).addClass("selected_heading");
+    //"Select" dragged/typed cells' column headings [old: $j("div.active_sheet")]
+    $j("div.sheet#spreadsheet_"+sheetNumber).parent().parent().find("div.col_headings div.col_heading").slice(minCol-1,maxCol).addClass("selected_heading");
 
-    //"Select" dragged cells' row headings
-    $j("div.active_sheet").parent().find("div.row_headings div.row_heading").slice(relativeMinRow-1,relativeMaxRow).addClass("selected_heading");
+    //"Select" dragged/typed cells' row headings
+    $j("div.sheet#spreadsheet_"+sheetNumber).parent().find("div.row_headings div.row_heading").slice(relativeMinRow-1,relativeMaxRow).addClass("selected_heading");
 
 
     //The following does not work when combined with (multiple) input text selections or multiple click and drag selections
     //or selection across sheets. fix when selections are done and move to post_selection_updates()
-    var selection = "";
-    selection += (num2alpha(minCol).toString() + minRow.toString());
+    if (!from_text) {
+        var selection = "";
+        selection += (num2alpha(minCol).toString() + minRow.toString());
 
-    if(maxRow != minRow || maxCol != minCol)
-        selection += (":" + num2alpha(maxCol).toString() + maxRow.toString());
+        if (maxRow != minRow || maxCol != minCol)
+            selection += (":" + num2alpha(maxCol).toString() + maxRow.toString());
 
-    $j('#selection_data').val(selection);
-
+        $j('#selection_data').val(selection);
+    }
     //Update cell coverage in annotation form
     $j('input.annotation_cell_coverage_class').attr("value",selection);
 
     //Show selection-dependent controls
     $j('.requires_selection').show();
+
+    return [minRow, maxRow, minCol, maxCol];
 }
 
 function post_selection_updates() {
@@ -763,7 +771,7 @@ function activateSheet(sheet, sheetTab) {
     //Set table active
     activeSheet.children("table.sheet").addClass('active_sheet');
 
-    deselect_cells();
+    //deselect_cells();
 
     //Record current sheet in annotation form
     $j('input#annotation_sheet_id').attr("value", sheetIndex -1);
