@@ -47,9 +47,9 @@
   roles:
     - role: geerlingguy.passenger
       become: yes
-
-#  tasks:
-#    - name: install passenger gem
-#      command: /bin/bash -lc "cd {{ seek_project_root }} && gem install passenger"
-#    - name: install passenger nginx module
-#      command: /bin/bash -lc "cd {{ seek_project_root }} && rvmsudo passenger-install-nginx-module"
+  tasks:
+    - name: Ensure passenger virtual host is disabled until the geerlingguy.passenger supports better configuration
+      become: yes
+      file:
+        dest: /etc/nginx/sites-enabled/passenger
+        state: absent
