@@ -68,8 +68,11 @@ vagrant --vmname=seek --cpus=2 --memory=4096 --nfs up
 </pre>
 
 With every git pull, it might be necessary to update the submodule also; git status should show if it is necessary
+also, since the roles might be installed from ansible-galaxy in new versions, the 'old' ones need to be removed
+ansible-galaxy does not have a lock feature with versions yet
 <pre>
 git submodule update
+rm -r -- vagrant/ansible/roles/*/
 </pre>
 
 ## Contacting Us
