@@ -42,6 +42,7 @@ The latest versions of these documents are also [included](doc).
 
 You can use the provided vagrant environment to develop in the project:
 <pre>
+git submodule update --init --recursive
 cd vagrant
 vagrant --extra-vars-file=../ansible_vars.yml --ansible-playbook=../ansible_site.yml --vmname=seek --cpus=2 --memory=4096 --nfs up
 vagrant ssh
@@ -64,6 +65,11 @@ To shutdown (after logout) and resume use:
 <pre>
 vagrant halt
 vagrant --vmname=seek --cpus=2 --memory=4096 --nfs up
+</pre>
+
+With every git pull, it might be necessary to update the submodule also; git status should show if it is necessary
+<pre>
+git submodule update
 </pre>
 
 ## Contacting Us
