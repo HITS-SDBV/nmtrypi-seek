@@ -21,8 +21,8 @@
       template:
         src:  /project/config/database.yml.tpl
         dest: /project/config/database.yml
-#    - name: rake db:setup
-#      command: /bin/bash -lc "cd {{ seek_project_root }} && rake db:setup"
+    - name: rake db:migrate
+      command: /bin/bash -lc "cd {{ seek_project_root }} && rake RAILS_ENV={{ rails_env }} db:migrate"
     - name: copy initd scripts for services
       become: yes
       template:
