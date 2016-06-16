@@ -230,8 +230,8 @@ $j(document).ready(function ($) {
     // 1. sheet1!A1:C10,sheet2!B3:J90, ...
     // 2. sheet1:sheet4!A1:C10, ....
     function select_typed_input(selection_text) {
-        var active_sheet = $("div.active_sheet");
-        var active_sheet_number = active_sheet[0].id.split('_')[1];
+        //var active_sheet = $("div.active_sheet");
+        //var active_sheet_number = active_sheet[0].id.split('_')[1];
         var selections_arr = selection_text.replace(/\s+/g,'').split(',');
         deselect_cells();
         var multiple = true;
@@ -247,7 +247,7 @@ $j(document).ready(function ($) {
 
             //if no sheet specified, select given range on active sheet
             if (loc_element.length == 1) {
-                select_range(loc_element[0], active_sheet_number, multiple, from_input);
+                select_range(loc_element[0], null, multiple, from_input);
 
             //sheet(s) were specified i.e "sheet1:sheet3"
             } else {
@@ -613,12 +613,15 @@ function select_range(range, sheetNumber, multiple=false, from_text=false) {
         startRow = coords[1],
         endCol = coords[2],
         endRow = coords[3];
+    var active_sheetNumber = $j("div.active_sheet")[0].id.split('_')[1];
+    if (!sheetNumber)
+        sheetNumber = active_sheetNumber;
 
     if(startRow && startCol && endRow && endCol)
         ordered_minMax_RC = select_cells(startCol, startRow, endCol, endRow, sheetNumber, multiple, from_text);
 
     //scroll to selection only if the selection was made on the active sheet
-    if ($j("div.active_sheet")[0].id.split('_')[1] == sheetNumber) {
+    if (active_sheetNumber == sheetNumber) {
         //Important to keep track of real min/max for the scrolling effect.
         startRow = ordered_minMax_RC[0];
         endRow   = ordered_minMax_RC[1];
@@ -652,6 +655,9 @@ function deselect_cells() {
 
 //Select cells in a specified area
 function select_cells(startCol, startRow, endCol, endRow, sheetNumber, ctrl_key, from_text=false) {
+
+    if (!sheetNumber)
+        sheetNumber = $j("div.active_sheet")[0].id.split('_')[1];
 
     var minRow = startRow;
     var minCol = startCol;
@@ -914,7 +920,10 @@ function deselect_heatmap_cells(col, totalRow, sheetNumber){
 function plotting_selected_cells() {
     var sel_data= new Array();
     var col_header_cells =  $j("table.active_sheet tr").first().children("td");
+    //var col_header_cells =  $j("div.sheet table tr").first().children("td");
+
     $j("table.active_sheet tr").each(function () {
+    // $j("div.sheet table tr").each(function () {
         var this_tr = $j(this);
         var row_header_cell = this_tr.children("td").filter(function () {
             return /^nmt[-_][a-zA-Z]+\d+/i.test($j(this).text()) == true
@@ -922,6 +931,10 @@ function plotting_selected_cells() {
 
         var row_label = row_header_cell.text();
         var heatmap_cells = $j(this).children("td.selected_cell");
+      /*  if (heatmap_cells.length > 0) {
+            console.log("length of selected heatmap cells for row : ", row_label, heatmap_cells.length);
+            console.log(heatmap_cells);
+        }*/
         for (var i = 0; i < heatmap_cells.size(); i++) {
             var col_index = heatmap_cells.eq(i).index();
             var cell_value = heatmap_cells.eq(i);
@@ -937,6 +950,7 @@ function plotting_selected_cells() {
         }
 
     });
+    console.log(sel_data)
     return sel_data;
 }
 
