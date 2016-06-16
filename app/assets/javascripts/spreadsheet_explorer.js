@@ -238,12 +238,13 @@ $j(document).ready(function ($) {
         var from_input = true;
         $('#selection_data').val(selection_text);
 
-        for (single_sel of selections_arr) {
-            console.log("single_sel: ", single_sel);
+        //for (single_sel of selections_arr) {
+        for (k=0; k<selections_arr.length; k++ ){
+            console.log("single_sel: ", selections_arr[k]);
 
             //loc_element[0] = sheet information, could be multiple sheets, one sheet, or none (default: active_sheet)
             //loc_element[1] = range of cells, unless previous doesn't exist.
-            var loc_element = single_sel.split('!');
+            var loc_element = selections_arr[k].split('!');
 
             //if no sheet specified, select given range on active sheet
             if (loc_element.length == 1) {
@@ -607,7 +608,7 @@ function jumpToAnnotation(id, sheet, range) {
 
 /* from_text: indicates if coming from typed_input_selection, to keep the typed selection in the input field.
 */
-function select_range(range, sheetNumber, multiple=false, from_text=false) {
+function select_range(range, sheetNumber, multiple, from_text) {
     var coords = explodeCellRange(range);
     var startCol = coords[0],
         startRow = coords[1],
@@ -654,7 +655,7 @@ function deselect_cells() {
 
 
 //Select cells in a specified area
-function select_cells(startCol, startRow, endCol, endRow, sheetNumber, ctrl_key, from_text=false) {
+function select_cells(startCol, startRow, endCol, endRow, sheetNumber, ctrl_key, from_text) {
 
     if (!sheetNumber)
         sheetNumber = $j("div.active_sheet")[0].id.split('_')[1];
@@ -707,7 +708,7 @@ function select_cells(startCol, startRow, endCol, endRow, sheetNumber, ctrl_key,
 
     //The following does not work when combined with (multiple) input text selections or multiple click and drag selections
     //or selection across sheets. fix when selections are done and move to post_selection_updates()
-    if (!from_text) {
+    if (from_text === undefined) {
         var selection = "";
         selection += (num2alpha(minCol).toString() + minRow.toString());
 
