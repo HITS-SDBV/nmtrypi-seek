@@ -18,11 +18,11 @@
     - name: bundle install
       command: /bin/bash -lc "cd {{ seek_project_root }} && bundle install"
     - name: copy database config
-      copy:
-        src:  /project/config/database.default.yml
+      template:
+        src:  /project/config/database.yml.tpl
         dest: /project/config/database.yml
-    - name: rake db:setup
-      command: /bin/bash -lc "cd {{ seek_project_root }} && rake db:setup"
+#    - name: rake db:setup
+#      command: /bin/bash -lc "cd {{ seek_project_root }} && rake db:setup"
     - name: copy initd scripts for services
       become: yes
       template:
