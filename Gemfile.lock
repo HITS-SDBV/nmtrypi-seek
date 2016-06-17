@@ -575,6 +575,7 @@ GEM
       nori (~> 1.1.0)
       wasabi (~> 2.5.0)
     sax-machine (1.0.2)
+    seedbank (0.3.0)
     sexp_processor (4.4.4)
     simple-spreadsheet-extractor (0.13.3)
       libxml-ruby (~> 2.6.0)
@@ -758,6 +759,7 @@ DEPENDENCIES
   rubyzip (~> 1.1.4)
   savon (= 1.1.0)
   search_biomodel (= 2.2.1)!
+  seedbank
   simple-spreadsheet-extractor (~> 0.13.3)
   site_announcements!
   sqlite3

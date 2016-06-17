@@ -6,7 +6,7 @@
   - name: bundle install
     command: /bin/bash -lc "rvm @`cat .ruby-gemset` --create do bundle install"
     args:
-      chdir: /project 
+      chdir: "{{ seek_project_root }}" 
 
 - hosts: [mysql]
   roles:
@@ -17,16 +17,19 @@
   tasks:
     - name: bundle install
       command: /bin/bash -lc "cd {{ seek_project_root }} && bundle install"
-    - name: copy database config
+    - name: generate config files from templates
       template:
-        src:  /project/config/database.yml.tpl
-        dest: /project/config/database.yml
+        src:  "{{ seek_project_root }}/{{ item }}.tpl"
+        dest: "{{ seek_project_root }}/{{ item }}"
+      with_items:
+        - "config/database.yml"
+        - "config/sunspot.yml"
     - name: rake db:migrate
       command: /bin/bash -lc "cd {{ seek_project_root }} && rake RAILS_ENV={{ rails_env }} db:migrate"
     - name: copy initd scripts for services
       become: yes
       template:
-        src:  "/project/script/initd/{{ item }}.tpl"
+        src:  "{{ seek_project_root }}/script/initd/{{ item }}.tpl"
         dest: "/etc/init.d/{{ item }}"
         mode: 0751
       with_items: "{{ seek_initd }}"

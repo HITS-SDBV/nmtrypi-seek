@@ -93,6 +93,7 @@ gem 'rjb'
 gem 'rcdk', '0.3.0', :git => "https://github.com/aina1205/rcdk.git"
 gem "d3-rails"
 gem "d3-tip-rails"
+gem 'seedbank'
 group :assets do
   gem 'turbo-sprockets-rails3'
   gem 'yui-compressor'
