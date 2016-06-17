@@ -3,6 +3,10 @@
 
 - hosts: [all]
   tasks:
+  - name: install gem bundler
+    command: /bin/bash -lc "rvm @`cat .ruby-gemset` --create do gem install bundler"
+    args:
+      chdir: "{{ seek_project_root }}"
   - name: bundle install
     command: /bin/bash -lc "rvm @`cat .ruby-gemset` --create do bundle install"
     args:
@@ -25,7 +29,7 @@
         - "config/database.yml"
         - "config/sunspot.yml"
     - name: rake db:migrate
-      command: /bin/bash -lc "cd {{ seek_project_root }} && rake RAILS_ENV={{ rails_env }} db:migrate"
+      command: /bin/bash -lc "cd {{ seek_project_root }} && rake db:migrate RAILS_ENV={{ rails_env }}"
     - name: copy initd scripts for services
       become: yes
       template:

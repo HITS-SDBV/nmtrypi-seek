@@ -59,7 +59,11 @@ This will restart the provisioning process - and ansible will take care of finis
 vagrant ssh
 </pre>
 You are in the virtual machine and you can find this project mounted in /project
-You can start eclipse with `sw/eclipse/4.5/eclipse/eclipse`
+You can start eclipse with
+<pre>
+cd /project # this is important to set the proper ruby version and GEM_HOME
+~/sw/eclipse/4.5/eclipse/eclipse
+</pre>
 
 To shutdown (after logout) and resume use:
 <pre>
