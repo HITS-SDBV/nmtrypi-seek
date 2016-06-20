@@ -253,10 +253,11 @@ $j(document).ready(function ($) {
             //sheet(s) were specified i.e "sheet1:sheet3"
             } else {
                 locations = loc_element[0].split(':');
+                var sheetNum1 = locations[0].match(/\d+/)[0];
+                var sheetNum2 = locations.length > 1 ? locations[1].match(/\d+/)[0]: sheetNum1;
                 //iterate on sheets to select the typed range on each
-                for (var i=0;i<locations.length;i++) {
-                    var sheetNum = locations[i].match(/\d+/)[0];
-                    select_range(loc_element[1], sheetNum, multiple, from_input);
+                for (var i=sheetNum1;i<=sheetNum2;i++) {
+                    select_range(loc_element[1], i, multiple, from_input);
                 }
             }
         } //done with a string of a single selection
