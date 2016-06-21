@@ -11,6 +11,10 @@
     command: /bin/bash -lc "rvm @`cat .ruby-gemset` --create do bundle install"
     args:
       chdir: "{{ seek_project_root }}" 
+  - name: gem install ruby-debug-ide
+    command: /bin/bash -lc "rvm @`cat .ruby-gemset` --create do gem install ruby-debug-ide"
+    args:
+      chdir: "{{ seek_project_root }}"
 
 - hosts: [mysql]
   roles:
