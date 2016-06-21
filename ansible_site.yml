@@ -49,8 +49,8 @@
         dest:        "{{ ansible_env.HOME }}/.profile"
         backup:      yes
         state:       present
-        line:        'RAILS_ENV={{ rails_env }}"'
-        regexp:      '^RAILS_ENV=.*$'
+        line:        'export RAILS_ENV={{ rails_env }}"'
+        regexp:      '^export RAILS_ENV=.*$'
 
 - hosts: [nginx]
   roles:
