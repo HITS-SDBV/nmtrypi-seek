@@ -8,6 +8,7 @@ eclipse_package: php
 eclipse_plugins_install:
   - egit
   - aptana_studio
+  - redmine_mylyn
 
 package_list_eclipse:
   - name: firefox

@@ -44,6 +44,13 @@
         enabled: yes
         state: started
       with_items: "{{ seek_initd }}"
+    - name: add RAILS_ENV in shell profile
+      lineinfile:
+        dest:        "{{ ansible_env.HOME }}/.profile"
+        backup:      yes
+        state:       present
+        line:        'RAILS_ENV={{ rails_env }}"'
+        regexp:      '^RAILS_ENV=.*$'
 
 - hosts: [nginx]
   roles:
