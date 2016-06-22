@@ -2,6 +2,17 @@
 - include: vagrant/ansible/site_ruby.yml
 
 - hosts: [all]
+  roles:
+  - name: GROG.package
+    package_list:
+    - name: libcurl4-gnutls-dev # for curb gem
+    - name: libxml++2.6-dev # for libxml-ruby gem
+    - name: libmysqlclient-dev # for mysql gem
+    - name: libpq-dev # for pq gem
+    - name: libmagick++-dev # for rmagick gem
+    - name: libreoffice # for soffice service
+    - name: poppler-utils # for pdf2text
+
   tasks:
   - name: install gem bundler
     command: /bin/bash -lc "rvm @`cat .ruby-gemset` --create do gem install bundler"
