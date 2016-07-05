@@ -1,9 +1,16 @@
 ---
-- include: vagrant/ansible/site_ruby.yml
+- include: vagrant/ansible/site.yml
+
+- hosts: [rvm]
+  roles:
+  - role: rvm_io.rvm1-ruby
+    become: yes
+    when: rvm1_rubies|length > 0
 
 - hosts: [all]
   roles:
   - name: GROG.package
+    become: yes
     package_list:
     - name: libcurl4-gnutls-dev # for curb gem
     - name: libxml++2.6-dev # for libxml-ruby gem
@@ -67,18 +74,7 @@
         line:        'export RAILS_ENV={{ rails_env }}'
         regexp:      '^export RAILS_ENV=.*$'
 
-- hosts: [nginx]
-  roles:
-    - role: geerlingguy.nginx
-      become: yes
-
 - hosts: [passenger]
   roles:
-    - role: geerlingguy.passenger
+    - role: ansible-role-passenger
       become: yes
-  tasks:
-    - name: Ensure passenger virtual host is disabled until the geerlingguy.passenger supports better configuration
-      become: yes
-      file:
-        dest: /etc/nginx/sites-enabled/passenger
-        state: absent

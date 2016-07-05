@@ -46,10 +46,6 @@ rails_env: vagrant
 # nginx setup
 nginx_remove_default_vhost: true
 passenger_ruby: /home/vagrant/sw/rvm/gems/{{ rvm1_rubies[0] }}@seek-0-22/wrappers/ruby
-passenger_server_name: seek.local
-passenger_app_root: "{{ seek_project_root }}/public"
-passenger_app_env: "{{ rails_env }}"
-
 
 nginx_vhosts:
   - listen: "80 default_server"
@@ -57,7 +53,6 @@ nginx_vhosts:
     root: "{{ seek_project_root }}/public"
     error_log:   /var/log/nginx/seek_error.log
     access_log:  /var/log/nginx/seek_access.log
-    extra_parameters: |
-      passenger_user vagrant;
-      passenger_enabled on;
-      passenger_app_env {{ rails_env }};
+    passenger_user: vagrant
+    passenger_enabled: "on"
+    passenger_app_env: "{{ rails_env }}"
