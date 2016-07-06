@@ -57,7 +57,7 @@ function initialize(data, textLength){
        .render()
        .brushMode("Single range")  // enable brushing
    //    .shadows()
-      // .reorderable() // I removed this for now as it can mess up with tooltips
+       .reorderable(); 
        //.interactive();
 
 } //end initialize
@@ -272,7 +272,10 @@ function addTooltip(clicked, clickedCenPts){
     // I'm pretty sure there is a better way to write this is Javascript
     for (var i=0; i<clicked.length; i++){
         for (var j=0; j<clickedCenPts[i].length; j++){
-            var text = d3.values(clicked[i])[j];
+            var reordered_col = graph.get_reorderDim_i(j);
+            //if nothing was reordered, reordered_col = j
+            //clicked[i] is a row (hash type object). d3.values(row)[j] gets the value of col j
+            var text = d3.values(clicked[i])[reordered_col];
             var x = clickedCenPts[i][j][0] - margins.left;
             var y = clickedCenPts[i][j][1] - margins.top;
             clickedDataSet.push([x, y,text]);

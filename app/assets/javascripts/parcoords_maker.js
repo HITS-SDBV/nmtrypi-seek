@@ -55,7 +55,7 @@ d3.parcoords = function(config) {
     bundleDimension: null,
     smoothness: 0.25,
     showControlPoints: false,
-    reorder_map: {},
+    reorder_dim: [],
     minValues: {},
     hideAxis : []
   };
@@ -596,6 +596,12 @@ function flipAxisAndUpdatePCP(dimension, i) {
   if (flags.shadows) paths(__.data, ctx.shadows);
 }
 
+function update_dim_order(i,j) {
+     var tmp = __.reorder_dim[i];
+     __.reorder_dim[i] = __.reorder_dim[j];
+     __.reorder_dim[j] = tmp;
+}
+
 function wrap(text) {
   var dim = d3.selectAll("g.dimension");
   var x0 = dim[0][0].getAttribute("transform").match(/\(.*\)/g)[0];
@@ -720,8 +726,13 @@ function rotateLabels() {
 
 
 
-  flags.axes= true;
-  return this;
+    flags.axes= true;
+    __.reorder_dim = d3.range(__.dimensions.length);
+        return this;
+};
+
+pc.get_reorderDim_i = function (i) {
+    return __.reorder_dim[i];
 };
 
 pc.removeAxes = function() {
@@ -806,8 +817,9 @@ pc.reorderable = function() {
   g.style("cursor", "move")
     .call(d3.behavior.drag()
       .on("dragstart", function(d) {
-        dragging[d] = this.__origin__ = xscale(d);
-        dimsAtDragstart = __.dimensions.slice();
+          dragging[d] = this.__origin__ = xscale(d);
+          dimsAtDragstart = __.dimensions.slice();
+          //orig_i = dimsAtDragstart.indexOf(d);
       })
       .on("drag", function(d) {
         dragging[d] = Math.min(w(), Math.max(0, this.__origin__ += d3.event.dx));
@@ -819,10 +831,11 @@ pc.reorderable = function() {
       .on("dragend", function(d, i) {
         // Let's see if the order has changed and send out an event if so.
         var j = __.dimensions.indexOf(d),
-            parent = this.parentElement;
+            parent = this.parentElement,
+            orig_i = dimsAtDragstart.indexOf(d);
 
         if (i !== j) {
-          events.axesreorder.call(pc, __.dimensions);
+            events.axesreorder.call(pc, __.dimensions);
           // We now also want to reorder the actual dom elements that represent
           // the axes. That is, the g.dimension elements. If we don't do this,
           // we get a weird and confusing transition when updateAxes is called.
@@ -831,11 +844,20 @@ pc.reorderable = function() {
           // without reordering the dom elements, the nth dom elements no longer
           // necessarily represents the nth axis.
           //
-          // i is the original index of the dom element
+          // i is the original index of the dom element? Update: does not work when switching dim back and forth
+          // orig_i is the original index from drag start.
           // j is the new index of the dom element
 
+            if (orig_i <= j) {
+                for (var k=orig_i; k<j; k++) {
+                    update_dim_order(k, k+1);
+                }
+            } else {
+                for (var k=orig_i; k>j; k--) {
+                    update_dim_order(k-1, k);
+                }
+            }
           parent.insertBefore(this, parent.children[j + 1])
-          console.log("order changed: ",d, i, j)
 
         }
 
