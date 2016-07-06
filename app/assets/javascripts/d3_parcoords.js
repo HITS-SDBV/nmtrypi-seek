@@ -57,7 +57,7 @@ function initialize(data, textLength){
        .render()
        .brushMode("Single range")  // enable brushing
    //    .shadows()
-       .reorderable(); 
+       .reorderable();
        //.interactive();
 
 } //end initialize
@@ -74,15 +74,14 @@ function draw_parallel_coord(data) {
 
 
  // add instruction text
-     var instructions = "-Drag along axis to create filter/ Click axis (outside filter) to clear / Click a label to color data based on axis values"+
-         " / Double-click label to flip axis / Roll mouse wheel over label to rotate / Hover on each line to highlight. Filtering modes apply for"+
-         " each axis, where multiple ranges allows choosing several ranges on the same axis.  The lines are filtered to  match"+
-         " ALL selected ranges (one range match per axis) or ANY of the selected ranges (at least one match on all axes altogether).";
+     var instructions = "- Drag along axis to create filter, or click axis outside the filter to clear" + "</br>" +  "- Text labels:  click a label to color the data based on axis values"+
+         " / double-click to invert the axis / drag label to move reorder the axis / roll mouse wheel over the label to rotate it" + "</br> " + "- Hover on each line to highlight" + "</br>" +
+         "- Match conditions: the lines are filtered to  match ALL selected ranges (one range match per axis) or ANY of the selected ranges (at least one match on all axes altogether)";
      d3.select(".pcButtons")
          .style("margin-top", (graph.height()+H_OFFSET).toString()+"px")
          .append("p")
          .attr("id", "instructions").append("text")
-         .text(instructions)
+         .html(instructions)
          .attr("text-anchor", "middle")
          .attr("text-decoration", "overline")
          .attr("transform", "translate(" + graph.width()/2 + "," + (graph.height()) + ")");;

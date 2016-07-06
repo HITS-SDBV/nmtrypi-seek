@@ -689,6 +689,7 @@ function rotateLabels() {
           //"transform": "translate("+__.x_translate+","+__.y_translate +") rotate(" + __.dimensionTitleRotation + ")",
           "class": "label"
       })
+      .style("cursor", "all-scroll")
       .call(wrap)
       // .each(function(d){
       //     d3plus.textwrap()
@@ -700,11 +701,12 @@ function rotateLabels() {
       //         .draw()
       // })
       .attr("transform", "translate("+__.x_translate+","+__.y_translate +") rotate(" + __.dimensionTitleRotation + ")")
+
       .on("dblclick", flipAxisAndUpdatePCP)
       .on("wheel", rotateLabels);
 
       //d3.selectAll("text.label").call(wrap, 10);
-
+    g.selectAll("text").append("title").text("Scroll to rotate / drag to reorder / click to color by values / double click to invert")
 
     //create scale for missing values axis
     var firstPC_Xoffset = xscale(__.dimensions[0]);
