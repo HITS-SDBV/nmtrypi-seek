@@ -55,7 +55,7 @@ function initialize(data, textLength){
        //.dimensionTitleRotation(270)
        .rate(5)
        .render()
-       .brushMode("Single range")  // enable brushing
+       .brushMode("Multiple ranges")  // enable brushing
    //    .shadows()
        .reorderable();
        //.interactive();
@@ -74,7 +74,7 @@ function draw_parallel_coord(data) {
 
 
  // add instruction text
-     var instructions = "- Drag along axis to create filter, or click axis outside the filter to clear" + "</br>" +  "- Text labels:  click a label to color the data based on axis values"+
+     var instructions = "- Drag along axis to create filter(s), or click axis outside the filters to clear" + "</br>" +  "- Text labels:  click a label to color the data based on axis values"+
          " / double-click to invert the axis / drag label to move reorder the axis / roll mouse wheel over the label to rotate it" + "</br> " + "- Hover on each line to highlight" + "</br>" +
          "- Match conditions: the lines are filtered to  match ALL selected ranges (one range match per axis) or ANY of the selected ranges (at least one match on all axes altogether)";
      d3.select(".pcButtons")
@@ -108,7 +108,7 @@ function draw_parallel_coord(data) {
             });
 
   /* the  following sets up different brush modes */
-  var sltBrushMode = d3.select('#sltBrushMode');
+ /* var sltBrushMode = d3.select('#sltBrushMode');
   sltBrushMode.selectAll('option')
           .data(graph.brushModes())
           .enter()
@@ -136,7 +136,7 @@ function draw_parallel_coord(data) {
       }
   });
 
-  sltBrushMode.property('value', 'Single range');
+  sltBrushMode.property('value', 'Single range');*/
 
   d3.select('#btnReset').on('click', function() {graph.brushReset();})
   d3.select('#sltPredicate').on('change', function() {
