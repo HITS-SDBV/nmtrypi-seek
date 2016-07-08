@@ -836,8 +836,8 @@ pc.reorderable = function() {
         var j = __.dimensions.indexOf(d),
             parent = this.parentElement,
             orig_i = dimsAtDragstart.indexOf(d);
-
-        if (i !== j) {
+        //console.log("i, orig_i, j: ",i, orig_i, j) //for debugging
+        if (orig_i !== j) {
             events.axesreorder.call(pc, __.dimensions);
           // We now also want to reorder the actual dom elements that represent
           // the axes. That is, the g.dimension elements. If we don't do this,
@@ -860,6 +860,7 @@ pc.reorderable = function() {
                     update_dim_order(k-1, k);
                 }
             }
+            //console.log("reorder_dim: ", __.reorder_dim) //for debugging
           parent.insertBefore(this, parent.children[j + 1])
 
         }
