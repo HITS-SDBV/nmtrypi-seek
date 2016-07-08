@@ -25,11 +25,9 @@ function initialize(data, textLength){
         }
       }
     }
-
      //assign "" to empty cells, otherwise tooltip labels are messed up for lines with missing values
      for(var i=0; i<data_length; i++) {
        for (var key in col_names) {
-//           console.log(key, i, parcoord_data[i][key])
          if (parcoord_data[i][key] === undefined || ( parcoord_data[i][key] == "NaN") ) {
             parcoord_data[i][key] = "";
          }
@@ -41,15 +39,20 @@ function initialize(data, textLength){
     //['#fc8d59','#ffffbf','#91cf60']; //(red-yellow-green)
     color_set = d3.scale.linear()
                .range(color_range_rg);
-    
+
     pcHeight = data_length < MAX_ROWS ? DEFAULT_HEIGHT : (data_length / MAX_ROWS) * DEFAULT_HEIGHT;
+    //can only get style of visible elements, not the new popup.
+    pcWidth =   d3.select("div.spreadsheet_container").style("width").replace("px","")
+    d3.select("div.spreadsheet_popup").style("width", pcWidth+"px")
+    d3.select("div#parcoords_plot").style("width", pcWidth+"px")
+    
     // set parallel coordinates
-    graph = d3.parcoords()('#parcoords_plot')
+    //chaining .width(value) to the d3 commands does not work. Might only be events (like brushMode) which can be chained
+    config = {width: pcWidth, height: pcHeight, alpha: 0.6}
+    graph = d3.parcoords(config)('#parcoords_plot')
        .data(parcoord_data)
        .margin({ top: 130, left: 8 * textLength, bottom: 40, right: 0 })
     //   .margin({ top: 100, left: 0, bottom: 40, right: 0 })
-       .height(pcHeight)
-       .alpha(0.6)
        //.mode("queue")
        //.composite("darker") //darken
        //.dimensionTitleRotation(270)

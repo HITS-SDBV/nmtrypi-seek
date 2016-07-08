@@ -43,7 +43,7 @@ d3.parcoords = function(config) {
     x_translate: 0, //-40??
     y_translate: -60,
     width: "1400",
-    height: "520",
+    height: 520,
     missingAxisOffset: "30",
     wrapFont: '12px sans-serif', //default font for label width calculation
     deltaPx: 10,    //substract from allowed pixel width when computing label wrap length
@@ -59,6 +59,7 @@ d3.parcoords = function(config) {
     minValues: {},
     hideAxis : []
   };
+
   extend(__, config);
 
   var pc = function(selection) {
