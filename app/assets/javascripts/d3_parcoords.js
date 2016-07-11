@@ -25,11 +25,9 @@ function initialize(data, textLength){
         }
       }
     }
-
      //assign "" to empty cells, otherwise tooltip labels are messed up for lines with missing values
      for(var i=0; i<data_length; i++) {
        for (var key in col_names) {
-//           console.log(key, i, parcoord_data[i][key])
          if (parcoord_data[i][key] === undefined || ( parcoord_data[i][key] == "NaN") ) {
             parcoord_data[i][key] = "";
          }
@@ -41,23 +39,28 @@ function initialize(data, textLength){
     //['#fc8d59','#ffffbf','#91cf60']; //(red-yellow-green)
     color_set = d3.scale.linear()
                .range(color_range_rg);
-    
+
     pcHeight = data_length < MAX_ROWS ? DEFAULT_HEIGHT : (data_length / MAX_ROWS) * DEFAULT_HEIGHT;
+    //can only get style of visible elements, not the new popup.
+    pcWidth =   d3.select("div.spreadsheet_container").style("width").replace("px","")
+    d3.select("div.spreadsheet_popup").style("width", pcWidth+"px")
+    d3.select("div#parcoords_plot").style("width", pcWidth+"px")
+
     // set parallel coordinates
-    graph = d3.parcoords()('#parcoords_plot')
+    //chaining .width(value) to the d3 commands does not work. Might only be events (like brushMode) which can be chained
+    config = {width: pcWidth, height: pcHeight, alpha: 0.6}
+    graph = d3.parcoords(config)('#parcoords_plot')
        .data(parcoord_data)
        .margin({ top: 130, left: 8 * textLength, bottom: 40, right: 0 })
     //   .margin({ top: 100, left: 0, bottom: 40, right: 0 })
-       .height(pcHeight)
-       .alpha(0.6)
        //.mode("queue")
        //.composite("darker") //darken
        //.dimensionTitleRotation(270)
        .rate(5)
        .render()
-       .brushMode("Single range")  // enable brushing
+       .brushMode("Multiple ranges")  // enable brushing
    //    .shadows()
-      // .reorderable() // I removed this for now as it can mess up with tooltips
+       .reorderable();
        //.interactive();
 
 } //end initialize
@@ -74,15 +77,14 @@ function draw_parallel_coord(data) {
 
 
  // add instruction text
-     var instructions = "-Drag along axis to create filter/ Click axis (outside filter) to clear / Click a label to color data based on axis values"+
-         " / Double-click label to flip axis / Roll mouse wheel over label to rotate / Hover on each line to highlight. Filtering modes apply for"+
-         " each axis, where multiple ranges allows choosing several ranges on the same axis.  The lines are filtered to  match"+
-         " ALL selected ranges (one range match per axis) or ANY of the selected ranges (at least one match on all axes altogether).";
+     var instructions = "- Drag along axis to create filter(s), or click axis outside the filters to clear" + "</br>" +  "- Text labels:  click a label to color the data based on axis values"+
+         " / double-click to invert the axis / drag label to move reorder the axis / roll mouse wheel over the label to rotate it" + "</br> " + "- Hover on each line to highlight" + "</br>" +
+         "- Match conditions: the lines are filtered to  match ALL selected ranges (one range match per axis) or ANY of the selected ranges (at least one match on all axes altogether)";
      d3.select(".pcButtons")
          .style("margin-top", (graph.height()+H_OFFSET).toString()+"px")
          .append("p")
          .attr("id", "instructions").append("text")
-         .text(instructions)
+         .html(instructions)
          .attr("text-anchor", "middle")
          .attr("text-decoration", "overline")
          .attr("transform", "translate(" + graph.width()/2 + "," + (graph.height()) + ")");;
@@ -109,7 +111,7 @@ function draw_parallel_coord(data) {
             });
 
   /* the  following sets up different brush modes */
-  var sltBrushMode = d3.select('#sltBrushMode');
+ /* var sltBrushMode = d3.select('#sltBrushMode');
   sltBrushMode.selectAll('option')
           .data(graph.brushModes())
           .enter()
@@ -137,8 +139,9 @@ function draw_parallel_coord(data) {
       }
   });
 
-  sltBrushMode.property('value', 'Single range');
-
+  sltBrushMode.property('value', 'Single range');*/
+  d3.select("#keepData").on("click", keep_data);
+  d3.select("#excludeData").on("click", exclude_data);
   d3.select('#btnReset').on('click', function() {graph.brushReset();})
   d3.select('#sltPredicate').on('change', function() {
       graph.brushPredicate(this.value);
@@ -146,7 +149,25 @@ function draw_parallel_coord(data) {
 
 } //end of draw_parallel_coord function
 
+// Inspired by Nutrient Explorer: http://bl.ocks.org/syntagmatic/raw/3150059/
+function keep_data() {
+    new_data = getActiveData();
+    console.log(new_data.length);
+    if (new_data.length == 0) {
+        alert("Cannot remove all data.\n\nTry expanding filters to get your data back. Then click 'Keep Data' when you've selected data you want to look closer at.");
+        return false;
+    }
+    graph.rescale_for_selection(new_data);
+};
 
+function exclude_data() {
+    new_data = _.difference(graph.data(), getActiveData());
+    if (new_data.length == 0) {
+        alert("Cannot remove all data.\n\nTry removing some filters to get your data back. Then click 'Exclude Data' when you've selected data you want to remove.");
+        return false;
+    }
+    graph.rescale_for_selection(new_data);
+};
 //   //from here: tooltip code + highlighting
 // update color and font weight of chart based on axis selection
 // modified from here: http://bl.ocks.org/mostaphaRoudsari/b4e090bb50146d88aec4
@@ -272,7 +293,10 @@ function addTooltip(clicked, clickedCenPts){
     // I'm pretty sure there is a better way to write this is Javascript
     for (var i=0; i<clicked.length; i++){
         for (var j=0; j<clickedCenPts[i].length; j++){
-            var text = d3.values(clicked[i])[j];
+            var reordered_col = graph.get_reorderDim_i(j);
+            //if nothing was reordered, reordered_col = j
+            //clicked[i] is a row (hash type object). d3.values(row)[j] gets the value of col j
+            var text = d3.values(clicked[i])[reordered_col];
             var x = clickedCenPts[i][j][0] - margins.left;
             var y = clickedCenPts[i][j][1] - margins.top;
             clickedDataSet.push([x, y,text]);

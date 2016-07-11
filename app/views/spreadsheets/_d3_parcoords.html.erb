@@ -17,30 +17,30 @@
 
 </style>
 <!--<div id="wrapper" class="parcoords" ></div>-->
-<div id="parcoords_container" class="spreadsheet_popup" style="width:1400px ;overflow: scroll;display: none">
+<div id="parcoords_container" class="spreadsheet_popup" style="overflow: scroll;display: none">
   <div class="spreadsheet_box_title">
     <div style="float: left">Parallel Coordinates Plot</div>
     <div style="float: right;"><a href="#" onclick="cleanup_parcoord_plot(); return false;">Close</a></div>
     <br style="clear:both"/>
   </div>
   <div id="parcoords_plot" class="parcoords"></div>
-  <div id="png_container" class="parcoords spreadsheet_popup" style="width:1250px ;max-height:600px;overflow: scroll;display: none"></div>
+  <div id="png_container" class="parcoords spreadsheet_popup" style="max-height:600px;overflow: scroll;display: none"></div>
 
   <div>
     <!--<button class="zoomin" type="button">+</button>-->
     <!--<button class="zoomout" type="button">&#45;&#45;</button>-->
     <div class = "pcButtons">
-      <label for="sltBrushMode">Filtering Modes per Column: </label>
+     <!-- <label for="sltBrushMode">Filtering Modes per Column: </label>
       <select id="sltBrushMode">
-      </select>
+      </select>-->
       <label id="lblPredicate" for="sltPredicate">Match Conditions:</label>
       <select id="sltPredicate">
           <option>ALL</option>
           <option>ANY</option>
       </select>
       <button id="btnReset">Reset Filters</button>
-  <!--    <button class="export_svg">Save as SVG</button>
-      <button class="export_pdf">Save as PDF</button>-->
+      <button id="keepData">Keep Only Selection</button>
+      <button id="excludeData">Exclude Selection</button>
       <button id="export" class="export">Export PNG</button>
   <!--    <button id="pcHelp" onclick="show_instructions(); return false;">Help</button>-->
     </div>
