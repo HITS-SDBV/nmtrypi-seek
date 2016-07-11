@@ -45,7 +45,7 @@ function initialize(data, textLength){
     pcWidth =   d3.select("div.spreadsheet_container").style("width").replace("px","")
     d3.select("div.spreadsheet_popup").style("width", pcWidth+"px")
     d3.select("div#parcoords_plot").style("width", pcWidth+"px")
-    
+
     // set parallel coordinates
     //chaining .width(value) to the d3 commands does not work. Might only be events (like brushMode) which can be chained
     config = {width: pcWidth, height: pcHeight, alpha: 0.6}
@@ -140,7 +140,8 @@ function draw_parallel_coord(data) {
   });
 
   sltBrushMode.property('value', 'Single range');*/
-
+  d3.select("#keepData").on("click", keep_data);
+  d3.select("#excludeData").on("click", exclude_data);
   d3.select('#btnReset').on('click', function() {graph.brushReset();})
   d3.select('#sltPredicate').on('change', function() {
       graph.brushPredicate(this.value);
@@ -148,7 +149,25 @@ function draw_parallel_coord(data) {
 
 } //end of draw_parallel_coord function
 
+// Inspired by Nutrient Explorer: http://bl.ocks.org/syntagmatic/raw/3150059/
+function keep_data() {
+    new_data = getActiveData();
+    console.log(new_data.length);
+    if (new_data.length == 0) {
+        alert("Cannot remove all data.\n\nTry expanding filters to get your data back. Then click 'Keep Data' when you've selected data you want to look closer at.");
+        return false;
+    }
+    graph.rescale_for_selection(new_data);
+};
 
+function exclude_data() {
+    new_data = _.difference(graph.data(), getActiveData());
+    if (new_data.length == 0) {
+        alert("Cannot remove all data.\n\nTry removing some filters to get your data back. Then click 'Exclude Data' when you've selected data you want to remove.");
+        return false;
+    }
+    graph.rescale_for_selection(new_data);
+};
 //   //from here: tooltip code + highlighting
 // update color and font weight of chart based on axis selection
 // modified from here: http://bl.ocks.org/mostaphaRoudsari/b4e090bb50146d88aec4

@@ -189,6 +189,18 @@ function getset(obj,state,events)  {
   });
 };
 
+pc.rescale_for_selection = function(new_data) {
+    __.data = new_data;
+    pc.autoscale();
+    pc.render();
+    pc.updateAxesScale();
+    //uninstall and reinstall the brush to get updated axis limits in "extents"
+    if (pc.brushMode() !== "None") {
+        var mode = pc.brushMode();
+        pc.brushMode("None");
+        pc.brushMode(mode);
+    }
+}
 function extend(target, source) {
   for (key in source) {
     target[key] = source[key];
@@ -743,6 +755,15 @@ pc.removeAxes = function() {
   return this;
 };
 
+pc.updateAxesScale = function() {
+    pc.svg.selectAll(".axis:not(#haxis)")
+        .transition()
+        .duration(1100)
+        .each(function(d) { d3.select(this).call(axis.scale(yscale[d])); });
+}
+
+    /* This function is never used? the wrap call does not work, not clear why.
+    * */
 pc.updateAxes = function() {
   var g_data = pc.svg.selectAll(".dimension").data(__.dimensions);
 
@@ -755,22 +776,25 @@ pc.updateAxes = function() {
       .attr("class", "axis")
       .attr("transform", "translate(0,0)")
       .each(function(d) { d3.select(this).call(axis.scale(yscale[d])); })
-    .append("svg:text")
+      .append("svg:text")
+      .attr("transform", "translate("+__.x_translate+","+__.y_translate +") rotate(" + __.dimensionTitleRotation + ")")
+      .text(String)
       .attr({
         "text-anchor": "middle",
         "x": 0,
         "y": 0,
-        //"y": -70,
-        "transform": "translate("+__.x_translate+","+__.y_translate +")) rotate(" + __.dimensionTitleRotation + ")",
-
+        "dy": 0,
+//        "transform": "translate("+__.x_translate+","+__.y_translate +")) rotate(" + __.dimensionTitleRotation + ")",
         "class": "label"
       })
-      .text(String)
+      .call(wrap)
+      .style("cursor", "all-scroll")
+      .attr("transform", "translate("+__.x_translate+","+__.y_translate +") rotate(" + __.dimensionTitleRotation + ")")
       .on("dblclick", flipAxisAndUpdatePCP)
       .on("wheel", rotateLabels);
 
-  // Update
-  g_data.attr("opacity", 0);
+
+    // Update
   g_data.attr("opacity", 0);
   g_data.select(".axis")
     .transition()
@@ -783,19 +807,20 @@ pc.updateAxes = function() {
       .duration(1100)
       .text(String)
       .attr("transform", "translate("+__.x_translate+","+__.y_translate +") rotate(" + __.dimensionTitleRotation + ")");
-
   // Exit
   g_data.exit().remove();
 
-  g = pc.svg.selectAll(".dimension");
+    g = pc.svg.selectAll(".dimension");
   g.transition().duration(1100)
     .attr("transform", function(p) { return "translate(" + position(p) + ")"; })
     .style("opacity", 1);
 
-  pc.svg.selectAll(".axis")
+    // rescale all but the horizontal 'Missing Values' axis
+  pc.svg.selectAll(".axis:not(#haxis)")
     .transition()
       .duration(1100)
       .each(function(d) { d3.select(this).call(axis.scale(yscale[d])); });
+   //pc.svg.selectAll(".label").call(wrap);
 
   if (flags.shadows) paths(__.data, ctx.shadows);
   if (flags.brushable) pc.brushable();
