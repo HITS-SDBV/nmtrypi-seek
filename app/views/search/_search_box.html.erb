@@ -5,9 +5,9 @@
 <% force_search_type(search_type_options) %>
 
 <% if Seek::Config.solr_enabled -%>
-
-  <%= form_tag main_app.search_path do -%>
-    <div id="search_box">
+  <div id="search_box">
+    <%= form_tag main_app.search_path do -%>
+      <%= jsme_popup_link -%>
       <span id='search_label'><%= t('search_label')%></span>
       <%= text_field_tag :search_query, @search_query, :class=>"curved", :style=>"display:none;", :placeholder=>"Search here..." %>
       <%= select_tag :search_type, options_for_select(search_type_options,@search_type)  %>
@@ -20,7 +20,6 @@
         </span>
       <% end %>
       <%= submit_tag "Search" -%>
-    </div>
-  <% end  -%>
+    <% end -%>
+  </div>
 <% end %>
-

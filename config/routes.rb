@@ -93,6 +93,7 @@ SEEK::Application.routes.draw do
   resources :compounds do
     collection do
       post :search_in_sabiork
+      post :jsme_box
     end
   end
 

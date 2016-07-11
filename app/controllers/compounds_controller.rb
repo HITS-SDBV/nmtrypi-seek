@@ -157,6 +157,16 @@ class CompoundsController < ApplicationController
      end
   end
 
+  # used as ajax action for creating a redbox containing a JSME molecular editor
+  # @author woetzens
+  def jsme_box
+    respond_to do |format|
+      format.html { render :partial => "compounds/jsme_box",
+                           :locals => {}
+                  }
+    end
+  end
+
   private  
 
   def find_all_compounds

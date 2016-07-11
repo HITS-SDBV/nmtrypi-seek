@@ -650,6 +650,16 @@ module ApplicationHelper
     "<span class='visibility #{css_class}'>#{text}</span>".html_safe
   end
 
+  def jsme_popup_link
+    return link_to_remote_redbox("JSME molecular editor",
+      { :url => jsme_box_compounds_path,
+        :failure => "alert('Unable to initialize JSME molecular editor.'); RedBox.close();"
+      },
+      { :id => 'jsme_box'
+      }
+    )
+  end
+
   private  
   PAGE_TITLES={"home"=>"Home", "projects"=>I18n.t('project').pluralize,"institutions"=>"Institutions", "people"=>"People", "sessions"=>"Login","users"=>"Signup","search"=>"Search",
                "assays"=>I18n.t('assays.assay').pluralize.capitalize,"sops"=>I18n.t('sop').pluralize,"models"=>I18n.t('model').pluralize,"data_files"=>I18n.t('data_file').pluralize,

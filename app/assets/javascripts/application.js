@@ -32,3 +32,4 @@
 //= require tabber-minimized
 //= require detect_browser
 //= require easytabs
+//= require jsme/jsme.nocache
