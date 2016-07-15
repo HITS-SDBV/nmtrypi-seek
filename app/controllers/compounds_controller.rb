@@ -157,6 +157,36 @@ class CompoundsController < ApplicationController
      end
   end
 
+  # post function to search for compounds based on SMARTS/SMILES
+  # @author woetzens
+  def search
+    @search_query = params[:structure_search_query]
+    @search=@search_query # used for logging, and logs the origin search query - see ApplicationController#log_event
+    @search_query||=""
+    @search_type = params[:search_type].to_sym
+    
+    canonical_policy = params[:canonical_policy].to_sym
+    isotope_stereo_policy = params[:isotope_stereo_policy].to_sym
+    
+    @compounds_hash = []
+    
+    case @search_type
+    when :SMILES
+      smiles = Seek::Search::Smiles.matchCompoundSmiles( Seek::Data::CompoundsExtraction.get_compound_id_smiles_hash, @search_query, canonical_policy, isotope_stereo_policy)
+      @compounds_hash = Seek::Data::CompoundsExtraction.get_compounds_hash.keep_if { |key,value| smiles.has_key? key}
+    when :SMARTS
+      smiles = Seek::Search::Smiles.matchCompoundSmarts Seek::Data::CompoundsExtraction.get_compound_id_smiles_hash, @search_query
+      @compounds_hash = Seek::Data::CompoundsExtraction.get_compounds_hash.keep_if { |key,value| smiles.has_key? key}
+    else
+      @compounds_hash = []
+    end
+    
+    respond_to do |format|
+      format.html { render template: 'data_files/compounds_view' }
+      # format.xml { render template: 'data_files/compounds_view' }
+    end
+  end
+
   # used as ajax action for creating a redbox containing a JSME molecular editor
   # @author woetzens
   def jsme_box

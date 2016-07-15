@@ -1,0 +1,12 @@
+<% @search_type=:SMILES unless @search_type %>
+<div id="smiles_search_box">
+  <%# for some reason is the first rendered <form> tag removed from the content, so this serves as a pawn for whatever does this %>
+  <form></form>
+  <%= form_tag(search_compounds_path, :method => :post) do %>
+    <%= text_field_tag :structure_search_query, @search_query, :class=>"curved", :placeholder=>"Enter SMILES or SMART" %>
+    <%= select_tag :search_type, options_for_select([:SMARTS,:SMILES],@search_type) %>
+    <%= select_tag :canonical_policy, options_for_select(Seek::Search::Smiles::POLICY_CANONICAL.collect{ |policy,explain| [explain, policy]}, :canonical) %>
+    <%= select_tag :isotope_stereo_policy, options_for_select(Seek::Search::Smiles::POLICY_ISOTOPE_STEREOCHEMISTRY.collect{ |policy,explain| [explain, policy]}, :canonical) %>
+    <%= submit_tag "Search" %>
+  <% end %>
+</div>

@@ -651,8 +651,9 @@ module ApplicationHelper
   end
 
   def jsme_popup_link
-    return link_to_remote_redbox("JSME molecular editor",
+    return link_to_remote_redbox("Structure Search",
       { :url => jsme_box_compounds_path,
+        :method => :GET,
         :failure => "alert('Unable to initialize JSME molecular editor.'); RedBox.close();"
       },
       { :id => 'jsme_box'

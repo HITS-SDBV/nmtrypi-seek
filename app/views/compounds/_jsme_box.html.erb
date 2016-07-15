@@ -4,7 +4,8 @@
   </div>
 
   <div class="body">
-	<div id='jsme_container'></div>
+    <div id='jsme_container'></div>
+    <%= render :partial => 'compounds/search_box' %>
     <div align="right" style="margin-top: 1em">
       <input type=button value='Close' onclick="RedBox.close()">
     </div>
@@ -15,7 +16,7 @@
 function showSmiles(jsmeEvent) {
 	var jsme = jsmeEvent.src;
 	var smiles = jsme.smiles();
-	var search_query = jQuery('#search_query');
+	var search_query = jQuery('#structure_search_query');
 	search_query.val(jsme.smiles());
 }
 //this function will be called after the JavaScriptApplet code has been loaded.
