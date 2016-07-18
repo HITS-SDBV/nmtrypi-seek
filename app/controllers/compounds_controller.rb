@@ -160,27 +160,36 @@ class CompoundsController < ApplicationController
   # post function to search for compounds based on SMARTS/SMILES
   # @author woetzens
   def search
-    @search_query = params[:structure_search_query]
-    @search=@search_query # used for logging, and logs the origin search query - see ApplicationController#log_event
-    @search_query||=""
-    @search_type = params[:search_type].to_sym
-    
-    canonical_policy = params[:canonical_policy].to_sym
-    isotope_stereo_policy = params[:isotope_stereo_policy].to_sym
+    @structure_search_query = params[:structure_search_query]
+    # @search=@structure_search_query # used for logging, and logs the origin search query - see ApplicationController#log_event
+    @structure_search_query||=""
+    @search_type = params.keys.find{|key| Seek::Search::Smiles::TYPES.has_key? key.to_sym}.to_sym
     
     @compounds_hash = []
     
     case @search_type
     when :SMILES
-      smiles = Seek::Search::Smiles.matchCompoundSmiles( Seek::Data::CompoundsExtraction.get_compound_id_smiles_hash, @search_query, canonical_policy, isotope_stereo_policy)
+      canonical_policy = params[:canonical_policy].to_sym
+      isotope_stereo_policy = params[:isotope_stereo_policy].to_sym
+      smiles = Seek::Search::Smiles.matchCompoundSmiles( Seek::Data::CompoundsExtraction.get_compound_id_smiles_hash, @structure_search_query, canonical_policy, isotope_stereo_policy)
       @compounds_hash = Seek::Data::CompoundsExtraction.get_compounds_hash.keep_if { |key,value| smiles.has_key? key}
     when :SMARTS
-      smiles = Seek::Search::Smiles.matchCompoundSmarts Seek::Data::CompoundsExtraction.get_compound_id_smiles_hash, @search_query
+      smiles = Seek::Search::Smiles.matchCompoundSmarts Seek::Data::CompoundsExtraction.get_compound_id_smiles_hash, @structure_search_query
+      @compounds_hash = Seek::Data::CompoundsExtraction.get_compounds_hash.keep_if { |key,value| smiles.has_key? key}
+    when :SIMILARITY
+      tanimoto_coefficient = params[:tanimoto_coefficient].to_f
+      smiles, @coefficients = Seek::Search::Smiles.matchCompoundSimilarity Seek::Data::CompoundsExtraction.get_compound_id_smiles_hash, @structure_search_query, tanimoto_coefficient
       @compounds_hash = Seek::Data::CompoundsExtraction.get_compounds_hash.keep_if { |key,value| smiles.has_key? key}
     else
       @compounds_hash = []
     end
     
+    # if @compounds_hash.empty?
+      # flash.now[:notice]="No matches found for '<b>#{@search_query}</b>'.".html_safe
+    # else
+      # flash.now[:notice]="#{@results.size} #{@results.size==1 ? 'item' : 'items'} matched '<b>#{@search_query}</b>' within their title or content.".html_safe
+    # end
+
     respond_to do |format|
       format.html { render template: 'data_files/compounds_view' }
       # format.xml { render template: 'data_files/compounds_view' }

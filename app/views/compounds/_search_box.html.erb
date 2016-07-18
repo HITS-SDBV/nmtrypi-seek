@@ -1,12 +1,38 @@
 <% @search_type=:SMILES unless @search_type %>
-<div id="smiles_search_box">
-  <%# for some reason is the first rendered <form> tag removed from the content, so this serves as a pawn for whatever does this %>
+<div id="smiles_search_box" style="background-color: #456AAA">
+  <%# for some reason is the first rendered <form> tag removed from the content, so this serves as a pawn for whatever does this 
+  %>
   <form></form>
   <%= form_tag(search_compounds_path, :method => :post) do %>
-    <%= text_field_tag :structure_search_query, @search_query, :class=>"curved", :placeholder=>"Enter SMILES or SMART" %>
-    <%= select_tag :search_type, options_for_select([:SMARTS,:SMILES],@search_type) %>
-    <%= select_tag :canonical_policy, options_for_select(Seek::Search::Smiles::POLICY_CANONICAL.collect{ |policy,explain| [explain, policy]}, :canonical) %>
-    <%= select_tag :isotope_stereo_policy, options_for_select(Seek::Search::Smiles::POLICY_ISOTOPE_STEREOCHEMISTRY.collect{ |policy,explain| [explain, policy]}, :canonical) %>
-    <%= submit_tag "Search" %>
+    <%= text_field_tag :structure_search_query, @search_query, :class=>"curved", :placeholder=>"Enter SMILES or SMART", :size => 50 %>
+    <div class="sysmo_gadget">
+      <div class="header curved_top">
+        <%= Seek::Search::Smiles::TYPES[:SMILES] %>
+      </div>
+      <div class="contents curved_bottom">
+        <%= select_tag :canonical_policy, options_for_select(Seek::Search::Smiles::POLICY_CANONICAL.collect{ |policy,explain| [explain, policy]}, :canonical) %>
+        <%= select_tag :isotope_stereo_policy, options_for_select(Seek::Search::Smiles::POLICY_ISOTOPE_STEREOCHEMISTRY.collect{ |policy,explain| [explain, policy]}, :canonical) %>
+        <%= submit_tag "Search", :name => :SMILES %>
+      </div>
+    </div>
+
+    <div class="sysmo_gadget">
+      <div class="header curved_top">
+        <%= Seek::Search::Smiles::TYPES[:SMARTS] %>
+      </div>
+      <div class="contents curved_bottom">
+        <%= submit_tag "Search", :name => :SMARTS %>
+      </div>
+    </div>
+    <div class="sysmo_gadget">
+      <div class="header curved_top">
+        <%= Seek::Search::Smiles::TYPES[:SIMILARITY] %>
+      </div>
+      <div class="contents curved_bottom">
+        <%= label_tag :tanimoto_coefficient, "Tanimoto coefficient cutoff" %>
+        <%= number_field_tag :tanimoto_coefficient, 0.8, min: 0, max: 1, step: 0.05 %>
+        <%= submit_tag "Search", :name => :SIMILARITY %>
+      </div>
+    </div>
   <% end %>
 </div>
