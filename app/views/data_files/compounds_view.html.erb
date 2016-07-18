@@ -1,12 +1,25 @@
 <%= stylesheet_link_tag "lightbox", "ul_li_table" %>
 <%= javascript_include_tag 'zoom/lightbox' %>
 
-<% @compounds_hash.each do |compound_id, data_files| %>
-  <% data_files.keys.each do |df_id| %>
-    <%= render :partial => 'data_files/compound',
-               locals: { compound_id: compound_id,
-                         data_file_id: df_id,
-                         compound_attributes: data_files}
-    %>
+<table>
+  <thead>
+    <% if @search_type == :SIMILARITY %>
+      <th>Tanimoto Coefficient</th>
+    <% end %>
+    <th>ID</th>
+    <th>view structure</th>
+    <th>general compound attributes</th>
+    <th>data files and attributes</th>
+  </thead>
+  <tbody>
+  <% @compounds_hash.each do |compound_id, data_files| %>
+    <% data_files.keys.each do |df_id| %>
+      <%= render :partial => 'data_files/compound',
+                 locals: { compound_id: compound_id,
+                           data_file_id: df_id,
+                           compound_attributes: data_files}
+      %>
+    <% end %>
   <% end %>
-<% end %>
+  </tbody>
+</table>
