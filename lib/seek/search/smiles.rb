@@ -6,6 +6,8 @@ jrequire 'org.openscience.cdk.smiles.SmilesGenerator'
 jrequire 'org.openscience.cdk.smiles.smarts.SMARTSQueryTool'
 jrequire 'org.openscience.cdk.similarity.Tanimoto'
 jrequire 'org.openscience.cdk.fingerprint.Fingerprinter'
+jrequire 'org.openscience.cdk.tools.manipulator.AtomContainerManipulator'
+jrequire 'org.openscience.cdk.tools.CDKHydrogenAdder'
 
 module Seek
   module Search
@@ -55,7 +57,7 @@ module Seek
       def self.matchCompoundSmiles compound_smiles_hash, smiles_query, canonical_policy, isotope_stereo_policy
         # smiles parser to generate atom container from smiles string
         smiles_parser = Cdk::Smiles::SmilesParser.new(Cdk::DefaultChemObjectBuilder.getInstance())
-        
+
         # smiles generator to generate smiles from atom container
         smiles_generator = smilesGeneratorFromPolicies canonical_policy, isotope_stereo_policy
         
@@ -97,6 +99,7 @@ module Seek
         # create a fingerprinter
         finger_printer = Cdk::Fingerprint::Fingerprinter.new()
         smiles_query_molecule = smiles_parser.parseSmiles(smiles_query)
+        # query_molecule_complete = addHydrogens smiles_query_molecule
         query_molecule_fingerprint = finger_printer.getBitFingerprint(smiles_query_molecule)
         
         matching_compounds_hash = Hash.new()
@@ -104,6 +107,7 @@ module Seek
         
         compound_smiles_hash.each do |id,compound_smiles|
           compound_smiles_molecule = smiles_parser.parseSmiles(compound_smiles)
+          # compound_molecule_complete = addHydrogens compound_smiles_molecule
           compound_molecule_fingerprint = finger_printer.getBitFingerprint(compound_smiles_molecule)
 
           tanimoto_coeff = Cdk::Similarity::Tanimoto.calculate(query_molecule_fingerprint,compound_molecule_fingerprint)
@@ -136,6 +140,14 @@ module Seek
         end
 
         return smiles_generator
+      end
+      
+      # http://efficientbits.blogspot.de/2013/12/new-smiles-behaviour-parsing-cdk-154.html
+      def self.addHydrogens molecule
+        adder = Cdk::Tools::CDKHydrogenAdder.getInstance(Cdk::DefaultChemObjectBuilder.getInstance())
+        Cdk::Tools::Manipulator::AtomContainerManipulator.percieveAtomTypesAndConfigureAtoms(molecule);
+        adder.addImplicitHydrogens(molecule)
+        return molecule
       end
       
     end # class Smiles
