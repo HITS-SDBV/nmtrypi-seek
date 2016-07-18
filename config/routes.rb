@@ -598,7 +598,7 @@ SEEK::Application.routes.draw do
   resources :statistics, :only => [:index]
   ### MISC MATCHES ###
 
-  match '/search/' => 'search#index', :as => :search
+  match '/search/' => 'search#index', :as => :search, :via => :post
   match '/search/save' => 'search#save', :as => :save_search
   match '/search/delete' => 'search#delete', :as => :delete_search
   match '/search/items_for_result' => 'search#items_for_result', :via => :post
