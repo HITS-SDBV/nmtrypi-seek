@@ -4,6 +4,8 @@ jrequire 'org.openscience.cdk.DefaultChemObjectBuilder'
 jrequire 'org.openscience.cdk.smiles.SmilesParser'
 jrequire 'org.openscience.cdk.smiles.SmilesGenerator'
 jrequire 'org.openscience.cdk.smiles.smarts.SMARTSQueryTool'
+jrequire 'org.openscience.cdk.similarity.Tanimoto'
+jrequire 'org.openscience.cdk.fingerprint.Fingerprinter'
 
 module Seek
   module Search
@@ -11,6 +13,12 @@ module Seek
     # @date 07/15/2016
     class Smiles
       include Org::Openscience
+
+      TYPES = Hash.new{ |hash, key| raise( "Search Type #{ key } is unknown" )}.update(
+        :SMILES => "Search for Structure",
+        :SMARTS => "Search for Substructure",
+        :SIMILARITY => "Search for similar Structures"
+      )
 
       FLAVOURS = Hash.new{ |hash, key| raise( "SMILES Flavour #{ key } is unknown" )}.update(
         :generic  => "non-canonical SMILES string, different atom ordering produces different SMILES. No isotope or stereochemistry encoded.",
@@ -83,6 +91,29 @@ module Seek
         return matching_compounds_hash
       end
 
+      def self.matchCompoundSimilarity compound_smiles_hash, smiles_query, tanimoto_coefficient_cutoff
+        # smiles parser to generate atom container from smiles string
+        smiles_parser = Cdk::Smiles::SmilesParser.new(Cdk::DefaultChemObjectBuilder.getInstance())
+        # create a fingerprinter
+        finger_printer = Cdk::Fingerprint::Fingerprinter.new()
+        smiles_query_molecule = smiles_parser.parseSmiles(smiles_query)
+        query_molecule_fingerprint = finger_printer.getBitFingerprint(smiles_query_molecule)
+        
+        matching_compounds_hash = Hash.new()
+        coefficients = Hash.new()
+        
+        compound_smiles_hash.each do |id,compound_smiles|
+          compound_smiles_molecule = smiles_parser.parseSmiles(compound_smiles)
+          compound_molecule_fingerprint = finger_printer.getBitFingerprint(compound_smiles_molecule)
+
+          tanimoto_coeff = Cdk::Similarity::Tanimoto.calculate(query_molecule_fingerprint,compound_molecule_fingerprint)
+          if tanimoto_coeff > tanimoto_coefficient_cutoff
+            matching_compounds_hash.merge! id => compound_smiles
+            coefficients.merge! id => tanimoto_coeff
+          end
+        end
+        return matching_compounds_hash, coefficients
+      end
 
       private
 
