@@ -174,7 +174,7 @@ class CompoundsController < ApplicationController
       smiles = Seek::Search::Smiles.matchCompoundSmiles( Seek::Data::CompoundsExtraction.get_compound_id_smiles_hash, @structure_search_query, @canonical_policy, @isotope_stereo_policy)
       @compounds_hash = Seek::Data::CompoundsExtraction.get_compounds_hash.keep_if { |key,value| smiles.has_key? key}
     when :SMARTS
-      smiles = Seek::Search::Smiles.matchCompoundSmarts Seek::Data::CompoundsExtraction.get_compound_id_smiles_hash, @structure_search_query
+      smiles, @matched_atoms_lists = Seek::Search::Smiles.matchCompoundSmarts Seek::Data::CompoundsExtraction.get_compound_id_smiles_hash, @structure_search_query
       @compounds_hash = Seek::Data::CompoundsExtraction.get_compounds_hash.keep_if { |key,value| smiles.has_key? key}
     when :SIMILARITY
       @tanimoto_coefficient_cutoff = params[:tanimoto_coefficient].to_f

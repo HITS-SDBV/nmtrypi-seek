@@ -1,7 +1,5 @@
-<% width||= "240px"%>
-<% height||= "120px"%>
+<% width||= "240px" %>
+<% height||= "120px" %>
+<% classes||="jsme-box" %>
 
-<div code="JME.class" archive="JME.jar" width="<%= width %>" height="<%= height %>">
-  <param name="options" value="depict,useopenchemlib,noshowdraganddropsymbolindepictmode">
-  <param name="smiles" value="<%= smiles %>">
-</div>
+<div id="<%= id %>" class="<%= classes %>" data-smiles="<%= smiles %>" data-options="[nozoom,depict,useopenchemlib,noshowdraganddropsymbolindepictmode]"></div>

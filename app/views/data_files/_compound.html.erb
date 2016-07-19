@@ -1,15 +1,23 @@
 <tr>
-    <% if @search_type == :SIMILARITY %>
-      <td><%= @coefficients[compound_id].round(2) %></td>
+  <% if @search_type == :SIMILARITY %>
+    <td><%= @coefficients[compound_id].round(2) %></td>
+  <% elsif @search_type == :SMARTS %>
+    <td><%= @matched_atoms_lists[compound_id].size %></td>
+  <% end %>
+  <td>
+    <%= link_to compound_id, compound_attributes_view_path(:id => data_file_id, :compound_id => compound_id), {:target => "_blank"} %>
+  </td>
+  <td>
+    <% smiles = get_attribute_value(compound_attributes, "smiles")
+       smiles.each do |s| %>
+      <%= render :partial => "smiles/structure_in_jsme",
+                 :locals => { smiles: s, classes: "jsme-box", id: "jsme_#{compound_id}" } %>
     <% end %>
-    <td>
-      <%= link_to compound_id, compound_attributes_view_path(:id => data_file_id, :compound_id => compound_id), {:target => "_blank"} %>
-    </td>
-    <td>
-      <% smiles = get_attribute_value(compound_attributes, "smiles")
-        smiles.each do |s| %>
-          <%= render :partial => "smiles/structure_in_jsme",
-                     :locals => { smiles: s } %>
+    <% if @search_type == :SMARTS %>
+      Highlight match: 
+      <% @matched_atoms_lists[compound_id].each_with_index do |atom_list, index| %>
+        <button type="button" onclick="highlightAtoms(this);" data-atom-list="<%= atom_list.as_json %>"><%= index %></button>
       <% end %>
-    </td>
+    <% end %>
+  </td>
 </tr>

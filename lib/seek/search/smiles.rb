@@ -82,15 +82,17 @@ module Seek
         smarts_query_tool = Cdk::Smiles::Smarts::SMARTSQueryTool.new(smarts_query,Cdk::DefaultChemObjectBuilder.getInstance())
         
         matching_compounds_hash = Hash.new()
+        matched_atoms_lists = Hash.new()
         compound_smiles_hash.each do |id,compound_smiles|
           # TODO it might be necessary to remove stereo-configuration in case isotope_stereo_policy is :no
           # this is not supported yet http://cdk.github.io/cdk/1.5/docs/api/org/openscience/cdk/smiles/smarts/SMARTSQueryTool.html
           compound_smiles_molecule = smiles_parser.parseSmiles(compound_smiles)
           if smarts_query_tool.matches(compound_smiles_molecule)
             matching_compounds_hash.merge! id => compound_smiles
+            matched_atoms_lists.merge! id => smarts_query_tool.getUniqueMatchingAtoms().toArray().collect{ |atom_list| atom_list.toArray().collect{ |i| i.intValue().to_i } }
           end
         end
-        return matching_compounds_hash
+        return matching_compounds_hash, matched_atoms_lists
       end
 
       def self.matchCompoundSimilarity compound_smiles_hash, smiles_query, tanimoto_coefficient_cutoff

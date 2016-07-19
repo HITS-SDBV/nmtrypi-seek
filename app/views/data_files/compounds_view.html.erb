@@ -6,6 +6,8 @@
     <thead>
       <% if @search_type == :SIMILARITY %>
         <th>Tanimoto Coefficient</th>
+      <% elsif @search_type == :SMARTS %>
+        <th>Number of occurences</th>
       <% end %>
       <th>ID</th>
       <th>structure</th>
@@ -23,3 +25,49 @@
     </tbody>
   </table>
 </div>
+
+<script type="text/javascript">
+//this function will be called after the JavaScriptApplet code has been loaded.
+function jsmeOnLoad() {
+  jsmeApplets = {};
+  jQuery('.jsme-box').each( function(index, element){
+    var box = jQuery(element);
+    var id = box.attr('id');
+    jsmeApplets[id] = new JSApplet.JSME(id, "280px", "280px", {
+      "options" : box.data('options'),
+      "smiles" : box.data('smiles')
+    });
+    jsmeApplets[id].setCallBack("AtomHighlight","show_smiles");
+
+  });
+}
+
+       var patt=/\[([A-Za-z][a-z]?)H?\d*:\d+\]/g; //regexp pattern for numbered atom
+       function show_smiles(event) {
+           // checkbox = document.getElementById("canonic_check");
+           // if(checkbox.checked) {
+               // jsmeApplet.options("canonize");
+           // } else {
+               // jsmeApplet.options("nocanonize");
+           // }
+           console.log(event);
+           // smiles = jsmeApplet.smiles(); //atom that are colored are numbered
+           // new_smiles = smiles.replace(patt, '<em>$1</em>');
+           // document.getElementById("smiles_container").innerHTML = new_smiles
+       }
+function highlightAtoms(element) {
+  var jelement = jQuery(element);
+  var jsme_box = jQuery(jelement.siblings('div.jsme-box'));
+  var jsme = jsmeApplets[jsme_box.attr('id')];
+  var atom_list = jelement.data("atom-list");
+  var atom_color_list = [];
+  var color = 1;
+  atom_list.forEach(function(item,index) {
+  	atom_color_list.push(item);
+  	atom_color_list.push(color);
+  });
+  console.log(atom_color_list.join());
+  jsme.resetAtomColors(1);
+  jsme.setAtomBackgroundColors(1, atom_color_list.join());
+}
+</script>
