@@ -3,50 +3,13 @@
       <td><%= @coefficients[compound_id].round(2) %></td>
     <% end %>
     <td>
-      <%= compound_id %>
+      <%= link_to compound_id, compound_attributes_view_path(:id => data_file_id, :compound_id => compound_id), {:target => "_blank"} %>
     </td>
     <td>
       <% smiles = get_attribute_value(compound_attributes, "smiles")
         smiles.each do |s| %>
-          <%= compound_structure_link(data_file_id, s, Seek::Data::DataMatch.standardize_compound_name(compound_id)) %>
-          <%= #image_tag compound_visualization_path({id: data_file_id, compound_id: compound_id}), height: "50%", width: "50%"
-           %>
+          <%= render :partial => "smiles/structure_in_jsme",
+                     :locals => { smiles: s } %>
       <% end %>
-    </td>
-    <td>
-      <ul class="table">
-        <% general_compound_attributes.each do |attr| %>
-          <% value = get_attribute_value(compound_attributes, attr).join(", ")%>
-          <li class="row">
-            <span> <%= attr %>: </span>
-            <span class="<%= 'none_text' if value == 'hidden' %>"><%= value %></span>
-          </li>
-        <% end  %>
-      </ul>
-    </td>
-    <td>
-    <% compound_attributes.each do |file_id, file_headers| %>
-        <%
-           data_file = DataFile.where(id: file_id).first
-           data_file_title = data_file.try(:title)
-          if data_file.can_view?(User.current_user)
-        %>
-        <li class="list-title"> <%= link_to data_file_title, data_file %></li>
-        <li>
-          <ul class="table">
-            <% file_headers.each do |header, value| %>
-                <%  not_general_attribute = !(general_compound_attributes | ["compound ID"]).detect{|ga| header.match(/#{ga.singularize.split(" ").join(".*")}/i)}
-                    not_compound_id = !(header.match(/compound.*ID/i) || header.match(/\Acompound\Z/i))
-                   if not_general_attribute && not_compound_id%>
-                <li class="row">
-                  <span> <%= header %>: </span>
-                  <span class="<%= 'none_text' if value == 'hidden' %>"> <%= value %></span>
-                </li>
-                <% end %>
-            <% end %>
-          </ul>
-        </li>
-      <% end %>
-    <% end %>
     </td>
 </tr>
