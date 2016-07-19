@@ -184,11 +184,11 @@ class CompoundsController < ApplicationController
       @compounds_hash = []
     end
     
-    # if @compounds_hash.empty?
-      # flash.now[:notice]="No matches found for '<b>#{@search_query}</b>'.".html_safe
-    # else
-      # flash.now[:notice]="#{@results.size} #{@results.size==1 ? 'item' : 'items'} matched '<b>#{@search_query}</b>' within their title or content.".html_safe
-    # end
+    if @compounds_hash.empty?
+      flash.now[:notice]="No matches found for SMILES '<b>#{@structure_search_query}</b>'.".html_safe
+    else
+      flash.now[:notice]="#{@compounds_hash.size} #{@compounds_hash.size==1 ? 'item' : 'items'} matched SMILES '<b>#{@structure_search_query}</b>'.".html_safe
+    end
 
     respond_to do |format|
       format.html { render template: 'data_files/compounds_view' }
