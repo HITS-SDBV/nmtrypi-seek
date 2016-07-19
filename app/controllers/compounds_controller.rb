@@ -169,26 +169,22 @@ class CompoundsController < ApplicationController
     
     case @search_type
     when :SMILES
-      canonical_policy = params[:canonical_policy].to_sym
-      isotope_stereo_policy = params[:isotope_stereo_policy].to_sym
-      smiles = Seek::Search::Smiles.matchCompoundSmiles( Seek::Data::CompoundsExtraction.get_compound_id_smiles_hash, @structure_search_query, canonical_policy, isotope_stereo_policy)
+      @canonical_policy = params[:canonical_policy].to_sym
+      @isotope_stereo_policy = params[:isotope_stereo_policy].to_sym
+      smiles = Seek::Search::Smiles.matchCompoundSmiles( Seek::Data::CompoundsExtraction.get_compound_id_smiles_hash, @structure_search_query, @canonical_policy, @isotope_stereo_policy)
       @compounds_hash = Seek::Data::CompoundsExtraction.get_compounds_hash.keep_if { |key,value| smiles.has_key? key}
     when :SMARTS
       smiles = Seek::Search::Smiles.matchCompoundSmarts Seek::Data::CompoundsExtraction.get_compound_id_smiles_hash, @structure_search_query
       @compounds_hash = Seek::Data::CompoundsExtraction.get_compounds_hash.keep_if { |key,value| smiles.has_key? key}
     when :SIMILARITY
-      tanimoto_coefficient = params[:tanimoto_coefficient].to_f
-      smiles, @coefficients = Seek::Search::Smiles.matchCompoundSimilarity Seek::Data::CompoundsExtraction.get_compound_id_smiles_hash, @structure_search_query, tanimoto_coefficient
+      @tanimoto_coefficient_cutoff = params[:tanimoto_coefficient].to_f
+      smiles, @coefficients = Seek::Search::Smiles.matchCompoundSimilarity Seek::Data::CompoundsExtraction.get_compound_id_smiles_hash, @structure_search_query, @tanimoto_coefficient_cutoff
       @compounds_hash = Seek::Data::CompoundsExtraction.get_compounds_hash.keep_if { |key,value| smiles.has_key? key}
     else
       @compounds_hash = []
     end
     
-    if @compounds_hash.empty?
-      flash.now[:notice]="No matches found for SMILES '<b>#{@structure_search_query}</b>'.".html_safe
-    else
-      flash.now[:notice]="#{@compounds_hash.size} #{@compounds_hash.size==1 ? 'item' : 'items'} matched SMILES '<b>#{@structure_search_query}</b>'.".html_safe
-    end
+    flash.now[:notice] = render_to_string( :partial => 'smiles/search_query').html_safe
 
     respond_to do |format|
       format.html { render template: 'data_files/compounds_view' }
