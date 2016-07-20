@@ -92,9 +92,7 @@ SEEK::Application.routes.draw do
   resources :uuids
   resources :compounds do
     collection do
-      get :jsme_box
       post :search_in_sabiork
-      post :search
     end
   end
 
@@ -643,6 +641,11 @@ SEEK::Application.routes.draw do
   #compound extraction
   match '/compound_visualization/:id/:compound_id' => 'data_files#compound_visualization', :as => :compound_visualization, :via => :get
   match '/compound_attributes_view/:id/:compound_id' => 'data_files#compound_attributes_view', :as => :compound_attributes_view, :via => :get
+  
+  #moelcules
+  match '/molecules/search' => 'molecules#search', :as => :search_molecules, :via => :post
+  match '/molecules/jsme_box' => 'molecules#jsme_box', :as => :jsme_box_molecules, :via => :get
+  
   #error rendering
   match "/404" => "errors#error_404"
   match "/422" => "errors#error_422"
