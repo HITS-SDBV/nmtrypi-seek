@@ -17,6 +17,7 @@
   <% else %>
       <%= seek_stylesheet_tags %>
       <%= seek_javascript_tags %>
+      <%= javascript_include_tag "jsme/jsme.nocache", :digest => false %>
   <% end %>
 
   <script type="text/javascript">

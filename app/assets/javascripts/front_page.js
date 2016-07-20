@@ -13,4 +13,3 @@
 //= require top_menu
 //= require dynamic_menu
 //= require jscrollpane/index
-//= require jsme/jsme.nocache
