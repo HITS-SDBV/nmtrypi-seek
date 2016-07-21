@@ -645,6 +645,7 @@ SEEK::Application.routes.draw do
   #moelcules
   match '/molecules/search' => 'molecules#search', :as => :search_molecules, :via => :post
   match '/molecules/jsme_box' => 'molecules#jsme_box', :as => :jsme_box_molecules, :via => :get
+  match '/molecules/mol2file' => 'molecules#molfile', :as => :mol2file_molecules, :via => :get
   
   #error rendering
   match "/404" => "errors#error_404"

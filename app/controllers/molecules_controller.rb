@@ -1,5 +1,12 @@
-class MoleculesController < ApplicationController
+jrequire 'org.openscience.cdk.DefaultChemObjectBuilder'
+jrequire 'org.openscience.cdk.io.MDLV2000Writer'
+jrequire 'org.openscience.cdk.layout.StructureDiagramGenerator'
+jrequire 'org.openscience.cdk.smiles.SmilesParser'
 
+jrequire 'java.io.StringWriter'
+
+class MoleculesController < ApplicationController
+  include Org::Openscience
   # before_filter :find_all_compounds
 
   # post function to search for compounds based on SMARTS/SMILES
@@ -35,6 +42,29 @@ class MoleculesController < ApplicationController
       format.html { render template: 'data_files/compounds_view' }
       # format.xml { render template: 'data_files/compounds_view' }
     end
+  end
+
+  def molfile
+    smiles = params[:SMILES]
+
+    # smiles parser to generate atom container from smiles string
+    smiles_parser = Cdk::Smiles::SmilesParser.new(Cdk::DefaultChemObjectBuilder.getInstance())
+
+    molecule = smiles_parser.parseSmiles(smiles)
+
+    # add coordinates
+    sdg = Cdk::Layout::StructureDiagramGenerator.new()
+    sdg.setMolecule(molecule)
+    sdg.generateCoordinates()
+    layed_out_mol = sdg.getMolecule();
+
+    writer = Java::Io::StringWriter.new()
+    molwriter = Cdk::Io::MDLV2000Writer.new(writer)
+    molwriter.writeMolecule(layed_out_mol)
+        
+    render :partial => 'molfile',
+           :content_type => "text/plain",
+           :locals => { frame: writer.toString().to_s }
   end
 
   # used as ajax action for creating a redbox containing a JSME molecular editor
