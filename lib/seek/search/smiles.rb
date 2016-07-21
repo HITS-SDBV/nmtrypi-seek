@@ -47,6 +47,10 @@ module Seek
                             :yes => :absolute}
       }
 
+      # class variables that are reused
+      @@chem_object_builder = Cdk::DefaultChemObjectBuilder.getInstance()
+      @@smiles_parser       = Cdk::Smiles::SmilesParser.new(@@chem_object_builder)
+
       # in a hash {"compound_id" => "smiles"} search for all key value pairs, that have a matching smiles_query
       # @param compound_smiles_hash hash "compound_id" => "smiles"}
       # @param smiles_query, the smiles string to compare to
@@ -55,19 +59,16 @@ module Seek
       # @see http://cdk.github.io/cdk/1.5/docs/api/org/openscience/cdk/smiles/SmilesGenerator.html
       # @return hash {"compound_id" => "smiles"} where the smiles in the hash mathches given the flavor
       def self.matchCompoundSmiles compound_smiles_hash, smiles_query, canonical_policy, isotope_stereo_policy
-        # smiles parser to generate atom container from smiles string
-        smiles_parser = Cdk::Smiles::SmilesParser.new(Cdk::DefaultChemObjectBuilder.getInstance())
-
         # smiles generator to generate smiles from atom container
         smiles_generator = smilesGeneratorFromPolicies canonical_policy, isotope_stereo_policy
         
         # create canonical or non-canonical smiles_query
-        smiles_query_molecule = smiles_parser.parseSmiles(smiles_query)
+        smiles_query_molecule = @@smiles_parser.parseSmiles(smiles_query)
         smiles_query_normalized = smiles_generator.create(smiles_query_molecule)
         
         matching_compounds_hash = Hash.new()
         compound_smiles_hash.each do |id,compound_smiles|
-          compound_smiles_molecule = smiles_parser.parseSmiles(compound_smiles)
+          compound_smiles_molecule = @@smiles_parser.parseSmiles(compound_smiles)
           compound_smiles_normalized = smiles_generator.create(compound_smiles_molecule)
           if smiles_query_normalized == compound_smiles_normalized
             matching_compounds_hash.merge! id => compound_smiles
@@ -78,29 +79,26 @@ module Seek
 
       def self.matchCompoundSmarts compound_smiles_hash, smarts_query
         # smiles parser to generate atom container from smiles string
-        smiles_parser = Cdk::Smiles::SmilesParser.new(Cdk::DefaultChemObjectBuilder.getInstance())
-        smarts_query_tool = Cdk::Smiles::Smarts::SMARTSQueryTool.new(smarts_query,Cdk::DefaultChemObjectBuilder.getInstance())
+        smarts_query_tool = Cdk::Smiles::Smarts::SMARTSQueryTool.new(smarts_query,@@chem_object_builder)
         
         matching_compounds_hash = Hash.new()
         matched_atoms_lists = Hash.new()
         compound_smiles_hash.each do |id,compound_smiles|
           # TODO it might be necessary to remove stereo-configuration in case isotope_stereo_policy is :no
           # this is not supported yet http://cdk.github.io/cdk/1.5/docs/api/org/openscience/cdk/smiles/smarts/SMARTSQueryTool.html
-          compound_smiles_molecule = smiles_parser.parseSmiles(compound_smiles)
+          compound_smiles_molecule = @@smiles_parser.parseSmiles(compound_smiles)
           if smarts_query_tool.matches(compound_smiles_molecule)
             matching_compounds_hash.merge! id => compound_smiles
-            matched_atoms_lists.merge! id => smarts_query_tool.getUniqueMatchingAtoms().toArray().collect{ |atom_list| atom_list.toArray().collect{ |i| i.intValue().to_i } }
+            matched_atoms_lists.merge! id => smarts_query_tool.getUniqueMatchingAtoms().toArray().collect{ |atom_list| atom_list.toArray().collect{ |i| i.intValue().to_i + 1 } }
           end
         end
         return matching_compounds_hash, matched_atoms_lists
       end
 
       def self.matchCompoundSimilarity compound_smiles_hash, smiles_query, tanimoto_coefficient_cutoff
-        # smiles parser to generate atom container from smiles string
-        smiles_parser = Cdk::Smiles::SmilesParser.new(Cdk::DefaultChemObjectBuilder.getInstance())
         # create a fingerprinter
         finger_printer = Cdk::Fingerprint::Fingerprinter.new()
-        smiles_query_molecule = smiles_parser.parseSmiles(smiles_query)
+        smiles_query_molecule = @@smiles_parser.parseSmiles(smiles_query)
         # query_molecule_complete = addHydrogens smiles_query_molecule
         query_molecule_fingerprint = finger_printer.getBitFingerprint(smiles_query_molecule)
         
@@ -108,7 +106,7 @@ module Seek
         coefficients = Hash.new()
         
         compound_smiles_hash.each do |id,compound_smiles|
-          compound_smiles_molecule = smiles_parser.parseSmiles(compound_smiles)
+          compound_smiles_molecule = @@smiles_parser.parseSmiles(compound_smiles)
           # compound_molecule_complete = addHydrogens compound_smiles_molecule
           compound_molecule_fingerprint = finger_printer.getBitFingerprint(compound_smiles_molecule)
 
@@ -146,7 +144,7 @@ module Seek
       
       # http://efficientbits.blogspot.de/2013/12/new-smiles-behaviour-parsing-cdk-154.html
       def self.addHydrogens molecule
-        adder = Cdk::Tools::CDKHydrogenAdder.getInstance(Cdk::DefaultChemObjectBuilder.getInstance())
+        adder = Cdk::Tools::CDKHydrogenAdder.getInstance(@@chem_object_builder)
         Cdk::Tools::Manipulator::AtomContainerManipulator.percieveAtomTypesAndConfigureAtoms(molecule);
         adder.addImplicitHydrogens(molecule)
         return molecule
