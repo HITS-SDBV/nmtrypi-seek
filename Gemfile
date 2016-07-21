@@ -81,6 +81,7 @@ gem 'my_annotations', :git=>"https://github.com/myGrid/annotations.git"
 
 gem 'taverna-t2flow'
 gem "taverna-player", :git=>"https://github.com/myGrid/taverna-player.git", :branch => 'list-inputs'
+#gem 'sass-rails'
 gem 'jquery-rails', '~> 3'
 gem 'jquery-ui-rails', '~>5'
 gem "recaptcha"
@@ -128,3 +129,9 @@ group :test do
   gem 'pg'
 end
 
+# javascript assets from https://rails-assets.org
+gem 'bundler', '>= 1.8.4'
+source 'https://rails-assets.org' do
+  gem 'rails-assets-datatables.net-jqui', '~> 1.10.0'
+  gem 'rails-assets-datatables.net-buttons-jqui', '~> 1.2.0'
+end

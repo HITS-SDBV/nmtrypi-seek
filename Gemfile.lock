@@ -145,6 +145,7 @@ GIT
 
 GEM
   remote: https://rubygems.org/
+  remote: https://rails-assets.org/
   specs:
     RedCloth (4.2.9)
     actionmailer (3.2.21)
@@ -443,6 +444,19 @@ GEM
       activesupport (= 3.2.21)
       bundler (~> 1.0)
       railties (= 3.2.21)
+    rails-assets-datatables.net (1.10.12)
+      rails-assets-jquery (>= 1.7)
+    rails-assets-datatables.net-buttons (1.2.1)
+      rails-assets-datatables.net (>= 1.10.9)
+      rails-assets-jquery (>= 1.7)
+    rails-assets-datatables.net-buttons-jqui (1.2.1)
+      rails-assets-datatables.net-buttons (>= 1.0.3)
+      rails-assets-datatables.net-jqui (>= 1.10.9)
+      rails-assets-jquery (>= 1.7)
+    rails-assets-datatables.net-jqui (1.10.12)
+      rails-assets-datatables.net (>= 1.10.9)
+      rails-assets-jquery (>= 1.7)
+    rails-assets-jquery (3.1.0)
     rails_autolink (1.1.6)
       rails (> 3.1)
     rails_best_practices (1.15.4)
@@ -684,6 +698,7 @@ DEPENDENCIES
   bioportal (>= 2.2)
   bives
   breadcrumbs_on_rails
+  bundler (>= 1.8.4)
   calendar_date_select!
   cancan
   cocaine
@@ -739,6 +754,8 @@ DEPENDENCIES
   psych
   rack-openid
   rails (= 3.2.21)
+  rails-assets-datatables.net-buttons-jqui (~> 1.2.0)!
+  rails-assets-datatables.net-jqui (~> 1.10.0)!
   rails_autolink
   rails_best_practices
   rcdk (= 0.3.0)!
@@ -779,3 +796,6 @@ DEPENDENCIES
   will_paginate (~> 3.0.4)
   yaml_db
   yui-compressor
+
+BUNDLED WITH
+   1.12.5

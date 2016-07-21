@@ -14,7 +14,7 @@
                  :locals => { smiles: s, classes: "jsme-box", id: "jsme_#{compound_id}" } %>
     <% end %>
     <% if @search_type == :SMARTS %>
-      Highlight match: <button type="button" onclick="clearHighlightAtoms(this);">Clear</button><br>
+      Highlight substructure match: <button type="button" onclick="clearHighlightAtoms(this);">Clear</button><br>
       <% @matched_atoms_lists[compound_id].each_with_index do |atom_list, index| %>
         <button type="button" onclick="highlightAtoms(this);" data-atom-list="<%= atom_list.as_json %>" data-color="<%= index.modulo(6) + 1 %>"><%= index+1 %></button>
       <% end %>

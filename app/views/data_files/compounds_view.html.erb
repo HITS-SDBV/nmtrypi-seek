@@ -2,15 +2,15 @@
 <%= javascript_include_tag 'zoom/lightbox' %>
 
 <div class="show_basic">
-  <table>
+  <table id="structure_query_result">
     <thead>
       <% if @search_type == :SIMILARITY %>
         <th>Tanimoto Coefficient</th>
       <% elsif @search_type == :SMARTS %>
         <th>Number of occurences</th>
       <% end %>
-      <th>ID</th>
-      <th>structure</th>
+      <th>compoundID</th>
+      <th data-orderable="false">structure</th>
     </thead>
     <tbody>
     <% @compounds_hash.each do |compound_id, data_files| %>
@@ -37,8 +37,6 @@ function jsmeOnLoad() {
       "options" : box.data('options'),
       "smiles" : box.data('smiles')
     });
-    jsmeApplets[id].setCallBack("AtomHighlight","show_smiles");
-
     // instead of using openchemlib to create molecule from smiles, use the seek service
     // jQuery.ajax({
     	// url: "<%= mol2file_molecules_path %>",
@@ -55,20 +53,6 @@ function jsmeOnLoad() {
   });
 }
 
-       var patt=/\[([A-Za-z][a-z]?)H?\d*:\d+\]/g; //regexp pattern for numbered atom
-       function show_smiles(event) {
-           // checkbox = document.getElementById("canonic_check");
-           // if(checkbox.checked) {
-               // jsmeApplet.options("canonize");
-           // } else {
-               // jsmeApplet.options("nocanonize");
-           // }
-           console.log(event);
-           // smiles = jsmeApplet.smiles(); //atom that are colored are numbered
-           // new_smiles = smiles.replace(patt, '<em>$1</em>');
-           // document.getElementById("smiles_container").innerHTML = new_smiles
-       }
-
 function highlightAtoms(element) {
   var jelement = jQuery(element);
   var jsme_box = jQuery(jelement.siblings('div.jsme-box'));
@@ -83,10 +67,19 @@ function highlightAtoms(element) {
   jsme.resetAtomColors(1);
   jsme.setAtomBackgroundColors(1, atom_color_list.join());
 }
+
 function clearHighlightAtoms(element) {
   var jelement = jQuery(element);
   var jsme_box = jQuery(jelement.siblings('div.jsme-box'));
   var jsme = jsmeApplets[jsme_box.attr('id')];
   jsme.resetAtomColors(1);
 }
+
+jQuery(document).ready(function(){
+ var table = jQuery('#structure_query_result').DataTable({
+ 	buttons: [ 'copy', 'csv', 'excel', 'pdf', 'print' ],
+ 	asStripeClasses: []
+ });
+ table.buttons().container().insertBefore( '#structure_query_result_filter' );
+});
 </script>

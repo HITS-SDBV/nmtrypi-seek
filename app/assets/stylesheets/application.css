@@ -25,4 +25,7 @@
 *= require jws
 *= require images
 *= require landing_page
+*= require jquery-ui
+*= require datatables.net-jqui
+*= require datatables.net-buttons-jqui
 */

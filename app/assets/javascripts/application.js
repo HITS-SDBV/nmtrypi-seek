@@ -32,3 +32,7 @@
 //= require tabber-minimized
 //= require detect_browser
 //= require easytabs
+//= require datatables.net
+//= require datatables.net-jqui
+//= require datatables.net-buttons
+//= require datatables.net-buttons-jqui
