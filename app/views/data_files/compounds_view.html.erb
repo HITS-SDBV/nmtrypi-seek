@@ -39,6 +39,19 @@ function jsmeOnLoad() {
     });
     jsmeApplets[id].setCallBack("AtomHighlight","show_smiles");
 
+    // instead of using openchemlib to create molecule from smiles, use the seek service
+    // jQuery.ajax({
+    	// url: "<%= mol2file_molecules_path %>",
+    	// data: { SMILES: box.data('smiles')},
+    	// dataType: "text",
+//     	
+    // }).done(function(data){
+    	// jsmeApplets[id] = new JSApplet.JSME(id, "280px", "280px", {
+          // "options" : box.data('options')
+        // });
+        // jsmeApplets[id].readMolFile(data);
+    	// jsmeApplets[id].setCallBack("AtomHighlight","show_smiles");
+    // });
   });
 }
 
@@ -55,19 +68,25 @@ function jsmeOnLoad() {
            // new_smiles = smiles.replace(patt, '<em>$1</em>');
            // document.getElementById("smiles_container").innerHTML = new_smiles
        }
+
 function highlightAtoms(element) {
   var jelement = jQuery(element);
   var jsme_box = jQuery(jelement.siblings('div.jsme-box'));
   var jsme = jsmeApplets[jsme_box.attr('id')];
   var atom_list = jelement.data("atom-list");
+  var color = jelement.data("color");;
   var atom_color_list = [];
-  var color = 1;
   atom_list.forEach(function(item,index) {
   	atom_color_list.push(item);
   	atom_color_list.push(color);
   });
-  console.log(atom_color_list.join());
   jsme.resetAtomColors(1);
   jsme.setAtomBackgroundColors(1, atom_color_list.join());
+}
+function clearHighlightAtoms(element) {
+  var jelement = jQuery(element);
+  var jsme_box = jQuery(jelement.siblings('div.jsme-box'));
+  var jsme = jsmeApplets[jsme_box.attr('id')];
+  jsme.resetAtomColors(1);
 }
 </script>
