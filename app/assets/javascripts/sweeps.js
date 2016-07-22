@@ -12,7 +12,7 @@ var sweep_prefixes = {
 };
 
 function remove_iteration(el) {
-  if($j('.iteration').size() > 1) {
+  if($j('.iteration').length > 1) {
     if(confirm("Are you sure you want to remove this iteration?\n\n"+
                "Any data entered for this iteration will be cleared.")) {
       $j(el).parents('.iteration').remove();

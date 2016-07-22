@@ -309,7 +309,7 @@ $j(document).ready(function ($) {
         .on("select", function(evt, ctrl_key){
             $(this).addClass("selected_heading");
             var col = $(this).index();
-            var last_row = $(this).parent().parent().parent().find("div.row_heading").size();
+            var last_row = $(this).parent().parent().parent().find("div.row_heading").length;
             select_cells(col,1,col,last_row,null, ctrl_key);
 
         })
@@ -340,7 +340,7 @@ $j(document).ready(function ($) {
         })
         .on("select", function(evt, ctrl_key){
             var row = $(this).index() + 1,
-                last_col = $(this).parent().parent().parent().find("div.col_heading").size();
+                last_col = $(this).parent().parent().parent().find("div.col_heading").length;
             $(this).addClass("selected_heading");
             select_cells(1,row,last_col,row,null, ctrl_key);
 
@@ -443,7 +443,7 @@ function explodeCellRange(range) {
 // changed, and to re-enhance DOM elements that have been reloaded
 function bindAnnotations(annotation_sources) {
     var annotationIndexTable = $j("div#annotation_overview table");
-    for(var s = 0; s < annotation_sources.size(); s++)
+    for(var s = 0; s < annotation_sources.length; s++)
     {
         var source = annotation_sources[s];
 
@@ -452,7 +452,7 @@ function bindAnnotations(annotation_sources) {
             .append($j("<a>Annotations from " + source.name + "</a>").attr({href : source.url})))
             .appendTo(annotationIndexTable);
 
-        for(var a = 0; a < source.annotations.size(); a++)
+        for(var a = 0; a < source.annotations.length; a++)
         {
             var ann = source.annotations[a];
 
@@ -801,10 +801,10 @@ function copy_cells()
 {
 
     var cells = $j('td.selected_cell');
-    var columns = $j('.col_heading.selected_heading').size();
+    var columns = $j('.col_heading.selected_heading').length;
     var text = "";
 
-    for(var i = 0; i < cells.size(); i += columns)
+    for(var i = 0; i < cells.length; i += columns)
     {
         for(var j = 0; j < columns; j += 1)
         {
@@ -896,7 +896,7 @@ function displayRowsPerPage(){
 function select_heatmap_cells(col, totalRow, sheetNumber) {
 
     $j("table.active_sheet tr").slice(0,totalRow).each(function() {
-        var count = $j(this).children("td.cell").size();
+        var count = $j(this).children("td.cell").length;
         $j(this).children("td.cell")[col-1].className += " heatmap_cell";
         if ( $j(this).children("td.cell")[col-1].className.indexOf("heatmap_cell") === -1){
             $j(this).children("td.cell")[col-1].className += " heatmap_cell"
@@ -937,7 +937,7 @@ function plotting_selected_cells() {
             console.log("length of selected heatmap cells for row : ", row_label, heatmap_cells.length);
             console.log(heatmap_cells);
         }*/
-        for (var i = 0; i < heatmap_cells.size(); i++) {
+        for (var i = 0; i < heatmap_cells.length; i++) {
             var col_index = heatmap_cells.eq(i).index();
             var cell_value = heatmap_cells.eq(i);
             if(cell_value[0].firstChild != null) {
@@ -976,7 +976,7 @@ function selection_for_parcoords() {
         var heatmap_cells = $j(this).children("td.selected_cell");
 
         //loop by (selected) columns, first row of each col might be a header
-        for (var j = 0; j < heatmap_cells.size(); j++) {
+        for (var j = 0; j < heatmap_cells.length; j++) {
             var col_index = heatmap_cells.eq(j).index(); //col
             var cell_value = heatmap_cells.eq(j);
             //up to here, the code was the same as in heatmap selection. but now

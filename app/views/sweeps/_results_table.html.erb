@@ -29,7 +29,7 @@
           });
 
           $j('#download_results_button').click(function (e) {
-            if ($j('.chk-select:checked').size() == 0) {
+            if ($j('.chk-select:checked').length == 0) {
               alert('Please select at least one result to download');
               return false;
             }

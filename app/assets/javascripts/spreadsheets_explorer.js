@@ -219,7 +219,7 @@ $j(document).ready(function ($) {
         })
         .mousedown(function(){
             var col = $(this).index();
-            var last_row = $(this).parent().parent().parent().find("div.row_heading").size();
+            var last_row = $(this).parent().parent().parent().find("div.row_heading").length;
             select_cells(col,1,col,last_row,null, $(this));
         })
     ;
@@ -235,7 +235,7 @@ $j(document).ready(function ($) {
         })
         .mousedown(function(){
             var row = $(this).index() + 1;
-            var last_col = $(this).parent().parent().parent().find("div.col_heading").size();
+            var last_col = $(this).parent().parent().parent().find("div.col_heading").length;
             select_cells(1,row,last_col,row,null, $(this));
         })
     ;
@@ -321,7 +321,7 @@ function explodeCellRange(range) {
 // changed, and to re-enhance DOM elements that have been reloaded
 function bindAnnotations(annotation_sources) {
     var annotationIndexTable = $j("div#annotation_overview table");
-    for(var s = 0; s < annotation_sources.size(); s++)
+    for(var s = 0; s < annotation_sources.length; s++)
     {
         var source = annotation_sources[s];
 
@@ -330,7 +330,7 @@ function bindAnnotations(annotation_sources) {
             .append($j("<a>Annotations from " + source.name + "</a>").attr({href : source.url})))
             .appendTo(annotationIndexTable);
 
-        for(var a = 0; a < source.annotations.size(); a++)
+        for(var a = 0; a < source.annotations.length; a++)
         {
             var ann = source.annotations[a];
 
@@ -642,11 +642,11 @@ function activateSheet(sheet, sheetTab, spreadsheet_index) {
 function copy_cells()
 {
     var cells = $j('td.selected_cell');
-    var columns = $j('.col_heading.selected_heading').size();
+    var columns = $j('.col_heading.selected_heading').length;
     var text = "";
     var context = cells.first().closest("div.spreadsheet_container");
 
-    for(var i = 0; i < cells.size(); i += columns)
+    for(var i = 0; i < cells.length; i += columns)
     {
         for(var j = 0; j < columns; j += 1)
         {
