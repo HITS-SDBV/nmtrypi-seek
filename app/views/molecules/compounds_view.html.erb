@@ -15,7 +15,7 @@
     <tbody>
     <% @compounds_hash.each do |compound_id, data_files| %>
       <% data_files.keys.each do |df_id| %>
-        <%= render :partial => 'data_files/compound',
+        <%= render :partial => 'molecules/compound',
                    locals: { compound_id: compound_id,
                              data_file_id: df_id,
                              compound_attributes: data_files}

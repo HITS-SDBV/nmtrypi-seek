@@ -39,8 +39,7 @@ class MoleculesController < ApplicationController
     flash.now[:notice] = render_to_string( :partial => 'smiles/search_query').html_safe
 
     respond_to do |format|
-      format.html { render template: 'data_files/compounds_view' }
-      # format.xml { render template: 'data_files/compounds_view' }
+      format.html { render template: 'molecules/compounds_view' }
     end
   end
 
