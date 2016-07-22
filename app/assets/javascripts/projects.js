@@ -3,10 +3,10 @@ var roles = new Array();
 
 
 function addSelectedOrganism() {
-    selected_option_index=$("possible_organisms").selectedIndex
-    selected_option=$("possible_organisms").options[selected_option_index]
-    title=selected_option.text
-    id=selected_option.value
+    selected_option_index=$("possible_organisms").selectedIndex;
+    selected_option=$("possible_organisms").options[selected_option_index];
+    title=selected_option.text;
+    id=selected_option.value;
 
     if(checkNotInList(id,organisms)) {
         addOrganism(title,id);
@@ -31,19 +31,19 @@ function removeOrganism(id) {
 }
 
 function updateOrganisms() {
-    organism_text=''
-    type="Organism"
+    organism_text='';
+    type="Organism";
     organism_ids=new Array();
 
     for (var i=0;i<organisms.length;i++) {
-        organism=organisms[i]
-        title=organism[0]
-        id=organism[1]
+        organism=organisms[i];
+        title=organism[0];
+        id=organism[1];
         organism_text += '<b>' + type + '</b>: ' + title
         //+ "&nbsp;&nbsp;<span style='color: #5F5F5F;'>(" + contributor + ")</span>"
         + '&nbsp;&nbsp;<small style="vertical-align: middle;">'
         + '[<a href="" onclick="javascript:removeOrganism('+id+'); return(false);">remove</a>]</small><br/>';
-        organism_ids.push(id)
+        organism_ids.push(id);
     }
 
     // remove the last line break
@@ -61,13 +61,13 @@ function updateOrganisms() {
 
     clearList('project_organism_ids');
 
-    select=$('project_organism_ids')
+    select=$('project_organism_ids');
     for (i=0;i<organism_ids.length;i++) {
-        id=organism_ids[i]
-        o=document.createElement('option')
-        o.value=id
-        o.text=id
-        o.selected=true
+        id=organism_ids[i];
+        o=document.createElement('option');
+        o.value=id;
+        o.text=id;
+        o.selected=true;
         try {
             select.add(o); //for older IE version
         }
@@ -78,7 +78,7 @@ function updateOrganisms() {
 }
 
 function addOrganism(title,id) {
-    organisms.push([title,id])
+    organisms.push([title,id]);
 }
 
 function updateInstitutionIds(){
@@ -96,7 +96,7 @@ function updateInstitutionIds(){
 }
 
 //project membership administration stuff
-var previouslyRemoved = {}
+var previouslyRemoved = {};
 
 function mark_group_membership_for_removal(person_id,institution_id,group_id) {
     var element_id = "#membership_"+person_id+"_"+institution_id;
@@ -127,7 +127,7 @@ function add_selected_people() {
                 var onclick = function () {
                     mark_group_membership_for_removal(person_id,institution_id,group_id);
                     return false;
-                }
+                };
             }
             else {
                 var dummy_id = guid();
@@ -142,7 +142,7 @@ function add_selected_people() {
                     remove_from_people_to_add(person_id,institution_id);
                     mark_group_membership_for_removal(person_id,institution_id,dummy_id);
                     return false;
-                }
+                };
             }
 
             var block = $j("#institution_block_" + institution_id);
@@ -186,7 +186,7 @@ function remove_from_people_to_add(person_id, institution_id) {
         if (json["person_id"] == person_id && json["institution_id"] == institution_id) {
             value.remove();
         }
-    })
+    });
 }
 
 function determine_selected_people() {

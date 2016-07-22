@@ -9,7 +9,7 @@ function inList(item,list) {
 }
 function model_type_selection_changed() {
     var selected=$('model_model_type_id');
-    $('selected_model_type_id').value=selected.value
+    $('selected_model_type_id').value=selected.value;
     if (selected.value)
     {        
         $('edit_model_type_icon').show();
@@ -19,7 +19,7 @@ function model_type_selection_changed() {
         else {
             $('delete_model_type_icon').hide();
         }
-        var text=selected.options[selected.selectedIndex].text        
+        var text=selected.options[selected.selectedIndex].text;
         $('updated_model_type').value=text;
         $('updated_model_type_id').value=selected.value;
         $('update_model_type_button').disabled=false;
@@ -36,7 +36,7 @@ function model_type_selection_changed() {
 
 function model_format_selection_changed() {
     var selected=$('model_model_format_id');
-    $('selected_model_format_id').value=selected.value
+    $('selected_model_format_id').value=selected.value;
     if (selected.value)
     {
         $('edit_model_format_icon').show();
@@ -46,7 +46,7 @@ function model_format_selection_changed() {
         else {
             $('delete_model_format_icon').hide();
         }
-        var text=selected.options[selected.selectedIndex].text
+        var text=selected.options[selected.selectedIndex].text;
         $('updated_model_format').value=text;
         $('updated_model_format_id').value=selected.value;
         $('update_model_format_button').disabled=false;

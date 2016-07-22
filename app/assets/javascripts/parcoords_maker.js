@@ -152,7 +152,7 @@ var side_effects = d3.dispatch.apply(this,d3.keys(__))
 	  } else {
 		  __.bundleDimension = d.value;
 	  }
-     console.log("bundle dimension: ", __.bundleDimension)
+     console.log("bundle dimension: ", __.bundleDimension);
 	  __.clusterCentroids = compute_cluster_centroids(__.bundleDimension);
   })
   .on("hideAxis", function(d) {
@@ -200,7 +200,7 @@ pc.rescale_for_selection = function(new_data) {
         pc.brushMode("None");
         pc.brushMode(mode);
     }
-}
+};
 function extend(target, source) {
   for (key in source) {
     target[key] = source[key];
@@ -209,7 +209,7 @@ function extend(target, source) {
 };
 
 function without(arr, item) {
-  return arr.filter(function(elem) { return item.indexOf(elem) === -1; })
+  return arr.filter(function(elem) { return item.indexOf(elem) === -1; });
 };
 pc.autoscale = function() {
    // console.log(__.data)
@@ -656,7 +656,7 @@ String.prototype.width = function(font) {
   o.remove();
 
   return w;
-}
+};
 
 function rotateLabels() {
   var delta = d3.event.deltaY;
@@ -719,7 +719,7 @@ function rotateLabels() {
       .on("wheel", rotateLabels);
 
       //d3.selectAll("text.label").call(wrap, 10);
-    g.selectAll("text").append("title").text("Scroll to rotate / drag to reorder / click to color by values / double click to invert")
+    g.selectAll("text").append("title").text("Scroll to rotate / drag to reorder / click to color by values / double click to invert");
 
     //create scale for missing values axis
     var firstPC_Xoffset = xscale(__.dimensions[0]);
@@ -737,7 +737,7 @@ function rotateLabels() {
         .call(haxis.scale(haxisScale).tickValues([]))  //no ticks and no tick labels
       .append("svg:text")
         .attr("transform","translate(-"+(+firstPC_Xoffset-1)+", -10)")
-        .text("Missing Values")
+        .text("Missing Values");
 
 
 
@@ -760,7 +760,7 @@ pc.updateAxesScale = function() {
         .transition()
         .duration(1100)
         .each(function(d) { d3.select(this).call(axis.scale(yscale[d])); });
-}
+};
 
     /* This function is never used? the wrap call does not work, not clear why.
     * */
@@ -886,7 +886,7 @@ pc.reorderable = function() {
                 }
             }
             //console.log("reorder_dim: ", __.reorder_dim) //for debugging
-          parent.insertBefore(this, parent.children[j + 1])
+          parent.insertBefore(this, parent.children[j + 1]);
 
         }
 
@@ -1011,13 +1011,13 @@ pc.brushMode = function(mode) {
     // test if within range
     var within = {
       "date": function(d,p,dimension) {
-        return extents[dimension][0] <= d[p] && d[p] <= extents[dimension][1]
+        return extents[dimension][0] <= d[p] && d[p] <= extents[dimension][1];
       },
       "number": function(d,p,dimension) {
-        return extents[dimension][0] <= d[p] && d[p] <= extents[dimension][1]
+        return extents[dimension][0] <= d[p] && d[p] <= extents[dimension][1];
       },
       "string": function(d,p,dimension) {
-        return extents[dimension][0] <= yscale[p](d[p]) && yscale[p](d[p]) <= extents[dimension][1]
+        return extents[dimension][0] <= yscale[p](d[p]) && yscale[p](d[p]) <= extents[dimension][1];
       }
     };
 
@@ -1056,7 +1056,7 @@ pc.brushMode = function(mode) {
 
     brush
       .y(yscale[axis])
-      .on("brushstart", function() { d3.event.sourceEvent.stopPropagation() })
+      .on("brushstart", function() { d3.event.sourceEvent.stopPropagation(); })
       .on("brush", function() {
         brushUpdated(selected());
       })
@@ -1110,7 +1110,7 @@ pc.brushMode = function(mode) {
       delete pc.brushReset;
     },
     selected: selected
-  }
+  };
 })();
 // // brush mode: 2D-strums
 // // bl.ocks.org/syntagmatic/5441022
@@ -1459,14 +1459,14 @@ pc.brushMode = function(mode) {
             // test if within range
             var within = {
                 "date": function(d,p,dimension,b) {
-                    return b[0] <= d[p] && d[p] <= b[1]
+                    return b[0] <= d[p] && d[p] <= b[1];
                 },
 
                 "number": function(d,p,dimension,b) {
-                    return b[0] <= d[p] && d[p] <= b[1]
+                    return b[0] <= d[p] && d[p] <= b[1];
                 },
                 "string": function(d,p,dimension,b) {
-                    return b[0] <= yscale[p](d[p]) && yscale[p](d[p]) <= b[1]
+                    return b[0] <= yscale[p](d[p]) && yscale[p](d[p]) <= b[1];
                 }
             };
 
@@ -1587,7 +1587,7 @@ pc.brushMode = function(mode) {
             },
             selected: selected,
             brushState: brushExtents
-        }
+        };
 })();
 pc.interactive = function() {
   flags.interactive = true;
@@ -1607,7 +1607,7 @@ pc.resize = function() {
   // selection size
   pc.selection.select("svg")
     .attr("width", __.width)
-    .attr("height", __.height)
+    .attr("height", __.height);
   pc.svg.attr("transform", "translate(" + __.margin.left + "," + __.margin.top + ")");
 
   // FIXME: the current brush state should pass through

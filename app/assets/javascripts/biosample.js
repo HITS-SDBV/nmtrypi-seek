@@ -33,17 +33,17 @@ function check_show_existing_items(organism_element_id, existing_items_element_i
 }
 
 function show_existing_specimens() {
-    Effect.Appear('existing_specimens', { duration: 0.25 })
+    Effect.Appear('existing_specimens', { duration: 0.25 });
 }
 function hide_existing_specimens() {
-    Effect.Fade('existing_specimens', { duration: 0.25 })
+    Effect.Fade('existing_specimens', { duration: 0.25 });
 }
 
 function show_existing_samples() {
-    Effect.Appear('existing_samples', { duration: 0.25 })
+    Effect.Appear('existing_samples', { duration: 0.25 });
 }
 function hide_existing_samples() {
-    Effect.Fade('existing_samples', { duration: 0.25 })
+    Effect.Fade('existing_samples', { duration: 0.25 });
 }
 
 function getSelectedStrains() {
@@ -122,7 +122,7 @@ function checkSelectOneStrain(){
 //if one specimen is selected, add the param specimen_id to the link
 //else send the link without any params
 function checkSelectOneSpecimen(cell_culture_or_specimen){
-    var selected_specimens = getSelectedSpecimens().split(',')
+    var selected_specimens = getSelectedSpecimens().split(',');
     if (selected_specimens.length > 1){
        alert("Please select only ONE " + cell_culture_or_specimen + " for this sample to base on, or select NO " + cell_culture_or_specimen);
        return false;
@@ -132,13 +132,13 @@ function checkSelectOneSpecimen(cell_culture_or_specimen){
         var new_link = old_link.split('?')[0];
         new_link = new_link.concat('?specimen_id=' + selected_specimens[0]);
         new_link = new_link.concat('&from_biosamples=true');
-        $('new_sample_link').href = new_link
+        $('new_sample_link').href = new_link;
         return true;
     }else{
         var old_link = $('new_sample_link').href;
         var new_link = old_link.split('?')[0];
         new_link = new_link.concat('?from_biosamples=true');
-        $('new_sample_link').href = new_link
+        $('new_sample_link').href = new_link;
         return true;
     }
 }
@@ -146,7 +146,7 @@ function checkSelectOneSpecimen(cell_culture_or_specimen){
 function strains_of_selected_organism(organism_id, strain_selection_box_id, strain_selection_box_name){
       var updated_selection_box = '<select id=\''+ strain_selection_box_id +'\' name=\''+ strain_selection_box_name +'\'>';
         updated_selection_box += "<option value='0'>Select Strain ...</option>";
-        url = "/biosamples/strains_of_selected_organism"
+        url = "/biosamples/strains_of_selected_organism";
         request = new Ajax.Request(url, {
             method: 'get',
             parameters:{
@@ -156,7 +156,7 @@ function strains_of_selected_organism(organism_id, strain_selection_box_id, stra
                 // "true" parameter to evalJSON() activates sanitization of input
                 var data = transport.responseText.evalJSON(true);
                 if (data.status == 200){
-                    var strains = data.strains
+                    var strains = data.strains;
                     for (var i=0; i< strains.length; i++){
                         updated_selection_box += '<option value=\''+ strains[i][0] + '\'>'+ strains[i][1] +'</option>';
 

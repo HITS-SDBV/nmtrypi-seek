@@ -534,10 +534,10 @@ function bindAnnotation(ann) {
     var relativeMaxRow = relative_rows[1];
     var startPage =  parseInt(ann.startRow/perPage) + 1;
     if (ann.startRow % perPage == 0)
-        startPage -=1
+        startPage -=1;
     var endPage = parseInt(ann.endRow/perPage) + 1;
     if (ann.endRow % perPage == 0)
-        endPage -=1
+        endPage -=1;
 
     //if no pagination, or the annotation belongs to the cell of current page, then bind it to the page
     var annotation_of_current_page = current_page >= startPage && current_page <= endPage;
@@ -568,7 +568,7 @@ function currentPage(sheetNumber){
 }
 
 function toggle_annotation_form(annotation_id) {
-    var elem = 'div#annotation_' + annotation_id
+    var elem = 'div#annotation_' + annotation_id;
 
     $j(elem + ' div.annotation_text').toggle();
     $j(elem + ' div.annotation_edit_text').toggle();
@@ -865,11 +865,11 @@ function relativeRows(minRow, maxRow, sheetNumber){
     var maxRowPage = parseInt(maxRow/perPage) + 1;
     if (relativeMinRow == 0){
         relativeMinRow = perPage;
-        minRowPage -=1
+        minRowPage -=1;
     }
     if (relativeMaxRow == 0){
         relativeMaxRow = perPage;
-        maxRowPage -=1
+        maxRowPage -=1;
     }
 
     //This is for the case of having minRow and maxRow in different pages.
@@ -928,7 +928,7 @@ function plotting_selected_cells() {
     // $j("div.sheet table tr").each(function () {
         var this_tr = $j(this);
         var row_header_cell = this_tr.children("td").filter(function () {
-            return /^nmt[-_][a-zA-Z]+\d+/i.test($j(this).text()) == true
+            return /^nmt[-_][a-zA-Z]+\d+/i.test($j(this).text()) == true;
         });
 
         var row_label = row_header_cell.text();
@@ -952,7 +952,7 @@ function plotting_selected_cells() {
         }
 
     });
-    console.log(sel_data)
+    console.log(sel_data);
     return sel_data;
 }
 
@@ -970,7 +970,7 @@ function selection_for_parcoords() {
     $j("table.active_sheet tr").each(function () {
         var this_tr = $j(this);
         var row_header_cell = this_tr.children("td").filter(function () {
-            return /^nmt[-_][a-zA-Z]+\d+/i.test($j(this).text()) == true
+            return /^nmt[-_][a-zA-Z]+\d+/i.test($j(this).text()) == true;
         });
         var row_label = row_header_cell.text();
         var heatmap_cells = $j(this).children("td.selected_cell");

@@ -37,7 +37,7 @@ function draw_heatmap(data) {
                         //col_labels.push(json.value);
                         //remove first row-header, do not include compound id column in presented data
                         data = $j.grep(data, function (jjson) {
-                            return (jjson != json && skip_col.indexOf(jjson.col_label.toLowerCase()) === -1)
+                            return (jjson != json && skip_col.indexOf(jjson.col_label.toLowerCase()) === -1);
                         });
                         // data.splice(i,1)
 
@@ -76,7 +76,7 @@ function draw_heatmap(data) {
         .attr("class", "grid")
         .append("g")
         .attr("id", "heatmap_matrix")
-        .attr("transform", "translate(" + margin.left + "," + margin.top + ") " + "scale(1,1)")
+        .attr("transform", "translate(" + margin.left + "," + margin.top + ") " + "scale(1,1)");
 
 
     //Prints the row labels (from col 0)
@@ -135,7 +135,7 @@ function draw_heatmap(data) {
                 + d3.format(".2f")(d.value)+ "</span>";
      });
     // svg.selectAll("#heatmap_matrix").call(tip);
-    svg.call(tip)
+    svg.call(tip);
      heatMap = svg.selectAll(".col")
         .data(data)
         .enter().append("rect")
@@ -159,7 +159,7 @@ function draw_heatmap(data) {
         .on("mouseout", function (d) {
             d3.select(this).style("opacity",'1.0').style("fill", prevFill);
             tip.hide(d);
-        })
+        });
 
 
      var min =  d3.min(data, function (d) {
@@ -172,8 +172,8 @@ function draw_heatmap(data) {
     //$j('#heatmap_matrix').attr('min', min)
     //$j('#heatmap_matrix').attr('max', max)
 
-    var delta = (max-min)/3.0
-    var new_limits = [min, d3.format(".1f")(min+delta,1), d3.format(".1g")(max-delta,1) ,max]
+    var delta = (max-min)/3.0;
+    var new_limits = [min, d3.format(".1f")(min+delta,1), d3.format(".1g")(max-delta,1) ,max];
     $j('#slide1').slider("option",{min: min, max: max});
     $j('#slide1').slider("option",{values: new_limits.slice(1, new_limits.length-1)});
 
@@ -256,7 +256,7 @@ function draw_slider(){
             value = x.invert(d3.mouse(this)[0]);
             brush.extent([value, value]);
         }
-        console.log(" brush value: "+ value)
+        console.log(" brush value: "+ value);
         filter_heatmap_data(value);
         handle.attr("cx", x(value));
         //d3.select("#slider").style("background-color", d3.hsl(value, .8, .8));
@@ -274,7 +274,7 @@ function filter_heatmap_data(threshold){
      }
    }
    // console.log(filtered_data)
-   draw_heatmap(filtered_data)
+   draw_heatmap(filtered_data);
 }
 
 

@@ -43,7 +43,7 @@ function tab_on_click(resource_type) {
         document.getElementById(resource_type).className = 'tabbertab';
 
         show_specified_facets_for_active_tab(resource_type);
-    }
+    };
 }
 
 function displayMoreLink(){

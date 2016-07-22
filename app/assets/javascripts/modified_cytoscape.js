@@ -264,7 +264,7 @@
     // Change the dault value for SEEK, it looks better with 6 instead of 10
     canvas_prototype.getRoundRectangleRadius = function(width, height) {
         return Math.min(width / 2, height / 2, 6);
-    }
+    };
 
     //Fix for the case that the graph disappears when browser is in the zoom mode
     canvas_prototype.matchCanvasSize = function(container) {
@@ -305,7 +305,7 @@
 
         this.data.overlay.style.width = width + 'px';
         this.data.overlay.style.height = height + 'px';
-    }
+    };
 
     // Fix the safari 6.1 and above quits unexpectedly
     canvas_prototype.roundRectangleIntersectLine = function(
@@ -386,7 +386,7 @@
         // Top Left
         {
             var topLeftCenterX = nodeX - halfWidth + cornerRadius;
-            var topLeftCenterY = nodeY - halfHeight + cornerRadius
+            var topLeftCenterY = nodeY - halfHeight + cornerRadius;
             arcIntersections = this.intersectLineCircle(
                 x, y, nodeX, nodeY,
                 topLeftCenterX, topLeftCenterY, cornerRadius + padding);
@@ -402,7 +402,7 @@
         // Top Right
         {
             var topRightCenterX = nodeX + halfWidth - cornerRadius;
-            var topRightCenterY = nodeY - halfHeight + cornerRadius
+            var topRightCenterY = nodeY - halfHeight + cornerRadius;
             arcIntersections = this.intersectLineCircle(
                 x, y, nodeX, nodeY,
                 topRightCenterX, topRightCenterY, cornerRadius + padding);
@@ -418,7 +418,7 @@
         // Bottom Right
         {
             var bottomRightCenterX = nodeX + halfWidth - cornerRadius;
-            var bottomRightCenterY = nodeY + halfHeight - cornerRadius
+            var bottomRightCenterY = nodeY + halfHeight - cornerRadius;
             arcIntersections = this.intersectLineCircle(
                 x, y, nodeX, nodeY,
                 bottomRightCenterX, bottomRightCenterY, cornerRadius + padding);
@@ -434,7 +434,7 @@
         // Bottom Left
         {
             var bottomLeftCenterX = nodeX - halfWidth + cornerRadius;
-            var bottomLeftCenterY = nodeY + halfHeight - cornerRadius
+            var bottomLeftCenterY = nodeY + halfHeight - cornerRadius;
             arcIntersections = this.intersectLineCircle(
                 x, y, nodeX, nodeY,
                 bottomLeftCenterX, bottomLeftCenterY, cornerRadius + padding);
@@ -446,7 +446,7 @@
                 return [arcIntersections[0], arcIntersections[1]];
             }
         }
-    }
+    };
 
     // Fix the safari 6.1 and above quits unexpectedly
     canvas_prototype.redraw = function( forcedContext, drawAll, forcedZoom, forcedPan ) {

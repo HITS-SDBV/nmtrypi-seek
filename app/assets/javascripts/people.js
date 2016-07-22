@@ -2,10 +2,10 @@ var disciplines=new Array();
 var roles = new Array();
 
 function addSelectedDiscipline() {
-    selected_option_index=$("possible_disciplines").selectedIndex
-    selected_option=$("possible_disciplines").options[selected_option_index]
-    title=selected_option.text    
-    id=selected_option.value
+    selected_option_index=$("possible_disciplines").selectedIndex;
+    selected_option=$("possible_disciplines").options[selected_option_index];
+    title=selected_option.text;
+    id=selected_option.value;
 
     if(checkNotInList(id,disciplines)) {
         addDiscipline(title,id);
@@ -30,19 +30,19 @@ function removeDiscipline(id) {
 }
 
 function updateDisciplines() {
-    discipline_text=''
-    type="Discipline"
+    discipline_text='';
+    type="Discipline";
     discipline_ids=new Array();
 
     for (var i=0;i<disciplines.length;i++) {
-        discipline=disciplines[i]
-        title=discipline[0]
-        id=discipline[1]        
+        discipline=disciplines[i];
+        title=discipline[0];
+        id=discipline[1];
         discipline_text += '<b>' + type + '</b>: ' + title
         //+ "&nbsp;&nbsp;<span style='color: #5F5F5F;'>(" + contributor + ")</span>"
         + '&nbsp;&nbsp;<small style="vertical-align: middle;">'
         + '[<a href="" onclick="javascript:removeDiscipline('+id+'); return(false);">remove</a>]</small><br/>';
-        discipline_ids.push(id)
+        discipline_ids.push(id);
     }
 
     // remove the last line break
@@ -60,13 +60,13 @@ function updateDisciplines() {
 
     clearList('person_discipline_ids');
 
-    select=$('person_discipline_ids')
+    select=$('person_discipline_ids');
     for (i=0;i<discipline_ids.length;i++) {
-        id=discipline_ids[i]
-        o=document.createElement('option')
-        o.value=id
-        o.text=id
-        o.selected=true
+        id=discipline_ids[i];
+        o=document.createElement('option');
+        o.value=id;
+        o.text=id;
+        o.selected=true;
         try {
             select.add(o); //for older IE version
         }
@@ -76,12 +76,12 @@ function updateDisciplines() {
     }
 }
 
-function addDiscipline(title,id) {    
-    disciplines.push([title,id])
+function addDiscipline(title,id) {
+    disciplines.push([title,id]);
 }
 
 function addRole(group_membership_id,title,id) {
-    roles.push([group_membership_id,title,id])
+    roles.push([group_membership_id,title,id]);
 }
 
 function removeRole(group_id,id) {
@@ -99,23 +99,23 @@ function removeRole(group_id,id) {
 function updateRoles(editable,group_id) {
 
     role_ids=new Array();
-    role_text=""
+    role_text="";
 
     for (var i=0;i<roles.length;i++) {
-        role=roles[i]
+        role=roles[i];
         if (role[0]==group_id) {
-            title=role[1]
-            id=role[2]
+            title=role[1];
+            id=role[2];
 
-            role_text += title
+            role_text += title;
             if (editable) {
                 role_text += '&nbsp;&nbsp;<small style="vertical-align: middle;">[<a href="" onclick="javascript:removeRole('+group_id+','+id+'); return(false);">remove</a>]</small><br/>';
             }
             else {
-                role_text += ", "
+                role_text += ", ";
             }
             
-            role_ids.push(id)
+            role_ids.push(id);
         }
     }
 
@@ -125,7 +125,7 @@ function updateRoles(editable,group_id) {
     }
 
     // update the page
-    el='roles_'+group_id
+    el='roles_'+group_id;
     if(role_text.length == 0) {
         $(el).innerHTML = '<span class="none_text">No roles defined</span>';
     }
@@ -136,13 +136,13 @@ function updateRoles(editable,group_id) {
     id_element="group_membership_role_ids_"+group_id;
     clearList(id_element);
 
-    select=$(id_element)
+    select=$(id_element);
     for (i=0;i<role_ids.length;i++) {
-        id=role_ids[i]
-        o=document.createElement('option')
-        o.value=id
-        o.text=id
-        o.selected=true
+        id=role_ids[i];
+        o=document.createElement('option');
+        o.value=id;
+        o.text=id;
+        o.selected=true;
         try {
             select.add(o); //for older IE version
         }
@@ -171,7 +171,7 @@ function addSelectedRole(group_id) {
 
 function checkNotInRoleList(group_id,id) {
     for (var i=0;i<roles.length;i++) {
-        role=roles[i]
+        role=roles[i];
         if (role[0]==group_id && role[2]==id) return false;
     }
     return true;
@@ -180,7 +180,7 @@ function checkNotInRoleList(group_id,id) {
 function startRolesEdit(group_id) {
     edit_id="edit_roles_"+group_id;
     roles_list_id="roles_"+group_id;
-    link_id='edit_link_'+group_id
+    link_id='edit_link_'+group_id;
 
     $(link_id).hide();
     
@@ -199,7 +199,7 @@ function startRolesEdit(group_id) {
 function stopRolesEdit(group_id) {
     edit_id="edit_roles_"+group_id;
     roles_list_id="roles_"+group_id;
-    link_id='edit_link_'+group_id
+    link_id='edit_link_'+group_id;
 
     $(link_id).show();
     
@@ -232,11 +232,11 @@ function removePersonFromAdminDefinedRole(role,project_id) {
     var display_id = role+"_project_"+project_id;
     $(display_id).remove();
     var select = $('_roles_'+role);
-    var options = select.childElements().select(function(c){return c.selected && c.value==project_id})
+    var options = select.childElements().select(function(c){return c.selected && c.value==project_id;});
     if (options.length>0) {
         options[0].selected=false;
     }
-    if (select.childElements().select(function(c){return c.selected}).length==0) {
+    if (select.childElements().select(function(c){return c.selected;}).length==0) {
         addNoProjectAssignedForAdminDefinedRole(role);
     }
 }
@@ -251,7 +251,7 @@ function addPersonToAdminDefinedRole(role) {
 
     if (!isAdminDefinedRoleAlreadySelected(role,project_id)) {
         var select = $('_roles_'+role);
-        var options = select.childElements().select(function(c){return !c.selected && c.value==project_id})
+        var options = select.childElements().select(function(c){return !c.selected && c.value==project_id;});
         if (options.length>0) {
             options[0].selected=true;
         }
@@ -284,6 +284,6 @@ function addNoProjectAssignedForAdminDefinedRole(role) {
 
 function isAdminDefinedRoleAlreadySelected(role,project_id) {
     var select = $('_roles_'+role);
-    var options = select.childElements().select(function(c){return c.selected && c.value==project_id});
+    var options = select.childElements().select(function(c){return c.selected && c.value==project_id;});
     return options.length>0;
 }
