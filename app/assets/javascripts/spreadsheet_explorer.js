@@ -1,6 +1,6 @@
 //these two are needed for exporting the heatmap to an SVG file
-//= require blob
-//= require FileSaver
+//= require blob-polyfill
+//= require filesaverjs
 
 function annotation_source(id, type, name, url) {
     this.id = id;
