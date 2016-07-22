@@ -143,7 +143,7 @@ d3.svg.multibrush = function() {
 
   function drawExtents(g) {
     var ex = xExtent.length > yExtent.length ? xExtent : yExtent,
-        i = ex.length
+        i = ex.length;
         extentArr = ex.map(function(d,i) { return i; }),
         extentResizes = d3.merge(ex.map(function(d,i) { return resizes.map(function(r) { return [r, i]; }); }));
 
@@ -302,7 +302,7 @@ d3.svg.multibrush = function() {
     d3.select("body").style("cursor", eventTarget.style("cursor"));
 
     // Show resizers as long as we're not dragging or resizing.
-    if(!dragging && !resizing) g.selectAll(".resize").style("display", null)
+    if(!dragging && !resizing) g.selectAll(".resize").style("display", null);
 
     // Notify listeners.
     event_({type: "brushstart"});
@@ -462,13 +462,13 @@ d3.svg.multibrush = function() {
     if (!arguments.length) return resizeAdaption;
     resizeAdaption = z;
     return brush;
-  }
+  };
 
   brush.extentAdaption = function(z) {
     if (!arguments.length) return extentAdaption;
     extentAdaption = z;
     return brush;
-  }
+  };
 
   brush.clamp = function(z) {
     if (!arguments.length) return x && y ? [xClamp, yClamp] : x ? xClamp : y ? yClamp : null;

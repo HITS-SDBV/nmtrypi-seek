@@ -12,7 +12,7 @@ function initialize(data, textLength){
     parcoord_data = data;
     var data_length = data.length;
     //parse data, keep numbers up to 2 decimal points
-    var col_names = {}
+    var col_names = {};
     for(var i=0; i<data_length; i++) {
       for(var prop in parcoord_data[i]){
         //keep a list for all possible axes names to track missing elements
@@ -42,13 +42,13 @@ function initialize(data, textLength){
 
     pcHeight = data_length < MAX_ROWS ? DEFAULT_HEIGHT : (data_length / MAX_ROWS) * DEFAULT_HEIGHT;
     //can only get style of visible elements, not the new popup.
-    pcWidth =   d3.select("div.spreadsheet_container").style("width").replace("px","")
-    d3.select("div.spreadsheet_popup").style("width", pcWidth+"px")
-    d3.select("div#parcoords_plot").style("width", pcWidth+"px")
+    pcWidth =   d3.select("div.spreadsheet_container").style("width").replace("px","");
+    d3.select("div.spreadsheet_popup").style("width", pcWidth+"px");
+    d3.select("div#parcoords_plot").style("width", pcWidth+"px");
 
     // set parallel coordinates
     //chaining .width(value) to the d3 commands does not work. Might only be events (like brushMode) which can be chained
-    config = {width: pcWidth, height: pcHeight, alpha: 0.6}
+    config = {width: pcWidth, height: pcHeight, alpha: 0.6};
     graph = d3.parcoords(config)('#parcoords_plot')
        .data(parcoord_data)
        .margin({ top: 130, left: 8 * textLength, bottom: 40, right: 0 })
@@ -67,7 +67,7 @@ function initialize(data, textLength){
 
 function draw_parallel_coord(data) {
      // collect text for first column to adjust left margin
-     var firstCell = data.map(function(d){return d3.values(d)[0]});
+     var firstCell = data.map(function(d){return d3.values(d)[0];});
      // find the longest text size in the first row to adjust left margin
      var textLength = 0;
      firstCell.forEach(function(d){
@@ -96,7 +96,7 @@ function draw_parallel_coord(data) {
      // click label to activate coloring
      graph.svg.selectAll(".dimension")
              .on("click", update_colors)
-             .selectAll(".label")
+             .selectAll(".label");
           //   .style("font-size", "14px"); // change font sizes of selected lable
 
     //add hover event
@@ -142,7 +142,7 @@ function draw_parallel_coord(data) {
   sltBrushMode.property('value', 'Single range');*/
   d3.select("#keepData").on("click", keep_data);
   d3.select("#excludeData").on("click", exclude_data);
-  d3.select('#btnReset').on('click', function() {graph.brushReset();})
+  d3.select('#btnReset').on('click', function() {graph.brushReset();});
   d3.select('#sltPredicate').on('change', function() {
       graph.brushPredicate(this.value);
   });
@@ -188,14 +188,14 @@ function update_colors(dimension) {
     // set domain+range of color scale
     var types = graph.detectDimensionTypes(graph.data());
     if (types[dimension] === 'number') {
-        var vals = graph.data().map(function(d){return parseFloat(d[dimension])});
+        var vals = graph.data().map(function(d){return parseFloat(d[dimension]);});
         color_set = d3.scale.linear()
                 .range(color_range_rg)
                 .domain([d3.min(vals), d3.max(vals)]);
                 //.domain([Math.sqrt(d3.min(vals)), Math.sqrt(d3.max(vals))]);
     //categorical data
     } else {
-        var vals = graph.data().map(function(d){return d[dimension]}).sort();
+        var vals = graph.data().map(function(d){return d[dimension];}).sort();
 
         /* ---
         domain + range are not enough here to define the mapping to the colors
@@ -212,7 +212,7 @@ function update_colors(dimension) {
     }
 
     // change colors for each line
-    graph.color(function(d){return color_set([d[dimension]])}).render();
+    graph.color(function(d){return color_set([d[dimension]]);}).render();
 };
 
 
@@ -287,7 +287,7 @@ function addTooltip(clicked, clickedCenPts){
 
     // add tooltip to multiple clicked lines
     var clickedDataSet = [];
-    var margins = graph.margin()
+    var margins = graph.margin();
 
     // get all the values into a single list
     // I'm pretty sure there is a better way to write this is Javascript
@@ -330,7 +330,7 @@ function addTooltip(clicked, clickedCenPts){
             .attr("fill", "white")
             .attr("text-anchor", "middle")
             .attr("font-size", fontSize)
-            .text( function (d){ return d[2];})
+            .text( function (d){ return d[2];});
 }
 
 function getClickedLines(mouseClick){
@@ -353,7 +353,7 @@ function getClickedLines(mouseClick){
             clickedCenPts.push(graphCentPts[i]); // for tooltip
         }
     });
-    return [clicked, clickedCenPts]
+    return [clicked, clickedCenPts];
 }
 
 
@@ -400,8 +400,8 @@ function highlightLineOnClick(mouseClick, drawTooltip){
 // }
 //
 /* Export code */
-$j(document).ready(function () {
-  $j('.export').click(function () {
+jQuery(document).ready(function () {
+  jQuery('.export').click(function () {
       var svg_selection1 = document.querySelector('svg');
       var svgString1 = new XMLSerializer().serializeToString(svg_selection1);
 
@@ -449,7 +449,8 @@ $j(document).ready(function () {
           //context[0].drawImage(img, -35, -100, graph.width(), graph.height() );
           for (var i = 1; i < canvas_list.length; i++) {
               //context[0].drawImage(canvas_list[i],0,0);
-              ctx.drawImage(canvas_list[i], svgW - canW,  graph.margin().top)}
+              ctx.drawImage(canvas_list[i], svgW - canW,  graph.margin().top);
+          }
           //var dataURL = context[0].canvas.toDataURL("image/png");
           var dataURL = ctx.canvas.toDataURL("image/png");
           document.querySelector('#png_container').innerHTML = '<img src="' + dataURL + '"/>';
@@ -472,7 +473,7 @@ $j(document).ready(function () {
       };
       img.src = url;
   });
-  })
+});
 
   /* Attention!!
   This function will inline CSS styles, can be done for many files ('css')
@@ -481,7 +482,7 @@ $j(document).ready(function () {
   For parcoords, it is  done only on the special css file created for it.
   */
   function inlineAllStyles() {
-      var svg_style, selector
+      var svg_style, selector;
       var cssText = 'spreadsheet_parcoords';
 
       for (var i = 0; i <= document.styleSheets.length - 1; i++) {
@@ -489,9 +490,9 @@ $j(document).ready(function () {
           if (document.styleSheets[i].href && document.styleSheets[i].href.indexOf(cssText) != -1) {
               //pull out the styles from the one you want to use
               if (document.styleSheets[i].rules != undefined) {
-                  svg_style = document.styleSheets[i].rules
+                  svg_style = document.styleSheets[i].rules;
               } else {
-                  svg_style = document.styleSheets[i].cssRules
+                  svg_style = document.styleSheets[i].cssRules;
               }
           }
       }
@@ -506,7 +507,7 @@ $j(document).ready(function () {
 
                   // Apply the style directly to the elements that match the selctor
                   // (this requires to not have to deal with selector parsing)
-                  d3.selectAll(selector).style(styles)
+                  d3.selectAll(selector).style(styles);
               }
           };
       }
@@ -521,7 +522,7 @@ $j(document).ready(function () {
           output[styleDec[s]] = styleDec[styleDec[s]];
           if(styleDec[styleDec[s]] === undefined) {
               //firefox being firefoxy
-              output[styleDec[s]] = styleDec.getPropertyValue(styleDec[s])
+              output[styleDec[s]] = styleDec.getPropertyValue(styleDec[s]);
           }
       }
 

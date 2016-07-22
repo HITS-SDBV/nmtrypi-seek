@@ -35,7 +35,7 @@ function initialize(data, textLength){
        //.dimensionTitleRotation(270)
        .rate(5)
        .render()
-       .brushMode("1D-axes")  // enable brushing
+       .brushMode("1D-axes");  // enable brushing
    //    .shadows()
       // .reorderable() // I removed this for now as it can mess up with tooltips
        //.interactive();
@@ -43,10 +43,10 @@ function initialize(data, textLength){
 } //end initialize
 
 function draw_parallel_coord(data) {
-    console.log("selected data: ",data)
+    console.log("selected data: ",data);
 
      // collect text for first column to adjust left margin
-     var firstCell = data.map(function(d){return d3.values(d)[0]});
+     var firstCell = data.map(function(d){return d3.values(d)[0];});
      // find the longest text size in the first row to adjust left margin
      var textLength = 0;
      firstCell.forEach(function(d){
@@ -57,7 +57,7 @@ function draw_parallel_coord(data) {
 
 
  // add instruction text
-     var instructions = "-Drag around axis to begin brush / Click axis to clear brush / Click a label to color data based on axis values / Hover on each line to highlight."
+     var instructions = "-Drag around axis to begin brush / Click axis to clear brush / Click a label to color data based on axis values / Hover on each line to highlight.";
      d3.select(".pcButtons").append("p").append("text")
              .text(instructions)
              .attr("text-anchor", "middle")
@@ -70,7 +70,7 @@ function draw_parallel_coord(data) {
      // click label to activate coloring
      graph.svg.selectAll(".dimension")
              .on("click", update_colors)
-             .selectAll(".label")
+             .selectAll(".label");
           //   .style("font-size", "14px"); // change font sizes of selected lable
 
     //add hover event
@@ -115,7 +115,7 @@ function draw_parallel_coord(data) {
 
   sltBrushMode.property('value', '1D-axes');
 
-  d3.select('#btnReset').on('click', function() {graph.brushReset();})
+  d3.select('#btnReset').on('click', function() {graph.brushReset();});
   d3.select('#sltPredicate').on('change', function() {
       graph.brushPredicate(this.value);
   });
@@ -137,14 +137,14 @@ function update_colors(dimension) {
     // set domain+range of color scale
     var types = graph.detectDimensionTypes(graph.data());
     if (types[dimension] === 'number') {
-        var vals = graph.data().map(function(d){return parseFloat(d[dimension])});
+        var vals = graph.data().map(function(d){return parseFloat(d[dimension]);});
         color_set = d3.scale.linear()
                 .range(color_range_rg)
                 .domain([d3.min(vals), d3.max(vals)]);
                 //.domain([Math.sqrt(d3.min(vals)), Math.sqrt(d3.max(vals))]);
     //categorical data
     } else {
-        var vals = graph.data().map(function(d){return d[dimension]}).sort();
+        var vals = graph.data().map(function(d){return d[dimension];}).sort();
 
         /* ---
         domain + range are not enough here to define the mapping to the colors
@@ -161,7 +161,7 @@ function update_colors(dimension) {
     }
 
     // change colors for each line
-    graph.color(function(d){return color_set([d[dimension]])}).render();
+    graph.color(function(d){return color_set([d[dimension]]);}).render();
 };
 
 
@@ -236,7 +236,7 @@ function addTooltip(clicked, clickedCenPts){
 
     // sdd tooltip to multiple clicked lines
     var clickedDataSet = [];
-    var margins = graph.margin()
+    var margins = graph.margin();
 
     // get all the values into a single list
     // I'm pretty sure there is a better way to write this is Javascript
@@ -281,7 +281,7 @@ function addTooltip(clicked, clickedCenPts){
             .attr("fill", "white")
             .attr("text-anchor", "middle")
             .attr("font-size", fontSize)
-            .text( function (d){ return d[2];})
+            .text( function (d){ return d[2];});
 }
 
 function getClickedLines(mouseClick){
@@ -307,7 +307,7 @@ function getClickedLines(mouseClick){
             clickedCenPts.push(graphCentPts[i]); // for tooltip
         }
     });
-    return [clicked, clickedCenPts]
+    return [clicked, clickedCenPts];
 }
 
 
@@ -357,13 +357,13 @@ function highlightLineOnClick(mouseClick, drawTooltip){
 // }
 //
 /* Export code */
-$j(document).ready(function () {
-  $j('.export').click(function () {
+jQuery(document).ready(function () {
+  jQuery('.export').click(function () {
       inlineAllStyles();
       //d3.select('svg').selectAll('rect').remove();
       var svg_selection = document.querySelector('svg');
       var svgString = new XMLSerializer().serializeToString(svg_selection);
-      console.log(svgString)
+      console.log(svgString);
 
       var canvas_list = document.getElementsByTagName("canvas");
       var context = [];
@@ -438,9 +438,9 @@ function inlineAllStyles() {
         if (document.styleSheets[i].href && document.styleSheets[i].href.indexOf('style.css') != -1) {
             //pull out the styles from the one you want to use
             if (document.styleSheets[i].rules != undefined) {
-                svg_style = document.styleSheets[i].rules
+                svg_style = document.styleSheets[i].rules;
             } else {
-                svg_style = document.styleSheets[i].cssRules
+                svg_style = document.styleSheets[i].cssRules;
             }
         }
     }
@@ -455,13 +455,13 @@ function inlineAllStyles() {
 
                 // Apply the style directly to the elements that match the selctor
                 // (this requires to not have to deal with selector parsing)
-                d3.selectAll(selector).style(styles)
+                d3.selectAll(selector).style(styles);
             }
         };
     }
 }
 
-function makeStyleObject(rule) {
+  function makeStyleObject(rule) {
     var styleDec = rule.style;
     var output = {};
     var s;
@@ -470,10 +470,10 @@ function makeStyleObject(rule) {
         output[styleDec[s]] = styleDec[styleDec[s]];
         if(styleDec[styleDec[s]] === undefined) {
             //firefox being firefoxy
-            output[styleDec[s]] = styleDec.getPropertyValue(styleDec[s])
+            output[styleDec[s]] = styleDec.getPropertyValue(styleDec[s]);
         }
     }
 
     return output;
-}
-})
+  }
+});
