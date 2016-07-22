@@ -135,4 +135,5 @@ gem 'bundler', '>= 1.8.4'
 source 'https://rails-assets.org' do
   gem 'rails-assets-datatables.net-jqui', '~> 1.10.0'
   gem 'rails-assets-datatables.net-buttons-jqui', '~> 1.2.0'
+  gem 'rails-assets-bxslider-4', '~> 4.1.0'
 end
