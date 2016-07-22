@@ -97,7 +97,8 @@ gem "d3-tip-rails"
 gem 'seedbank'
 group :assets do
   gem 'turbo-sprockets-rails3'
-  gem 'yui-compressor'
+  gem 'therubyracer'
+  gem 'uglifier'
 end
 
 group :production do

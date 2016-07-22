@@ -23,8 +23,8 @@ module SEEK
     #config.assets.version = '1.0'
     # Change the path that assets are served from
     # config.assets.prefix = "/assets"
-    config.assets.js_compressor = :yui
-    config.assets.css_compressor = :yui
+    config.assets.js_compressor = :uglifier
+#    config.assets.css_compressor = :sass
 
     config.assets.precompile += ['*.js','*.css']
     config.assets.paths +=%W(#{Rails.root}/app/assets/flashes #{Rails.root}/vendor/assets/flashes)
