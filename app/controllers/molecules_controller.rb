@@ -17,23 +17,20 @@ class MoleculesController < ApplicationController
     @structure_search_query||=""
     @search_type = params.keys.find{|key| Seek::Search::Smiles::TYPES.has_key? key.to_sym}.to_sym
     
-    @compounds_hash = []
+    @smiles_hash = []
     
     case @search_type
     when :SMILES
       @canonical_policy = params[:canonical_policy].to_sym
       @isotope_stereo_policy = params[:isotope_stereo_policy].to_sym
-      smiles = Seek::Search::Smiles.matchCompoundSmiles( Seek::Data::CompoundsExtraction.get_compound_id_smiles_hash, @structure_search_query, @canonical_policy, @isotope_stereo_policy)
-      @compounds_hash = Seek::Data::CompoundsExtraction.get_compounds_hash.keep_if { |key,value| smiles.has_key? key}
+      @smiles_hash = Seek::Search::Smiles.matchCompoundSmiles Seek::Data::CompoundsExtraction.get_compound_id_smiles_hash, @structure_search_query, @canonical_policy, @isotope_stereo_policy
     when :SMARTS
-      smiles, @matched_atoms_lists = Seek::Search::Smiles.matchCompoundSmarts Seek::Data::CompoundsExtraction.get_compound_id_smiles_hash, @structure_search_query
-      @compounds_hash = Seek::Data::CompoundsExtraction.get_compounds_hash.keep_if { |key,value| smiles.has_key? key}
+      @smiles_hash, @matched_atoms_lists = Seek::Search::Smiles.matchCompoundSmarts Seek::Data::CompoundsExtraction.get_compound_id_smiles_hash, @structure_search_query
     when :SIMILARITY
       @tanimoto_coefficient_cutoff = params[:tanimoto_coefficient].to_f
-      smiles, @coefficients = Seek::Search::Smiles.matchCompoundSimilarity Seek::Data::CompoundsExtraction.get_compound_id_smiles_hash, @structure_search_query, @tanimoto_coefficient_cutoff
-      @compounds_hash = Seek::Data::CompoundsExtraction.get_compounds_hash.keep_if { |key,value| smiles.has_key? key}
+      @smiles_hash, @coefficients = Seek::Search::Smiles.matchCompoundSimilarity Seek::Data::CompoundsExtraction.get_compound_id_smiles_hash, @structure_search_query, @tanimoto_coefficient_cutoff
     else
-      @compounds_hash = []
+      @smiles_hash = {}
     end
     
     flash.now[:notice] = render_to_string( :partial => 'smiles/search_query').html_safe

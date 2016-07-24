@@ -12,17 +12,15 @@
       <% end %>
         <th>compoundID</th>
         <th data-orderable="false">structure</th>
+        <th data-orderable="false">smiles</th>
       </tr>
     </thead>
     <tbody>
-    <% @compounds_hash.each do |compound_id, data_files| %>
-      <% data_files.keys.each do |df_id| %>
+    <% @smiles_hash.each do |compound_id, smiles| %>
         <%= render :partial => 'molecules/compound',
                    locals: { compound_id: compound_id,
-                             data_file_id: df_id,
-                             compound_attributes: data_files}
+                             smiles: smiles}
         %>
-      <% end %>
     <% end %>
     </tbody>
   </table>
