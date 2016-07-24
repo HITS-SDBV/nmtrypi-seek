@@ -1,0 +1,86 @@
+<div class="show_basic">
+  <table id="compounds_attributes">
+    <thead>
+      <tr>
+        <th>
+          normalizedID
+        </th>
+        <% @header.keys.each do |name| %>
+        <th>
+          <%= name %>
+        </th>
+        <% end %>
+      </tr>
+    </thead>
+    <tbody>
+      <% @compounds_hash.each do |id,datafile_attributes| %>
+      <tr data-compoundid="<%= id %>">
+        <td>
+          <%= id %>
+        </td>
+        <% @header.keys.each do |name| %>
+        <td>
+          <% datafile_attributes.each do |file_id,attributes| %>
+            <% if attributes.has_key? name %>
+              <%= attributes[name] %>
+              <% break %>
+            <% end %>
+          <% end %>
+        </td>
+        <% end %>
+      </tr>
+      <% end %>
+    </tbody>
+    <tfoot>
+      <tr>
+        <th>In Datafile:</th>
+        <% @header.each do |name,datafile_ids| %>
+        <td>
+          <ul>
+            <% datafile_ids.each do |file_id| %>
+              <%
+                 data_file = DataFile.where(id: file_id).first
+                 data_file_title = data_file.try(:title)
+              %>
+              <% if data_file.can_view?(User.current_user) %>
+                <li class="list-title"> <%= link_to data_file_title, data_file %></li>
+              <% end %>
+            <% end %>
+          </ul>
+        </td>
+        <% end %>
+      </tr>
+    </tfoot>
+  </table>
+</div>
+
+<div class="warning">Please note: If an attribute is found in multiple data_files, only the value from the first is shown in this table.</div>
+
+<script type="text/javascript">
+
+jQuery(document).ready(function(){
+  var table = jQuery('#compounds_attributes').DataTable({
+    buttons: [ 
+      'copy', 'csv', 'excel', 'pdf', 'print',
+      {
+        text: "Attributes for selected",
+        action: function(){
+          ids = jQuery( table.rows('.selected').nodes()).map(
+                  function(){ return jQuery(this).data('compoundid');}
+                ).get();
+          if( ids.length > 0) {
+            window.location.href = "<%= compounds_attributes_table_path %>?" + jQuery.param({ "ids":ids});
+          } 
+        }
+      }
+    ],
+    order: [[ 0, 'asc' ]],
+    asStripeClasses: []
+  });
+  jQuery('#compounds_attributes tbody').on( 'click', 'tr', function () {
+    jQuery(this).toggleClass('selected');
+  });
+ 
+  table.buttons().container().insertBefore( '#compounds_attributes_filter' );
+});
+</script>

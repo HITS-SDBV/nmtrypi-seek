@@ -641,6 +641,7 @@ SEEK::Application.routes.draw do
   #compound extraction
   match '/compound_visualization/:id/:compound_id' => 'data_files#compound_visualization', :as => :compound_visualization, :via => :get
   match '/compound_attributes_view/:id/:compound_id' => 'data_files#compound_attributes_view', :as => :compound_attributes_view, :via => :get
+  match '/compounds_attributes_table' => 'data_files#compounds_attributes_table', :as => :compounds_attributes_table, :via => :get
   
   #moelcules
   match '/molecules/search' => 'molecules#search', :as => :search_molecules, :via => :post

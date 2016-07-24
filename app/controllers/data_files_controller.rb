@@ -332,6 +332,27 @@ class DataFilesController < ApplicationController
       @compound_attributes = Hash(compounds_hash[standardized_compound_id])
   end
 
+  # given a list of compounds ids as they are used in data_files generate a table view
+  def compounds_attributes_table
+    # standardize all compound ids
+    compound_ids = params[:ids].collect{ |id| Seek::Data::DataMatch.standardize_compound_name(id)}
+    
+    # collect all compound attributes for all compound ids given
+    @compounds_hash = Seek::Data::CompoundsExtraction.get_compounds_hash.keep_if { |key,value| compound_ids.include? key}
+    @header = Hash.new
+    @compounds_hash.each do |compound_id,datafile|
+      datafile.each do |datafile_id,attributes|
+        attributes.each do |name, value|
+          if !@header.has_key? name
+            @header[name] = [datafile_id]
+          elsif !@header[name].include? datafile_id
+            @header[name] << datafile_id
+          end
+        end
+      end
+    end
+  end
+
   def clear_population bio_samples
       specimens = Specimen.find_all_by_title bio_samples.instance_values["specimen_names"].values
       samples = Sample.find_all_by_title bio_samples.instance_values["sample_names"].values

@@ -1,4 +1,4 @@
-<tr>
+<tr data-compoundid="<%= compound_id %>">
   <% if @search_type == :SIMILARITY %>
     <td><%= @coefficients[compound_id].round(2) %></td>
   <% elsif @search_type == :SMARTS %>

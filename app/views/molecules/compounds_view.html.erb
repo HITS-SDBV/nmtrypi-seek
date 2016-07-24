@@ -4,13 +4,15 @@
 <div class="show_basic">
   <table id="structure_query_result">
     <thead>
+      <tr>
       <% if @search_type == :SIMILARITY %>
         <th>Tanimoto Coefficient</th>
       <% elsif @search_type == :SMARTS %>
         <th>Number of occurences</th>
       <% end %>
-      <th>compoundID</th>
-      <th data-orderable="false">structure</th>
+        <th>compoundID</th>
+        <th data-orderable="false">structure</th>
+      </tr>
     </thead>
     <tbody>
     <% @compounds_hash.each do |compound_id, data_files| %>
@@ -76,10 +78,27 @@ function clearHighlightAtoms(element) {
 }
 
 jQuery(document).ready(function(){
- var table = jQuery('#structure_query_result').DataTable({
- 	buttons: [ 'copy', 'csv', 'excel', 'pdf', 'print' ],
- 	asStripeClasses: []
- });
- table.buttons().container().insertBefore( '#structure_query_result_filter' );
+  var table = jQuery('#structure_query_result').DataTable({
+    buttons: [ 
+      'copy', 'csv', 'excel', 'pdf', 'print',
+      {
+      text: "Attributes for selected",
+        action: function(){
+          ids = jQuery( table.rows('.selected').nodes()).map(
+                  function(){ return jQuery(this).data('compoundid');}
+                ).get();
+          if( ids.length > 0) {
+            window.location.href = "<%= compounds_attributes_table_path %>?" + jQuery.param({ "ids":ids});
+          } 
+        }
+      }
+    ],
+    order: [[ 0, 'asc' ]],
+    asStripeClasses: []
+  });
+  jQuery('#structure_query_result tbody').on( 'click', 'tr', function () {
+    jQuery(this).toggleClass('selected');
+  });
+  table.buttons().container().insertBefore( '#structure_query_result_filter' );
 });
 </script>
