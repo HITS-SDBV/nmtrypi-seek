@@ -51,7 +51,7 @@ function jsmeOnLoad() {
   //arguments: HTML id, width, height (must be string not number!), options
   jsmeQueryApplet = new JSApplet.JSME("jsme_container", "380px", "380px", {
     //optional parameters
-    smiles: "<%= @structure_search_query %>",
+    smiles: jQuery('#structure_search_query').val(),
     "options" : "query,hydrogens"
   });
   jsmeQueryApplet.setCallBack("AfterStructureModified", updateQuery);
@@ -78,6 +78,29 @@ function jsmeOnLoad() {
     	// jsmeApplets[id].setCallBack("AtomHighlight","show_smiles");
     // });
   });
+
+  var table = jQuery('#structure_query_result').DataTable({
+    buttons: [ 
+      'copy', 'csv', 'excel', 'pdf', 'print',
+      {
+      text: "Attributes for selected",
+        action: function(){
+          ids = jQuery( table.rows('.selected').nodes()).map(
+                  function(){ return jQuery(this).data('compoundid');}
+                ).get();
+          if( ids.length > 0) {
+            window.location.href = "<%= compounds_attributes_table_path %>?" + jQuery.param({ "ids":ids});
+          } 
+        }
+      }
+    ],
+    order: [[ 0, 'asc' ]],
+    asStripeClasses: []
+  });
+  jQuery('#structure_query_result tbody').on( 'click', 'tr', function () {
+    jQuery(this).toggleClass('selected');
+  });
+  table.buttons().container().insertBefore( '#structure_query_result_filter' );
 }
 
 function highlightAtoms(element) {
@@ -101,29 +124,4 @@ function clearHighlightAtoms(element) {
   var jsme = jsmeApplets[jsme_box.attr('id')];
   jsme.resetAtomColors(1);
 }
-
-jQuery(document).ready(function(){
-  var table = jQuery('#structure_query_result').DataTable({
-    buttons: [ 
-      'copy', 'csv', 'excel', 'pdf', 'print',
-      {
-      text: "Attributes for selected",
-        action: function(){
-          ids = jQuery( table.rows('.selected').nodes()).map(
-                  function(){ return jQuery(this).data('compoundid');}
-                ).get();
-          if( ids.length > 0) {
-            window.location.href = "<%= compounds_attributes_table_path %>?" + jQuery.param({ "ids":ids});
-          } 
-        }
-      }
-    ],
-    order: [[ 0, 'asc' ]],
-    asStripeClasses: []
-  });
-  jQuery('#structure_query_result tbody').on( 'click', 'tr', function () {
-    jQuery(this).toggleClass('selected');
-  });
-  table.buttons().container().insertBefore( '#structure_query_result_filter' );
-});
 </script>

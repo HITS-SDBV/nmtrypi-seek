@@ -1,5 +1,3 @@
-require 'rcdk'
-
 jrequire 'org.openscience.cdk.DefaultChemObjectBuilder'
 jrequire 'org.openscience.cdk.smiles.SmilesParser'
 jrequire 'org.openscience.cdk.smiles.SmilesGenerator'
@@ -15,6 +13,7 @@ module Seek
     # @date 07/15/2016
     class Smiles
       include Org::Openscience
+      include Java
 
       TYPES = Hash.new{ |hash, key| raise( "Search Type #{ key } is unknown" )}.update(
         :SMILES => "Search for Structure",
@@ -52,23 +51,38 @@ module Seek
       @@smiles_parser       = Cdk::Smiles::SmilesParser.new(@@chem_object_builder)
 
       # in a hash {"compound_id" => "smiles"} search for all key value pairs, that have a matching smiles_query
-      # @param compound_smiles_hash hash "compound_id" => "smiles"}
-      # @param smiles_query, the smiles string to compare to
+      # @param compound_smiles_hash hash {"compound_id" => "smiles"}
+      # @param smiles_query the smiles string to compare to
       # @param canonical_policy
       # @param isotope_stereo_policy
       # @see http://cdk.github.io/cdk/1.5/docs/api/org/openscience/cdk/smiles/SmilesGenerator.html
       # @return hash {"compound_id" => "smiles"} where the smiles in the hash mathches given the flavor
       def self.matchCompoundSmiles compound_smiles_hash, smiles_query, canonical_policy, isotope_stereo_policy
+        matching_compounds_hash = Hash.new()
+        # moelcule from query
+        smiles_query_molecule = nil
+        begin
+          smiles_query_molecule = @@smiles_parser.parseSmiles(smiles_query)
+        rescue
+          Rails.logger.error "unable to parse smiles query into molecule: #{smiles_query}"
+          return matching_compounds_hash
+        end
+
         # smiles generator to generate smiles from atom container
         smiles_generator = smilesGeneratorFromPolicies canonical_policy, isotope_stereo_policy
-        
+
         # create canonical or non-canonical smiles_query
-        smiles_query_molecule = @@smiles_parser.parseSmiles(smiles_query)
         smiles_query_normalized = smiles_generator.create(smiles_query_molecule)
-        
-        matching_compounds_hash = Hash.new()
+
         compound_smiles_hash.each do |id,compound_smiles|
-          compound_smiles_molecule = @@smiles_parser.parseSmiles(compound_smiles)
+          # parse smiles into molecule, skip if not possible
+          compound_smiles_molecule = nil
+          begin
+            compound_smiles_molecule = @@smiles_parser.parseSmiles(compound_smiles)
+          rescue
+            Rails.logger.warn "unable to parse smiles into molecule or fingerprint: #{compound_smiles} => Skipping"
+            next
+          end
           compound_smiles_normalized = smiles_generator.create(compound_smiles_molecule)
           if smiles_query_normalized == compound_smiles_normalized
             matching_compounds_hash.merge! id => compound_smiles
@@ -77,16 +91,35 @@ module Seek
         return matching_compounds_hash
       end
 
+      # in a hash {"compound_id" => "smiles"} search for all key value pairs, that have a smarts_query as a substructure
+      # @param compound_smiles_hash hash {"compound_id" => "smiles"}
+      # @param smarts_query the smiles or amarts string to compare to
+      # @return hash {"compound_id" => "smiles"} where the query is a substructure of the molecule, list of lists of matched atom_ids
       def self.matchCompoundSmarts compound_smiles_hash, smarts_query
-        # smiles parser to generate atom container from smiles string
-        smarts_query_tool = Cdk::Smiles::Smarts::SMARTSQueryTool.new(smarts_query,@@chem_object_builder)
-        
         matching_compounds_hash = Hash.new()
         matched_atoms_lists = Hash.new()
+
+        # smiles parser to generate atom container from smiles string
+        smarts_query_tool = nil
+        begin
+          smarts_query_tool = Cdk::Smiles::Smarts::SMARTSQueryTool.new(smarts_query,@@chem_object_builder)
+        rescue
+          Rails.logger.error "unable to parse smarts query into smarts query tool: #{smarts_query}"
+          return matching_compounds_hash, matched_atoms_lists
+        end
+
         compound_smiles_hash.each do |id,compound_smiles|
           # TODO it might be necessary to remove stereo-configuration in case isotope_stereo_policy is :no
           # this is not supported yet http://cdk.github.io/cdk/1.5/docs/api/org/openscience/cdk/smiles/smarts/SMARTSQueryTool.html
-          compound_smiles_molecule = @@smiles_parser.parseSmiles(compound_smiles)
+          compound_smiles_molecule = nil
+          begin
+            compound_smiles_molecule = @@smiles_parser.parseSmiles(compound_smiles)
+          rescue
+            Rails.logger.warn "unable to parse smiles into molecule or fingerprint: #{compound_smiles} => Skipping"
+            next
+          end
+          
+          # check if it matches
           if smarts_query_tool.matches(compound_smiles_molecule)
             matching_compounds_hash.merge! id => compound_smiles
             matched_atoms_lists.merge! id => smarts_query_tool.getUniqueMatchingAtoms().toArray().collect{ |atom_list| atom_list.toArray().collect{ |i| i.intValue().to_i + 1 } }
@@ -95,22 +128,47 @@ module Seek
         return matching_compounds_hash, matched_atoms_lists
       end
 
-      def self.matchCompoundSimilarity compound_smiles_hash, smiles_query, tanimoto_coefficient_cutoff
-        # create a fingerprinter
-        finger_printer = Cdk::Fingerprint::Fingerprinter.new()
-        smiles_query_molecule = @@smiles_parser.parseSmiles(smiles_query)
-        # query_molecule_complete = addHydrogens smiles_query_molecule
-        query_molecule_fingerprint = finger_printer.getBitFingerprint(smiles_query_molecule)
-        
-        matching_compounds_hash = Hash.new()
+      # in a hash {"compound_id" => "smiles"} search for all key value pairs, that have a smiles molecule that is similar above the tanimoto_coefficient_cutoff
+      # @param compound_smiles_hash hash {"compound_id" => "smiles"}
+      # @param smiles_query the smiles string for the moelcule the similarity is measured against
+      # @param fingerprint_size the size of the fingerprint
+      # @param fingerprint_search_depth the depth of the search to generate the fingerprint
+      # @param tanimoto_coefficient_cutoff the minimal similarity [0..1] to include the smiles in the result hash
+      # @return hash {"compound_id" => "smiles"} where the query structure is similar above the given cutoff, Hash of coefficients {"compound_id" => "tanimoto_coefficient"}
+      def self.matchCompoundSimilarity compound_smiles_hash, smiles_query, fingerprint_size, fingerprint_search_depth, tanimoto_coefficient_cutoff
+        matching_compounds_hash = Hash.new
         coefficients = Hash.new()
-        
-        compound_smiles_hash.each do |id,compound_smiles|
-          compound_smiles_molecule = @@smiles_parser.parseSmiles(compound_smiles)
-          # compound_molecule_complete = addHydrogens compound_smiles_molecule
-          compound_molecule_fingerprint = finger_printer.getBitFingerprint(compound_smiles_molecule)
 
+        # create a fingerprinter
+        finger_printer = Cdk::Fingerprint::Fingerprinter.new(fingerprint_size,fingerprint_search_depth)
+
+        smiles_query_molecule = nil
+        query_molecule_fingerprint = nil
+        begin
+          smiles_query_molecule = @@smiles_parser.parseSmiles(smiles_query)
+          # query_molecule_complete = addHydrogens smiles_query_molecule
+          query_molecule_fingerprint = finger_printer.getBitFingerprint(smiles_query_molecule)
+        rescue
+          Rails.logger.error "unable to parse smiles query into molecule or fingerprint: #{smiles_query}"
+          return matching_compounds_hash, coefficients
+        end
+
+        # compare to each molecule
+        compound_smiles_hash.each do |id,compound_smiles|
+          compound_smiles_molecule = nil
+          begin
+            compound_smiles_molecule = @@smiles_parser.parseSmiles(compound_smiles)
+            # compound_molecule_complete = addHydrogens compound_smiles_molecule
+            compound_molecule_fingerprint = finger_printer.getBitFingerprint(compound_smiles_molecule)
+          rescue
+            Rails.logger.warn "unable to parse smiles into molecule or fingerprint: #{compound_smiles} => Skipping"
+            next
+          end
+
+          # calculate the similarity
           tanimoto_coeff = Cdk::Similarity::Tanimoto.calculate(query_molecule_fingerprint,compound_molecule_fingerprint)
+
+          # only add if above cutoff
           if tanimoto_coeff > tanimoto_coefficient_cutoff
             matching_compounds_hash.merge! id => compound_smiles
             coefficients.merge! id => tanimoto_coeff
