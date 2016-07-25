@@ -7,7 +7,7 @@
   <td>
     <%= compound_id %>
   </td>
-  <td>
+  <td  class="not_selectable">
     <div>
     <%= render :partial => "smiles/structure_in_jsme",
                :locals => { smiles: smiles, classes: "jsme-box", id: "jsme_#{compound_id}" } %>

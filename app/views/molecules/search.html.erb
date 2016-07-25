@@ -13,7 +13,14 @@
 <div class="show_basic">
   <div id='jsme_container'></div>
 
-  <table id="structure_query_result">
+  <% data_order = ""
+     case @search_type
+     when :SIMILARITY
+       data_order = '[[ 0, "desc" ]]'
+     when :SMARTS
+       data_order  = '[[ 0, "asc" ]]'
+     end %>
+  <table id="structure_query_result" data-order='<%= data_order %>'>
     <thead>
       <tr>
       <% if @search_type == :SIMILARITY %>
@@ -94,11 +101,10 @@ function jsmeOnLoad() {
         }
       }
     ],
-    order: [[ 0, 'asc' ]],
     asStripeClasses: []
   });
-  jQuery('#structure_query_result tbody').on( 'click', 'tr', function () {
-    jQuery(this).toggleClass('selected');
+  jQuery('#structure_query_result tbody tr').on( 'click', 'td:not(.not_selectable)', function () {
+    jQuery(this).parent().toggleClass('selected');
   });
   table.buttons().container().insertBefore( '#structure_query_result_filter' );
 }
