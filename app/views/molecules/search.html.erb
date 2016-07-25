@@ -1,7 +1,18 @@
-<%= stylesheet_link_tag "lightbox", "ul_li_table" %>
-<%= javascript_include_tag 'zoom/lightbox' %>
+<div class="yui-g" style="margin: 0.8em 0.8em;">
+  <div class="yui-u first">
+    <div>Search Query</div>
+    <%= render :partial => "search_box" %>
+  </div>
+
+  <div class="yui-u">
+    <div>JSME Editor</div>
+    <div id='jsme_container'></div>
+  </div>
+</div>
 
 <div class="show_basic">
+  <div id='jsme_container'></div>
+
   <table id="structure_query_result">
     <thead>
       <tr>
@@ -27,8 +38,24 @@
 </div>
 
 <script type="text/javascript">
+function updateQuery(jsmeEvent) {
+  var jsme = jsmeEvent.src;
+  var smiles = jsme.smiles();
+  var search_query = jQuery('#structure_search_query');
+  search_query.val(jsme.smiles());
+}
+
 //this function will be called after the JavaScriptApplet code has been loaded.
 function jsmeOnLoad() {
+  //Instantiate a new JSME:
+  //arguments: HTML id, width, height (must be string not number!), options
+  jsmeQueryApplet = new JSApplet.JSME("jsme_container", "380px", "380px", {
+    //optional parameters
+    smiles: "<%= @structure_search_query %>",
+    "options" : "query,hydrogens"
+  });
+  jsmeQueryApplet.setCallBack("AfterStructureModified", updateQuery);
+
   jsmeApplets = {};
   jQuery('.jsme-box').each( function(index, element){
     var box = jQuery(element);

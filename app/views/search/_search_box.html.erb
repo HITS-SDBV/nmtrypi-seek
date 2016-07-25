@@ -7,9 +7,7 @@
 <% if Seek::Config.solr_enabled -%>
   <div id="search_box">
     <%= form_tag main_app.search_path do -%>
-      <% if !is_front_page? %>
-        <%= jsme_popup_link -%>
-      <% end %>
+      <a href="<%= search_molecules_path %>">Structure search</a>
       <span id='search_label'><%= t('search_label')%></span>
       <%= text_field_tag :search_query, @search_query, :class=>"curved", :style=>"display:none;", :placeholder=>"Search here..." %>
       <%= select_tag :search_type, options_for_select(search_type_options,@search_type)  %>

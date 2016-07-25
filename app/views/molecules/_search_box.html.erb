@@ -1,38 +1,75 @@
-<% @search_type=:SMILES unless @search_type %>
 <div id="smiles_search_box" style="background-color: #456AAA">
   <%# for some reason is the first rendered <form> tag removed from the content, so this serves as a pawn for whatever does this 
   %>
   <form></form>
   <%= form_tag(search_molecules_path, :method => :post) do %>
+    <%= label_tag :structure_search_query, "SMILES or SMARTS:" %>
     <%= text_field_tag :structure_search_query, @search_query, :class=>"curved", :placeholder=>"Enter SMILES or SMART", :size => 50 %>
-    <div class="sysmo_gadget">
-      <div class="header curved_top">
-        <%= Seek::Search::Smiles::TYPES[:SMILES] %>
+    <div id="search_type_tabs">
+      <ul>
+        <li><a href="#search_type_SMILES"><%= Seek::Search::Smiles::TYPES[:SMILES] %></a></li>
+        <li><a href="#search_type_SMARTS"><%= Seek::Search::Smiles::TYPES[:SMARTS] %></a></li>
+        <li><a href="#search_type_SIMILARITY"><%= Seek::Search::Smiles::TYPES[:SIMILARITY] %></a></li>
+      </ul>
+      <div id="search_type_SMILES">
+        <p>
+          In this search, structures can be searched that match exactly the query structure.<br>
+          This can be adjusted to match exactly the SMILES ("Canonical Policy").<br>
+          It can also be adjusted to match SMILES encoded stereo and isotope configuration ("Isotope and Stereo Policy").
+        </p>
+        <table>
+          <tbody>
+            <tr>
+              <td><%= label_tag :canonical_policy, "Canonical Policy:"%></td>
+              <td><%= select_tag :canonical_policy, options_for_select(Seek::Search::Smiles::POLICY_CANONICAL.collect{ |policy,explain| [explain, policy]}, :canonical) %></td>
+            </tr>
+            <tr>
+              <td><%= label_tag :isotope_stereo_policy, "Isotope and Stereo Policy:"%></td>
+              <td><%= select_tag :isotope_stereo_policy, options_for_select(Seek::Search::Smiles::POLICY_ISOTOPE_STEREOCHEMISTRY.collect{ |policy,explain| [explain, policy]}, :canonical) %></td>
+            </tr>
+            <tr>
+              <td></td>
+              <td><%= submit_tag "Search", :name => :SMILES %></td>
+            </tr>
+          </tbody>
+        </table>
       </div>
-      <div class="contents curved_bottom">
-        <%= select_tag :canonical_policy, options_for_select(Seek::Search::Smiles::POLICY_CANONICAL.collect{ |policy,explain| [explain, policy]}, :canonical) %>
-        <%= select_tag :isotope_stereo_policy, options_for_select(Seek::Search::Smiles::POLICY_ISOTOPE_STEREOCHEMISTRY.collect{ |policy,explain| [explain, policy]}, :canonical) %>
-        <%= submit_tag "Search", :name => :SMILES %>
-      </div>
-    </div>
-
-    <div class="sysmo_gadget">
-      <div class="header curved_top">
-        <%= Seek::Search::Smiles::TYPES[:SMARTS] %>
-      </div>
-      <div class="contents curved_bottom">
+      <div id="search_type_SMARTS">
+        <p>
+          In this search, substructures can be searched. meaning the given SMILE is part of the structure to be found.<br>
+          Using the SMARTS language, wildcards for bonds and substituents can be set.
+        </p>
         <%= submit_tag "Search", :name => :SMARTS %>
       </div>
-    </div>
-    <div class="sysmo_gadget">
-      <div class="header curved_top">
-        <%= Seek::Search::Smiles::TYPES[:SIMILARITY] %>
-      </div>
-      <div class="contents curved_bottom">
-        <%= label_tag :tanimoto_coefficient, "Tanimoto coefficient cutoff" %>
-        <%= number_field_tag :tanimoto_coefficient, 0.8, min: 0, max: 1, step: 0.05 %>
-        <%= submit_tag "Search", :name => :SIMILARITY %>
+      <div id="search_type_SIMILARITY">
+        <p>
+          In this search, similar structures will be searched for. For the query structure a fingerprint will be generated.<br>
+          For all sructures to query against fingerprints are available. The similarity is then qunatified using the Tanimoto coefficient.<br>
+          Since all structure are queried and will be in the result, a reasonable cutoff needs to be defined.
+        </p>
+        <table>
+          <tbody>
+            <tr>
+              <td><%= label_tag :tanimoto_coefficient, "Tanimoto coefficient cutoff" %></td>
+              <td><%= number_field_tag :tanimoto_coefficient, @tanimoto_coefficient, min: 0.05, max: 1, step: 0.05 %></td>
+            </tr>
+            <tr>
+              <td></td>
+              <td><%= submit_tag "Search", :name => :SIMILARITY %></td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
   <% end %>
 </div>
+
+<script type="text/javascript">
+jQuery( function() {
+  var index = jQuery('#search_type_tabs a[href="#search_type_<%= @search_type.to_s %>"]').parent().index();
+  jQuery("#search_type_tabs").tabs({
+    active: index
+  });
+});
+</script>
+

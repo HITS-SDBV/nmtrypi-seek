@@ -1,6 +1,7 @@
 // ...
 //= require jquery
 //= require jquery_no_conflict
+//= require jquery-ui
 //= require taverna_player/application
 //= require savage_beast/application
 //= require prototype

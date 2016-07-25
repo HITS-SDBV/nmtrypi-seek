@@ -5,39 +5,41 @@ jrequire 'org.openscience.cdk.smiles.SmilesParser'
 
 jrequire 'java.io.StringWriter'
 
+# class MoleculeController
+# this class implements actions to search for molecules (based on smiles or smarts) in all data_files
+# @author woetzens
 class MoleculesController < ApplicationController
   include Org::Openscience
   # before_filter :find_all_compounds
 
-  # post function to search for compounds based on SMARTS/SMILES
+  # default parameters
+  DEFAULT_PARAMS = {
+    :structure_search_query => "",
+    :search_type => "SMILES",
+    :canonical_policy => "canonical",
+    :isotope_stereo_policy => "no",
+    :tanimoto_coefficient => "0.2"
+  }
+
+  # search for compounds based on SMARTS/SMILES
+  # the view renders a form, where all parameters for the search can be set; it also renders a tables with the found molecules
   # @author woetzens
   def search
-    @structure_search_query = params[:structure_search_query]
-    # @search=@structure_search_query # used for logging, and logs the origin search query - see ApplicationController#log_event
-    @structure_search_query||=""
-    @search_type = params.keys.find{|key| Seek::Search::Smiles::TYPES.has_key? key.to_sym}.to_sym
-    
-    @smiles_hash = []
+    # parse parameters into class variables
+    parse_params params
+    @smiles_hash = {}
     
     case @search_type
     when :SMILES
-      @canonical_policy = params[:canonical_policy].to_sym
-      @isotope_stereo_policy = params[:isotope_stereo_policy].to_sym
       @smiles_hash = Seek::Search::Smiles.matchCompoundSmiles Seek::Data::CompoundsExtraction.get_compound_id_smiles_hash, @structure_search_query, @canonical_policy, @isotope_stereo_policy
     when :SMARTS
       @smiles_hash, @matched_atoms_lists = Seek::Search::Smiles.matchCompoundSmarts Seek::Data::CompoundsExtraction.get_compound_id_smiles_hash, @structure_search_query
     when :SIMILARITY
-      @tanimoto_coefficient_cutoff = params[:tanimoto_coefficient].to_f
       @smiles_hash, @coefficients = Seek::Search::Smiles.matchCompoundSimilarity Seek::Data::CompoundsExtraction.get_compound_id_smiles_hash, @structure_search_query, @tanimoto_coefficient_cutoff
     else
       @smiles_hash = {}
     end
     
-    flash.now[:notice] = render_to_string( :partial => 'smiles/search_query').html_safe
-
-    respond_to do |format|
-      format.html { render template: 'molecules/compounds_view' }
-    end
   end
 
   def molfile
@@ -63,20 +65,15 @@ class MoleculesController < ApplicationController
            :locals => { frame: writer.toString().to_s }
   end
 
-  # used as ajax action for creating a redbox containing a JSME molecular editor
-  # @author woetzens
-  def jsme_box
-    respond_to do |format|
-      format.html { render :partial => "molecules/jsme_box",
-                           :locals => {}
-                  }
-    end
-  end
-
   private  
 
-  def find_all_compounds
-     @compounds=Compound.order(:name)
+  # set class varibales that are used for search from the params
+  def parse_params params
+    @structure_search_query      = (params[:structure_search_query]                                         || DEFAULT_PARAMS[:structure_search_query])
+    @search_type                 = (params.keys.find{|key| Seek::Search::Smiles::TYPES.has_key? key.to_sym} || DEFAULT_PARAMS[:search_type]           ).to_sym
+    @canonical_policy            = (params[:canonical_policy]                                               || DEFAULT_PARAMS[:canonical_policy]      ).to_sym
+    @isotope_stereo_policy       = (params[:isotope_stereo_policy]                                          || DEFAULT_PARAMS[:isotope_stereo_policy] ).to_sym
+    @tanimoto_coefficient_cutoff = (params[:tanimoto_coefficient]                                           || DEFAULT_PARAMS[:tanimoto_coefficient]  ).to_f
   end
 
 end
