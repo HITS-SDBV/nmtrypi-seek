@@ -26,7 +26,7 @@ module SpreadsheetHelper
   end
 
   def cell_link value, data_file_id
-    if (cname = Seek::Data::DataMatch.get_compound_name(value) != nil)
+    if (cname = Seek::Data::DataMatch.get_compound_name(value)) != nil
       cname = cname.to_s
       value.slice! cname #removes the matched compound name directly out of value
       compound_link(data_file_id, cname) + auto_link(h(value))
