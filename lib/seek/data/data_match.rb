@@ -7,6 +7,12 @@ module Seek
         content.to_s.match(/nmt[-_][a-zA-Z]+\d+/i) != nil
       end
 
+      def self.get_compound_name content
+        # nmtrypi project compounds naming conventions, e.g. NMT-H0004
+        #content.to_s.downcase.match(/\Anmt[-_][a-zA-Z]+(\d+)\Z/i) != nil
+        content.to_s.match(/nmt[-_][a-zA-Z]+\d+/i)
+      end
+
       def self.standardize_compound_name content
         # "-" <--> "_", and remove leading 0s before the non-zero number, e.g. NMT-H0004 <--> NMT_H4
         if compound_name? content
