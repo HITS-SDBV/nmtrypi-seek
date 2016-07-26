@@ -1,18 +1,16 @@
 <div class="yui-g" style="margin: 0.8em 0.8em;">
   <div class="yui-u first">
-    <div>Search Query</div>
+    <div><h1>Search Query</h1></div>
     <%= render :partial => "search_box" %>
   </div>
 
   <div class="yui-u">
-    <div>JSME Editor</div>
+    <div><h1>JSME Editor</h1></div>
     <div id='jsme_container'></div>
   </div>
 </div>
 
 <div class="show_basic">
-  <div id='jsme_container'></div>
-
   <% data_order = ""
      case @search_type
      when :SIMILARITY
@@ -49,7 +47,7 @@ function updateQuery(jsmeEvent) {
   var jsme = jsmeEvent.src;
   var smiles = jsme.smiles();
   var search_query = jQuery('#structure_search_query');
-  search_query.val(jsme.smiles());
+  search_query.val(jsme.smiles()).change();
 }
 
 //this function will be called after the JavaScriptApplet code has been loaded.

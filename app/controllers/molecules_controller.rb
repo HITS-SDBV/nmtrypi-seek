@@ -34,11 +34,31 @@ class MoleculesController < ApplicationController
     
     case @search_type
     when :SMILES
-      @smiles_hash = Seek::Search::Smiles.matchCompoundSmiles Seek::Data::CompoundsExtraction.get_compound_id_smiles_hash, @structure_search_query, @canonical_policy, @isotope_stereo_policy
+      begin
+        @smiles_hash = Seek::Search::Smiles.matchCompoundSmiles Seek::Data::CompoundsExtraction.get_compound_id_smiles_hash, @structure_search_query, @canonical_policy, @isotope_stereo_policy
+      rescue InvalidSmilesException => e
+        flash[:error] = "Check your SMILES: #{e.message}".html_safe
+      rescue Exception => e 
+        flash[:error] = "unknown error occured: #{e.to_s}".html_safe
+      end
     when :SMARTS
-      @smiles_hash, @matched_atoms_lists = Seek::Search::Smiles.matchCompoundSmarts Seek::Data::CompoundsExtraction.get_compound_id_smiles_hash, @structure_search_query
+      begin
+        @smiles_hash, @matched_atoms_lists = Seek::Search::Smiles.matchCompoundSmarts Seek::Data::CompoundsExtraction.get_compound_id_smiles_hash, @structure_search_query
+      rescue IllegalArgumentException => e
+        flash[:error] = "Check your SMARTS: #{e.message}".html_safe
+      rescue Exception => e 
+        flash[:error] = "unknown error occured: #{e.to_s}".html_safe
+      end
     when :SIMILARITY
-      @smiles_hash, @coefficients = Seek::Search::Smiles.matchCompoundSimilarity Seek::Data::CompoundsExtraction.get_compound_id_smiles_hash, @structure_search_query, @fingerprint_size, @fingerprint_search_depth, @tanimoto_coefficient_cutoff
+      begin
+        @smiles_hash, @coefficients = Seek::Search::Smiles.matchCompoundSimilarity Seek::Data::CompoundsExtraction.get_compound_id_smiles_hash, @structure_search_query, @fingerprint_size, @fingerprint_search_depth, @tanimoto_coefficient_cutoff
+      rescue InvalidSmilesException => e
+        flash[:error] = "Check your SMILES: #{e.message}".html_safe
+      rescue CDKException => e
+        flash[:error] = "#{e.message}".html_safe
+      rescue Exception => e 
+        flash[:error] = "unknown error occured: #{e.to_s}".html_safe
+      end
     else
       @smiles_hash = {}
     end

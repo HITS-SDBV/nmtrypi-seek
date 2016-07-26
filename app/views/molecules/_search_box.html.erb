@@ -1,15 +1,13 @@
-<div id="smiles_search_box" style="background-color: #456AAA">
-  <%# for some reason is the first rendered <form> tag removed from the content, so this serves as a pawn for whatever does this 
-  %>
-  <form></form>
+<div id="smiles_search_box">
   <%= form_tag(search_molecules_path, :method => :post) do %>
-    <%= label_tag :structure_search_query, "SMILES or SMARTS:" %>
-    <%= text_field_tag :structure_search_query, @structure_search_query, :class=>"curved", :placeholder=>"Enter SMILES or SMART", :size => 50 %>
     <div id="search_type_tabs">
+      <%= label_tag :structure_search_query, "SMILES or SMARTS:" %>
+      <%= text_field_tag :structure_search_query, @structure_search_query, :class=>"curved", :placeholder=>"Enter SMILES or SMART", :size => 50 %>
+      <br><small>This field will be updated as you draw your structure in the Editor.</small>
       <ul>
-        <li><a href="#search_type_SMILES"><%= Seek::Search::Smiles::TYPES[:SMILES] %></a></li>
-        <li><a href="#search_type_SMARTS"><%= Seek::Search::Smiles::TYPES[:SMARTS] %></a></li>
-        <li><a href="#search_type_SIMILARITY"><%= Seek::Search::Smiles::TYPES[:SIMILARITY] %></a></li>
+        <li><a href="#search_type_SMILES" data-search_type="SMILES"><%= Seek::Search::Smiles::TYPES[:SMILES] %></a></li>
+        <li><a href="#search_type_SMARTS" data-search_type="SMARTS"><%= Seek::Search::Smiles::TYPES[:SMARTS] %></a></li>
+        <li><a href="#search_type_SIMILARITY" data-search_type="SIMILARITY"><%= Seek::Search::Smiles::TYPES[:SIMILARITY] %></a></li>
       </ul>
       <div id="search_type_SMILES">
         <p>
@@ -52,32 +50,69 @@
             <tr>
               <td><%= label_tag :fingerprint_size, "Fingerprint size" %></td>
               <td><%= number_field_tag :fingerprint_size, @fingerprint_size, min: 128, max: 1024, step: 128 %></td>
+              <td></td>
             </tr>
             <tr>
               <td><%= label_tag :fingerprint_search_depth, "Fingerprint search depth" %></td>
               <td><%= number_field_tag :fingerprint_search_depth, @fingerprint_search_depth, min: 0, max: 8, step: 1 %></td>
+              <td>(reduce this when error occurs)</td>
             </tr>
             <tr>
               <td><%= label_tag :tanimoto_coefficient_cutoff, "Tanimoto coefficient cutoff" %></td>
               <td><%= number_field_tag :tanimoto_coefficient_cutoff, @tanimoto_coefficient_cutoff, min: 0.05, max: 1, step: 0.05 %></td>
+              <td></td>
             </tr>
             <tr>
               <td></td>
               <td><%= submit_tag "Search", :name => :SIMILARITY %></td>
+              <td></td>
             </tr>
           </tbody>
         </table>
       </div>
     </div>
+    <div>
+      <h2><a id="structure_search_link" href="<%= search_molecules_path %>">Link to this search</a></h2>
+    </div>
   <% end %>
 </div>
 
 <script type="text/javascript">
+function updateSearchLink(){
+  var link = jQuery('#structure_search_link');
+  var url = "<%= search_molecules_path %>?";
+  var params = {
+    "structure_search_query"      : jQuery('#structure_search_query').val(),
+    "canonical_policy"            : jQuery('#canonical_policy').val(),
+    "isotope_stereo_policy"       : jQuery('#isotope_stereo_policy').val(),
+    "fingerprint_size"            : jQuery('#fingerprint_size').val(),
+    "fingerprint_search_depth"    : jQuery('#fingerprint_search_depth').val(),
+    "tanimoto_coefficient_cutoff" : jQuery('#tanimoto_coefficient_cutoff').val()
+  };
+  var search_type = jQuery('#search_type_tabs > ul > li.ui-tabs-active').attr("aria-controls").replace("search_type_","");
+  params[search_type] = "Search";
+  url += jQuery.param(params);
+  console.log(url);
+  link.attr('href', url);
+}
+
 jQuery( function() {
   var index = jQuery('#search_type_tabs a[href="#search_type_<%= @search_type.to_s %>"]').parent().index();
   jQuery("#search_type_tabs").tabs({
-    active: index
+    active: index,
+    activate: updateSearchLink
   });
+  var on_change_element_ids = [
+    "structure_search_query",
+    "canonical_policy",
+    "isotope_stereo_policy",
+    "fingerprint_size",
+    "fingerprint_search_depth",
+    "tanimoto_coefficient_cutoff"];
+  on_change_element_ids.forEach(function(item){
+    jQuery('#' + item).change(updateSearchLink);
+  });
+  updateSearchLink();
 });
 </script>
 

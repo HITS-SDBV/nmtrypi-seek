@@ -59,14 +59,16 @@ module Seek
       # @return hash {"compound_id" => "smiles"} where the smiles in the hash mathches given the flavor
       def self.matchCompoundSmiles compound_smiles_hash, smiles_query, canonical_policy, isotope_stereo_policy
         matching_compounds_hash = Hash.new()
-        # moelcule from query
         smiles_query_molecule = nil
-        begin
+
+        # exeptions for the query should be handled upstream, since they might be shown as error to the user
+        # begin
+          # moelcule from query
           smiles_query_molecule = @@smiles_parser.parseSmiles(smiles_query)
-        rescue
-          Rails.logger.error "unable to parse smiles query into molecule: #{smiles_query}"
-          return matching_compounds_hash
-        end
+        # rescue
+          # Rails.logger.error "unable to parse smiles query into molecule: #{smiles_query}"
+          # return matching_compounds_hash
+        # end
 
         # smiles generator to generate smiles from atom container
         smiles_generator = smilesGeneratorFromPolicies canonical_policy, isotope_stereo_policy
@@ -98,15 +100,15 @@ module Seek
       def self.matchCompoundSmarts compound_smiles_hash, smarts_query
         matching_compounds_hash = Hash.new()
         matched_atoms_lists = Hash.new()
-
-        # smiles parser to generate atom container from smiles string
         smarts_query_tool = nil
-        begin
+
+        # exeptions for the query should be handled upstream, since they might be shown as error to the user
+        # begin
           smarts_query_tool = Cdk::Smiles::Smarts::SMARTSQueryTool.new(smarts_query,@@chem_object_builder)
-        rescue
-          Rails.logger.error "unable to parse smarts query into smarts query tool: #{smarts_query}"
-          return matching_compounds_hash, matched_atoms_lists
-        end
+        # rescue
+          # Rails.logger.error "unable to parse smarts query into smarts query tool: #{smarts_query}"
+          # return matching_compounds_hash, matched_atoms_lists
+        # end
 
         compound_smiles_hash.each do |id,compound_smiles|
           # TODO it might be necessary to remove stereo-configuration in case isotope_stereo_policy is :no
@@ -144,14 +146,15 @@ module Seek
 
         smiles_query_molecule = nil
         query_molecule_fingerprint = nil
-        begin
+        # exeptions for the query should be handled upstream, since they might be shown as error to the user
+        # begin
           smiles_query_molecule = @@smiles_parser.parseSmiles(smiles_query)
           # query_molecule_complete = addHydrogens smiles_query_molecule
           query_molecule_fingerprint = finger_printer.getBitFingerprint(smiles_query_molecule)
-        rescue
-          Rails.logger.error "unable to parse smiles query into molecule or fingerprint: #{smiles_query}"
-          return matching_compounds_hash, coefficients
-        end
+        # rescue
+          # Rails.logger.error "unable to parse smiles query into molecule or fingerprint: #{smiles_query}"
+          # return matching_compounds_hash, coefficients
+        # end
 
         # compare to each molecule
         compound_smiles_hash.each do |id,compound_smiles|
