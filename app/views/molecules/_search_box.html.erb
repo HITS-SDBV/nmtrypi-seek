@@ -92,7 +92,6 @@ function updateSearchLink(){
   var search_type = jQuery('#search_type_tabs > ul > li.ui-tabs-active').attr("aria-controls").replace("search_type_","");
   params[search_type] = "Search";
   url += jQuery.param(params);
-  console.log(url);
   link.attr('href', url);
 }
 
