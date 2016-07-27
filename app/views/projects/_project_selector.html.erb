@@ -7,13 +7,18 @@
    allow_nil ||= false
    allow_all ||= Seek::Config.is_virtualliver
 
+   def_proj = Project.where(:title => t('special.default_project'))[0]
+   def_proj_id = def_proj ? def_proj.id : []
 
    possibilities ||= allow_all  ? Project.all : (User.current_user.person.projects + resource.try(:projects)).uniq
 
    resource ||= nil
-   if resource       
-       selected_project_ids = [possibilities.first.id] if resource.new_record? && resource.errors.empty? && possibilities.count==1
-       selected_project_ids ||= resource.project_ids
+   if resource
+       #selected_project_ids = [possibilities.first.id] if resource.new_record? && resource.errors.empty? && possibilities.count==1
+     selected_project_ids = [possibilities.first.id] if resource.new_record? && resource.errors.empty? && possibilities.count==1
+     selected_project_ids ||= [def_proj_id] if resource.new_record? && resource.errors.empty?
+     selected_project_ids ||= resource.project_ids
+
    else
      selected_project_ids = []
    end

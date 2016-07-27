@@ -1,5 +1,10 @@
 #The terms should be capitalized at the first character.
 en:
+  #instance specific
+  special:
+    default_project: "NMTrypI"
+    compound_id_prefix: "nmt"
+
   #Biosamples renaming
   biosamples:
     sample_parent_term: "Cell culture"
