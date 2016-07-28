@@ -22,6 +22,7 @@
 
 <br/>
 
+<% if @study.can_manage? %>
 <div class="fold">
   <div class="foldTitle">
     <%= t('investigation') %> details
@@ -56,6 +57,7 @@
     <%= render :seek_partial=>"assets/sharing_form" if @study.can_manage? -%>
   </p>
 </div>
+<% end %>
 
 
 
