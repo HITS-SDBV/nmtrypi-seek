@@ -59,7 +59,7 @@ module SpreadsheetHelper
     #li_smiles_graph = content_tag(:li, ("Compound structure " + smile_graph_link).html_safe, :class => "dynamic_menu_li").html_safe
     li_report = content_tag(:li, compound_report_link, :class => "dynamic_menu_li").html_safe
     link_list = "#{li_search}  #{li_report}".gsub("'", %q(\\\'))
-    value_link = link_to_function(value, {:class => "context_menu_link", :onclick => "$j(this).trigger('context_menu', ['#{link_list}']); return false;"}).html_safe
+    value_link = link_to_function(value, {:class => "context_menu_link", :onclick => "jQuery(this).trigger('context_menu', ['#{link_list}']); return false;"}).html_safe
     value_link + " " + smile_graph_link
   end
 
@@ -72,7 +72,7 @@ module SpreadsheetHelper
 
                            :onclick => "javascript: window.open('#{string_db_url.html_safe}', '_blank');").html_safe
     #left click
-    string_or_uniprot_link = link_to_function value, {:class => "context_menu_link", :onclick => "$j(this).trigger('context_menu', ['#{li_uniprot}'+ '#{li_string}']); return false;"}
+    string_or_uniprot_link = link_to_function value, {:class => "context_menu_link", :onclick => "jQuery(this).trigger('context_menu', ['#{li_uniprot}'+ '#{li_string}']); return false;"}
     string_or_uniprot_link.html_safe
   end
 

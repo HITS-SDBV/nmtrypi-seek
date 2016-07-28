@@ -355,7 +355,7 @@ $j(document).ready(function ($) {
        .on("context_menu", function(evt, menu_content){
            $('#cell_menu').css('top', $(this).position().top + $(this).height());
            $('#cell_menu').css('left',$(this).position().left);
-           Element.update('cell_menu',menu_content);
+           $('#cell_menu').html(menu_content);
            if( $('#cell_menu').css("display") === "none"){
                $('#cell_menu').show();
            }
