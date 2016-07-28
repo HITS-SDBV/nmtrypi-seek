@@ -3,6 +3,8 @@
 <%# - selected_project_ids - IDs of the projects the resource is currently associated with; skip this parameter for a "new" resource -%>
 <%# - disable_project_select - selection should only be available on 'new' action, but not on 'edit'; this parameter has a default of "false" -%>
 
+<%# Sets the projects that are already associated with the asset in the blue box with a 'remove' option.
+a new asset will be automatically associated to the default_project in the configuration file (en.yml special:default_project). %>
 <%
    allow_nil ||= false
    allow_all ||= Seek::Config.is_virtualliver

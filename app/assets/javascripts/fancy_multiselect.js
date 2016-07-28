@@ -11,7 +11,7 @@
         $(multiselect).setValue($F(multiselect).without(value));
         updateFancyMultiselect(multiselect);
     }
-
+    //inserts an item to the box that specifies the selected assets so far, with a "remove" link
     function insertFancyListItem(multiselect, displaylist, option) {
         var text = option.text;
         var title_span = '<span title="' + text.escapeHTML() + '">' + text.truncate(100).escapeHTML() + '</span>';
@@ -21,7 +21,7 @@
         remove_link += '); return(false);">remove</a>';
         displaylist.insert('<li>' + title_span +'&nbsp;&nbsp;<small style="vertical-align: middle;">[' + remove_link + ']</small></li>');
     }
-
+    // updates the selected assets box (display) with a selected options. 
     function updateFancyMultiselect(multiselect) {
         var possible_multiselect = $("possible_" + multiselect);
         var multiselect = $(multiselect);

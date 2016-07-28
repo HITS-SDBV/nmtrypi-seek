@@ -1,5 +1,6 @@
 <%= javascript_include_tag 'calendar_date_select/calendar_date_select' %>
 <%= stylesheet_link_tag 'calendar_date_select/default' %>
+<%# input: form f, boolean manage (can the current user manage this asset?) %>
 <%
    if f ||= nil
      resource_type ||= f.object.class.name
@@ -9,6 +10,7 @@
 	 other_creators ||= f.object.try :other_creators
 	 related_publications ||= f.try(:object).respond_to?(:related_publications) ? f.object.related_publications : nil
    end
+   manage = false if manage.nil?
    existing_attributions||=[]
    existing_creators||=[current_user.person]
    related_publications||=[]
@@ -16,7 +18,7 @@
    show_publications=true if show_publications.nil?
    show_publications = show_publications && Seek::Config.publications_enabled
    taggable = resource_type.constantize.is_taggable?
-   sharing_enable=true if sharing_enable.nil?
+   sharing_enable=true if (sharing_enable.nil? && manage)
    attribution_enable=true if attribution_enable.nil?
    creators_enable=true if creators_enable.nil?
    sharing_link=true if sharing_link.nil?
