@@ -17,14 +17,16 @@
 
     <%# only the owner should be able to change sharing permissions -%>
       <% if current_user_authorized_to_manage -%>
-
+          <%# projects/project_selector sets up the projects that are already selected for this asset (data file)  %>
           <%= render :partial => "projects/project_selector", :locals => {:resource => @data_file, :allow_nil => true} %>
           <p>
             <%= render :partial => "scales/scales_selector", :locals => {:object => @data_file} if show_scales? %>
           </p>
       <% end %>
 
-      <%= render :partial=>"assets/asset_form_bottom", :locals=> { :f => f } -%>
+    <%# This displays: sharing, tags, attributions, contributors, publications
+        takes the form (f) as input and a boolean value (manage) for whether the user is authorized to manage -%>
+    <%= render :partial=>"assets/asset_form_bottom", :locals=> { :f => f, :manage => current_user_authorized_to_manage } -%>
       
 
         <p>

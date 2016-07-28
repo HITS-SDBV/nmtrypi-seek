@@ -26,8 +26,10 @@ module SpreadsheetHelper
   end
 
   def cell_link value, data_file_id
-    if Seek::Data::DataMatch.compound_name?(value) # if it is a compound id/name
-      compound_link data_file_id, value
+    if (cname = Seek::Data::DataMatch.get_compound_name(value)) != nil
+      cname = cname.to_s
+      value.slice! cname #removes the matched compound name directly out of value
+      compound_link(data_file_id, cname) + auto_link(h(value))
     elsif Seek::Data::DataMatch.uniprot_identifier?(value) # if it is an uniprot identifier
       string_or_uniprot_link(value)
     else
