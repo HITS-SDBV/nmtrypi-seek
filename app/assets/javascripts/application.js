@@ -37,3 +37,5 @@
 //= require datatables.net-jqui
 //= require datatables.net-buttons
 //= require datatables.net-buttons-jqui
+//= require datatables.net-responsive
+//= require datatables.net-responsive-jqui
