@@ -3,6 +3,7 @@ jrequire 'org.openscience.cdk.io.MDLV2000Writer'
 jrequire 'org.openscience.cdk.layout.StructureDiagramGenerator'
 jrequire 'org.openscience.cdk.smiles.SmilesParser'
 jrequire 'org.openscience.cdk.fingerprint.Fingerprinter'
+jrequire 'org.openscience.cdk.smiles.smarts.parser.SMARTSParser'
 
 jrequire 'java.io.StringWriter'
 
@@ -32,10 +33,13 @@ class MoleculesController < ApplicationController
     parse_params params
     @smiles_hash = {}
     
+    @compound_id_smiles_hash = Seek::Data::CompoundsExtraction.get_compound_id_smiles_hash
+    @visible_compound_id_smiles_hash = @compound_id_smiles_hash.keep_if{ |compound_id,smiles| smiles != 'hidden'}
+    
     case @search_type
     when :SMILES
       begin
-        @smiles_hash = Seek::Search::Smiles.matchCompoundSmiles Seek::Data::CompoundsExtraction.get_compound_id_smiles_hash, @structure_search_query, @canonical_policy, @isotope_stereo_policy
+        @smiles_hash = Seek::Search::Smiles.matchCompoundSmiles @visible_compound_id_smiles_hash, @structure_search_query, @canonical_policy, @isotope_stereo_policy
       rescue InvalidSmilesException => e
         flash[:error] = "Check your SMILES: #{e.message}".html_safe
       rescue Exception => e 
@@ -43,7 +47,7 @@ class MoleculesController < ApplicationController
       end
     when :SMARTS
       begin
-        @smiles_hash, @matched_atoms_lists = Seek::Search::Smiles.matchCompoundSmarts Seek::Data::CompoundsExtraction.get_compound_id_smiles_hash, @structure_search_query
+        @smiles_hash, @matched_atoms_lists = Seek::Search::Smiles.matchCompoundSmarts @visible_compound_id_smiles_hash, @structure_search_query
       rescue IllegalArgumentException => e
         flash[:error] = "Check your SMARTS: #{e.message}".html_safe
       rescue Exception => e 
@@ -51,7 +55,7 @@ class MoleculesController < ApplicationController
       end
     when :SIMILARITY
       begin
-        @smiles_hash, @coefficients = Seek::Search::Smiles.matchCompoundSimilarity Seek::Data::CompoundsExtraction.get_compound_id_smiles_hash, @structure_search_query, @fingerprint_size, @fingerprint_search_depth, @tanimoto_coefficient_cutoff
+        @smiles_hash, @coefficients = Seek::Search::Smiles.matchCompoundSimilarity @visible_compound_id_smiles_hash, @structure_search_query, @fingerprint_size, @fingerprint_search_depth, @tanimoto_coefficient_cutoff
       rescue InvalidSmilesException => e
         flash[:error] = "Check your SMILES: #{e.message}".html_safe
       rescue CDKException => e
@@ -71,11 +75,15 @@ class MoleculesController < ApplicationController
     # smiles parser to generate atom container from smiles string
     smiles_parser = Cdk::Smiles::SmilesParser.new(Cdk::DefaultChemObjectBuilder.getInstance())
 
-    molecule = smiles_parser.parseSmiles(smiles)
+    molecule = nil
+    begin
+      molecule = smiles_parser.parseSmiles(smiles)
+    rescue InvalidSmilesException
+    end
 
     # add coordinates
     sdg = Cdk::Layout::StructureDiagramGenerator.new()
-    sdg.setMolecule(molecule)
+    sdg.setMolecule(molecule,false)
     sdg.generateCoordinates()
     layed_out_mol = sdg.getMolecule();
 

@@ -27,6 +27,9 @@
         <th>Number of occurences</th>
       <% end %>
         <th>compoundID</th>
+      <% if @search_type == :SMARTS %>
+        <th data-orderable="false">Highlight substructure match</th>
+      <% end %>
         <th data-orderable="false">structure</th>
         <th data-orderable="false">smiles</th>
       </tr>
@@ -61,6 +64,14 @@ function jsmeOnLoad() {
   });
   jsmeQueryApplet.setCallBack("AfterStructureModified", updateQuery);
 
+  // jQuery.ajax({
+    // url: "<%= mol2file_molecules_path %>",
+    // data: { SMILES: jQuery('#structure_search_query').val()},
+    // dataType: "text"
+  // }).done(function(data){
+    // jsmeQueryApplet.readMolFile(data);
+  // });
+
   jsmeApplets = {};
   jQuery('.jsme-box').each( function(index, element){
     var box = jQuery(element);
@@ -84,11 +95,45 @@ function jsmeOnLoad() {
     // });
   });
 
+
+	// the current version of datatables.net-buttons collection still uses the deprecated 'addSelf' instead of 'addBack'
+	// https://github.com/jquery/jquery-migrate/blob/dc1d703f7747d71f471316bc66a2ea32b6197046/src/traversing.js
+	// this is already fixed in the master branch, but has not been in the release yet
+	var oldSelf = jQuery.fn.andSelf || jQuery.fn.addBack;
+	jQuery.fn.andSelf = function() {
+		console.log( "jQuery.fn.andSelf() is deprecated and removed. Remove this code once datatables.net-buttons is updated to 1.2.2 or higher" );
+		return oldSelf.apply( this, arguments );
+	};
+
   var table = jQuery('#structure_query_result').DataTable({
     buttons: [ 
-      'copy', 'csv', 'excel', 'pdf', 'print',
       {
-      text: "Attributes for selected",
+        extend: 'collection',
+        text: 'Export',
+        autoClose: true,
+        buttons: ['copy', 'csv', 'excel', 'pdf', 'print']
+      },
+      {
+        extend: 'collection',
+        text: 'Select',
+        autoClose: true,
+        buttons: [
+          {
+            text: "Select all",
+            action: function(){
+              jQuery('#structure_query_result tbody tr').addClass('selected');
+            }
+          },
+          {
+            text: "Deselect all",
+            action: function(){
+              jQuery('#structure_query_result tbody tr').removeClass('selected');
+            }
+          }
+        ]
+      },
+      {
+        text: "Attributes for selected",
         action: function(){
           ids = jQuery( table.rows('.selected').nodes()).map(
                   function(){ return jQuery(this).data('compoundid');}
@@ -101,22 +146,23 @@ function jsmeOnLoad() {
     ],
     asStripeClasses: []
   });
+  table.buttons().container().insertAfter( '#structure_query_result_length');
+  
   jQuery('#structure_query_result tbody tr').on( 'click', 'td:not(.not_selectable)', function () {
     jQuery(this).parent().toggleClass('selected');
   });
-  table.buttons().container().insertBefore( '#structure_query_result_filter' );
 }
 
 function highlightAtoms(element) {
   var jelement = jQuery(element);
-  var jsme_box = jQuery(jelement.siblings('div.jsme-box'));
-  var jsme = jsmeApplets[jsme_box.attr('id')];
+  var row = jQuery(jelement.parents('tr'));
+  var jsme = jsmeApplets["jsme_"+row.data('compoundid')];
   var atom_list = jelement.data("atom-list");
   var color = jelement.data("color");;
   var atom_color_list = [];
   atom_list.forEach(function(item,index) {
-  	atom_color_list.push(item);
-  	atom_color_list.push(color);
+    atom_color_list.push(item);
+    atom_color_list.push(color);
   });
   jsme.resetAtomColors(1);
   jsme.setAtomBackgroundColors(1, atom_color_list.join());
@@ -124,8 +170,8 @@ function highlightAtoms(element) {
 
 function clearHighlightAtoms(element) {
   var jelement = jQuery(element);
-  var jsme_box = jQuery(jelement.siblings('div.jsme-box'));
-  var jsme = jsmeApplets[jsme_box.attr('id')];
+  var row = jQuery(jelement.parents('tr'));
+  var jsme = jsmeApplets["jsme_"+row.data('compoundid')];
   jsme.resetAtomColors(1);
 }
 </script>

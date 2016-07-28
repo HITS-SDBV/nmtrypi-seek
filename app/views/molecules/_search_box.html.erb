@@ -74,6 +74,9 @@
     <div>
       <h2><a id="structure_search_link" href="<%= search_molecules_path %>">Link to this search</a></h2>
     </div>
+    <div>
+      <h2><%= "Found #{@smiles_hash.size} in #{@visible_compound_id_smiles_hash.size} visible in #{@compound_id_smiles_hash.size} compounds with smiles." %></h2>
+    </div>
   <% end %>
 </div>
 

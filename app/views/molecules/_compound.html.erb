@@ -7,17 +7,17 @@
   <td>
     <%= compound_id %>
   </td>
-  <td  class="not_selectable">
-    <div>
+  <% if @search_type == :SMARTS %>
+    <td class="not_selectable">
+      <% @matched_atoms_lists[compound_id].each_with_index do |atom_list, index| %>
+        <button type="button" onclick="highlightAtoms(this);" data-atom-list="<%= atom_list.as_json %>" data-color="<%= index.modulo(6) + 1 %>"><%= index+1 %></button><br>
+      <% end %>
+      <button type="button" onclick="clearHighlightAtoms(this);">Clear</button>
+    </td>
+  <% end %>
+  <td class="not_selectable">
     <%= render :partial => "smiles/structure_in_jsme",
                :locals => { smiles: smiles, classes: "jsme-box", id: "jsme_#{compound_id}" } %>
-    <% if @search_type == :SMARTS %>
-      Highlight substructure match: <button type="button" onclick="clearHighlightAtoms(this);">Clear</button><br>
-      <% @matched_atoms_lists[compound_id].each_with_index do |atom_list, index| %>
-        <button type="button" onclick="highlightAtoms(this);" data-atom-list="<%= atom_list.as_json %>" data-color="<%= index.modulo(6) + 1 %>"><%= index+1 %></button>
-      <% end %>
-    <% end %>
-    </div>
   </td>
   <td>
     <%= smiles %>
