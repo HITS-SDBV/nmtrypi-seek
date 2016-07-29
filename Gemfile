@@ -118,9 +118,9 @@ group :development do
   gem 'rails_best_practices'
 end
 
-group :vagrant do
-  gem "ruby-debug-ide"
-end
+#group :vagrant do
+#  gem "ruby-debug-ide"
+#end
 
 group :test do
   gem 'test_after_commit'
