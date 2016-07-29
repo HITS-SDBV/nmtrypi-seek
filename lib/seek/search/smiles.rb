@@ -12,8 +12,8 @@ module Seek
     # @author woetzens
     # @date 07/15/2016
     class Smiles
-      include Org::Openscience
       include Java
+      include Org::Openscience
 
       TYPES = Hash.new{ |hash, key| raise( "Search Type #{ key } is unknown" )}.update(
         :SMILES => "Search for Structure",
@@ -21,6 +21,7 @@ module Seek
         :SIMILARITY => "Search for similar Structures"
       )
 
+      # http://cdk.github.io/cdk/1.5/docs/api/org/openscience/cdk/smiles/SmilesGenerator.html
       FLAVOURS = Hash.new{ |hash, key| raise( "SMILES Flavour #{ key } is unknown" )}.update(
         :generic  => "non-canonical SMILES string, different atom ordering produces different SMILES. No isotope or stereochemistry encoded.",
         :unique   => "canonical SMILES string, different atom ordering produces the same* SMILES. No isotope or stereochemistry encoded.",
@@ -97,6 +98,7 @@ module Seek
       # @param compound_smiles_hash hash {"compound_id" => "smiles"}
       # @param smarts_query the smiles or amarts string to compare to
       # @return hash {"compound_id" => "smiles"} where the query is a substructure of the molecule, list of lists of matched atom_ids
+      # @return [[atomid1,atomid2],[atomid1, atomid2]] list of matched atom ids
       def self.matchCompoundSmarts compound_smiles_hash, smarts_query
         matching_compounds_hash = Hash.new()
         matched_atoms_lists = Hash.new()
@@ -136,7 +138,8 @@ module Seek
       # @param fingerprint_size the size of the fingerprint
       # @param fingerprint_search_depth the depth of the search to generate the fingerprint
       # @param tanimoto_coefficient_cutoff the minimal similarity [0..1] to include the smiles in the result hash
-      # @return hash {"compound_id" => "smiles"} where the query structure is similar above the given cutoff, Hash of coefficients {"compound_id" => "tanimoto_coefficient"}
+      # @return hash {"compound_id" => "smiles"} where the query structure is similar above the given cutoff
+      # @return hash of coefficients {"compound_id" => "tanimoto_coefficient"}
       def self.matchCompoundSimilarity compound_smiles_hash, smiles_query, fingerprint_size, fingerprint_search_depth, tanimoto_coefficient_cutoff
         matching_compounds_hash = Hash.new
         coefficients = Hash.new()

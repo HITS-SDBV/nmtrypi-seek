@@ -96,7 +96,7 @@ class MoleculesController < ApplicationController
            :locals => { frame: writer.toString().to_s }
   end
 
-  private  
+  private
 
   # set class varibales that are used for search from the params
   def parse_params params

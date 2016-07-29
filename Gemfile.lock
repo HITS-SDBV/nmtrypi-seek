@@ -557,7 +557,7 @@ GEM
       mime-types (>= 1.16, < 3.0)
       netrc (~> 0.7)
     rfc-822 (0.4.0)
-    rjb (1.5.3)
+    rjb (1.5.4)
     rmagick (2.13.2)
     rsolr (1.0.10)
       builder (>= 2.1.2)
@@ -802,7 +802,7 @@ DEPENDENCIES
   request-log-analyzer
   rest-client
   rfc-822
-  rjb
+  rjb (~> 1.5.3)
   rmagick (= 2.13.2)
   rspec-rails
   rubocop
