@@ -18,7 +18,7 @@
     <%# only the owner should be able to change sharing permissions -%>
       <% if current_user_authorized_to_manage -%>
           <%# projects/project_selector sets up the projects that are already selected for this asset (data file)  %>
-          <%= render :partial => "projects/project_selector", :locals => {:resource => @data_file, :allow_nil => true} %>
+          <%= render :partial => "projects/project_selector", :locals => {:resource => @data_file, :allow_nil => true, :manage => current_user_authorized_to_manage } %>
           <p>
             <%= render :partial => "scales/scales_selector", :locals => {:object => @data_file} if show_scales? %>
           </p>
