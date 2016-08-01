@@ -1,4 +1,13 @@
 GIT
+  remote: https://github.com/HITS-SDBV/rcdk.git
+  revision: 16f6662f9ba5e17a82b6ee9e800cd3364b881d97
+  tag: v0.4.0
+  specs:
+    rcdk (0.4.0)
+      lock_jar (~> 0.15.0)
+      rjb (~> 1.5)
+
+GIT
   remote: https://github.com/SysMO-DB/acts_as_activity_logged.git
   revision: da0b6d8e4ccabfa231c39aa89522c8ba73f03c0e
   specs:
@@ -99,12 +108,6 @@ GIT
   revision: c02bea47e477c1ac59e45a2a8a51aaa2c8e6b72f
   specs:
     white_list_formatted_content (1.0.0)
-
-GIT
-  remote: https://github.com/aina1205/rcdk.git
-  revision: f2e3a6d756c5d7f68b80b21d914022991d959a21
-  specs:
-    rcdk (0.3.0)
 
 GIT
   remote: https://github.com/myGrid/annotations.git
@@ -304,6 +307,7 @@ GEM
     httparty (0.12.0)
       json (~> 1.8)
       multi_xml (>= 0.5.2)
+    httpclient (2.8.0)
     httpi (1.1.1)
       rack
     i18n (0.7.0)
@@ -345,6 +349,9 @@ GEM
       celluloid (>= 0.15.2)
       rb-fsevent (>= 0.9.3)
       rb-inotify (>= 0.9)
+    lock_jar (0.15.2)
+      naether (~> 0.15.0)
+      thor (>= 0.18.1)
     lograge (0.3.0)
       actionpack (>= 3)
       activesupport (>= 3)
@@ -385,6 +392,9 @@ GEM
     multi_xml (0.5.5)
     multipart-post (2.0.0)
     mysql2 (0.3.16)
+    naether (0.15.0)
+      httpclient
+      rjb (> 1.4.0, < 1.6.0)
     net-http-digest_auth (1.4)
     net-http-persistent (2.9.4)
     netrc (0.8.0)
@@ -794,7 +804,7 @@ DEPENDENCIES
   rails-assets-underscore (~> 1.8.3)!
   rails_autolink
   rails_best_practices
-  rcdk (= 0.3.0)!
+  rcdk (= 0.4.0)!
   rdf-virtuoso (>= 0.1.6)
   rdoc
   recaptcha

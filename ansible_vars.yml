@@ -56,3 +56,5 @@ nginx_vhosts:
     passenger_user: vagrant
     passenger_enabled: "on"
     passenger_app_env: "{{ rails_env }}"
+    # https://www.phusionpassenger.com/library/indepth/ruby/spawn_methods/#smart-spawning-caveats
+    extra_parameters: "passenger_spawn_method direct;"
