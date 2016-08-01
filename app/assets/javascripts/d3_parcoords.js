@@ -2,7 +2,10 @@
 
 var parcoord_data;
 var graph;
-var color_range_rg;
+var color_range = ["#fed98e", "#a1dab4" , "#41b6c4", "#2c7fb8", "#253494"];
+//color_range = [ "#74a92c", "#f33"]; //red-green
+//['#fc8d59','#ffffbf','#91bfdb'];// (red-white-blue)
+//['#fc8d59','#ffffbf','#91cf60']; //(red-yellow-green)
 var color_set;
 var MAX_ROWS = 50;
 var DEFAULT_HEIGHT = 520;
@@ -34,11 +37,8 @@ function initialize(data, textLength){
        }
      }
 
-    color_range_rg = [ "#74a92c", "#f33"]; //red-green
-    //['#fc8d59','#ffffbf','#91bfdb'];// (red-white-blue)
-    //['#fc8d59','#ffffbf','#91cf60']; //(red-yellow-green)
-    color_set = d3.scale.linear()
-               .range(color_range_rg);
+    //color_set = d3.scale.linear()
+     //          .range(color_range);
 
     pcHeight = data_length < MAX_ROWS ? DEFAULT_HEIGHT : (data_length / MAX_ROWS) * DEFAULT_HEIGHT;
     //can only get style of visible elements, not the new popup.
@@ -48,7 +48,7 @@ function initialize(data, textLength){
 
     // set parallel coordinates
     //chaining .width(value) to the d3 commands does not work. Might only be events (like brushMode) which can be chained
-    config = {width: pcWidth, height: pcHeight, alpha: 0.6};
+    config = {width: pcWidth, height: pcHeight, alpha: 1};
     graph = d3.parcoords(config)('#parcoords_plot')
        .data(parcoord_data)
        .margin({ top: 130, left: 8 * textLength, bottom: 40, right: 0 })
@@ -184,14 +184,24 @@ function update_colors(dimension) {
         .filter(function(d) { return d == dimension; })
         .style("font-weight", "bold");
 
+    var color_arr_size = color_range.length;
+    var domain_array=[];
     // change color of lines
     // set domain+range of color scale
     var types = graph.detectDimensionTypes(graph.data());
     if (types[dimension] === 'number') {
         var vals = graph.data().map(function(d){return parseFloat(d[dimension]);});
+
+        var delta = (d3.max(vals) - d3.min(vals)) / (color_arr_size-1)
+
+        for (var i=0; i<color_arr_size; i++) {
+            domain_array[i] = d3.min(vals) + i*delta
+        }
+
         color_set = d3.scale.linear()
-                .range(color_range_rg)
-                .domain([d3.min(vals), d3.max(vals)]);
+                .range(color_range)
+                .domain(domain_array);
+                //.domain([d3.min(vals), d3.max(vals)]);
                 //.domain([Math.sqrt(d3.min(vals)), Math.sqrt(d3.max(vals))]);
     //categorical data
     } else {
@@ -202,11 +212,17 @@ function update_colors(dimension) {
         as in typical linear scales. Therefore we map the range of vals [0,vals.length]
         to a color scale in a domain of [0, vals.length]
         ---*/
+
+        var delta = vals.length / (color_arr_size-1)
+        for (var i=0; i<color_arr_size; i++) {
+            domain_array[i] = i*delta
+        }
         color_set = d3.scale.ordinal()
                 .domain(vals)
                 .range(d3.range(vals.length).map(d3.scale.linear()
-                        .domain([0, vals.length - 1])
-                        .range(color_range_rg)
+                       // .domain([0, vals.length - 1])
+                        .domain(domain_array)
+                        .range(color_range)
                         .interpolate(d3.interpolateLab)));
                 //.range(colorbrewer.RdYlGn[9]);
     }
