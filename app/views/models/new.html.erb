@@ -33,7 +33,7 @@
             <%= render :partial => "scales/scales_selector",:locals=>{:object=>@model} if show_scales?%>
           </p>
 
-        <%= fields_for(@model) {|f| render :partial=>"assets/asset_form_bottom", :locals=> {:f => f}} -%>
+        <%= fields_for(@model) {|f| render :partial=>"assets/asset_form_bottom", :locals=> {:f => f, :manage => @model.can_manage? }} -%>
        
 
         <%= render :partial => "assays/associate_assays", :locals=>{:resource => @model, :show_relationships => false} -%>
