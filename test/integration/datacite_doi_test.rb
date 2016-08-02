@@ -279,8 +279,9 @@ class DataciteDoiTest < ActionController::IntegrationTest
       assert asset.is_any_doi_minted?
 
       get "/#{type.pluralize}/#{asset.id}/edit"
-
-      assert_select "input[type=radio][disabled=true]", :count => 2
+      if (asset.can_manage?)
+         assert_select "input[type=radio][disabled=true]", :count => 2
+      end
     end
   end
 
