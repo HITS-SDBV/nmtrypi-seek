@@ -8,7 +8,9 @@ addons:
 
 sudo: false
 
-cache: bundler
+cache:
+  - bundler
+  - $HOME/.m2
 
 env:
   - SUITE="rake test:units" DB_TYPE=mysql

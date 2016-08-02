@@ -1,9 +1,9 @@
 GIT
   remote: https://github.com/HITS-SDBV/rcdk.git
-  revision: 16f6662f9ba5e17a82b6ee9e800cd3364b881d97
-  tag: v0.4.0
+  revision: 4b4091a9f063e9a1481f86415d9a521040d3b818
+  tag: v0.4.1
   specs:
-    rcdk (0.4.0)
+    rcdk (0.4.1)
       lock_jar (~> 0.15.0)
       rjb (~> 1.5)
 
@@ -804,7 +804,7 @@ DEPENDENCIES
   rails-assets-underscore (~> 1.8.3)!
   rails_autolink
   rails_best_practices
-  rcdk (= 0.4.0)!
+  rcdk (= 0.4.1)!
   rdf-virtuoso (>= 0.1.6)
   rdoc
   recaptcha
