@@ -91,7 +91,7 @@ gem 'mimemagic'
 
 gem 'datacite_doi_ify'
 gem 'rjb', '~> 1.5.3'
-gem 'rcdk', "=0.4.0", :git => "https://github.com/HITS-SDBV/rcdk.git", :tag => "v0.4.0"
+gem 'rcdk', "=0.4.1", :git => "https://github.com/HITS-SDBV/rcdk.git", :tag => "v0.4.1"
 gem "d3-rails"
 gem "d3-tip-rails"
 gem 'seedbank'
