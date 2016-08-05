@@ -26,6 +26,10 @@ function annotation(id, type, sheet_number, cell_range, content, date_created) {
 }
 
 var $j = jQuery.noConflict(); //To prevent conflicts with prototype
+var compound_prefix = "nmt";
+var matchRegEx = new RegExp("^"+compound_prefix+"[-_][a-zA-Z]+\\d+", "i");
+//matchRegEx.test($j(this).text())
+    // /^nmt[-_][a-zA-Z]+\d+/i.test($j(this).text()) == true;
 
 $j(window)
     .resize(function(e) {
@@ -928,7 +932,8 @@ function plotting_selected_cells() {
     // $j("div.sheet table tr").each(function () {
         var this_tr = $j(this);
         var row_header_cell = this_tr.children("td").filter(function () {
-            return /^nmt[-_][a-zA-Z]+\d+/i.test($j(this).text()) == true;
+            return matchRegEx.test($j(this).text()) == true;
+            //return /^nmt[-_][a-zA-Z]+\d+/i.test($j(this).text()) == true;
         });
 
         var row_label = row_header_cell.text();
@@ -970,7 +975,7 @@ function selection_for_parcoords() {
     $j("table.active_sheet tr").each(function () {
         var this_tr = $j(this);
         var row_header_cell = this_tr.children("td").filter(function () {
-            return /^nmt[-_][a-zA-Z]+\d+/i.test($j(this).text()) == true;
+            return matchRegEx.test($j(this).text()) == true;
         });
         var row_label = row_header_cell.text();
         var heatmap_cells = $j(this).children("td.selected_cell");
