@@ -305,6 +305,7 @@ pc.scale = function(d, domain) {
 
 pc.flip = function(d) {
 	//yscale[d].domain().reverse();					// does not work
+    console.log("flipping range: ", yscale[d].domain())
 	yscale[d].domain(yscale[d].domain().reverse()); // works
 
 	return this;
@@ -596,17 +597,20 @@ pc.clear = function(layer) {
   ctx[layer].clearRect(0,0,w()+2,h()+(+__.missingAxisOffset));
   return this;
 };
-function flipAxisAndUpdatePCP(dimension, i) {
-  var g = pc.svg.selectAll(".dimension");
 
-  pc.flip(dimension);
-  d3.select(g[0][i])
+//where is i coming from? it is always the original i of the dimension (as it was upon creation)? how can it be updated when reordering?
+function flipAxisAndUpdatePCP(dimension, i) {
+    var g = pc.svg.selectAll(".dimension");
+
+    pc.flip(dimension);
+    i = __.dimensions.indexOf(dimension);
+    d3.select(g[0][i])
     .transition()
       .duration(1100)
       .call(axis.scale(yscale[dimension]));
-  brushUpdated(brush.modes[brush.mode].selected());
-  pc.render();
-  if (flags.shadows) paths(__.data, ctx.shadows);
+    brushUpdated(brush.modes[brush.mode].selected());
+    pc.render();
+    if (flags.shadows) paths(__.data, ctx.shadows);
 }
 
 function update_dim_order(i,j) {
@@ -880,16 +884,19 @@ pc.reorderable = function() {
                 for (var k=orig_i; k<j; k++) {
                     update_dim_order(k, k+1);
                 }
+                parent.insertBefore(this, parent.children[j + 1]);
             } else {
                 for (var k=orig_i; k>j; k--) {
                     update_dim_order(k-1, k);
                 }
+                parent.insertBefore(this, parent.children[j]);
+
             }
             //console.log("reorder_dim: ", __.reorder_dim) //for debugging
-          parent.insertBefore(this, parent.children[j + 1]);
 
         }
 
+          //var g = pc.svg.selectAll(".dimension");
         delete this.__origin__;
         delete dragging[d];
         d3.select(this).transition().attr("transform", "translate(" + xscale(d) + ")");
