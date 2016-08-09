@@ -9,7 +9,7 @@ addons:
 sudo: false
 
 cache:
-  - bundler
+  bundler: true
   directories:
     - $HOME/.m2
 
