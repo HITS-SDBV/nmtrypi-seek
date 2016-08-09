@@ -997,8 +997,8 @@ function selection_for_parcoords() {
                   sel_data.push({});  //initialize row object
                 };
 
-                sel_data[row_i][col_label] = cell_value.text();
-                //console.log(row_i, col_label, cell_value.text());
+                sel_data[row_i][col_label] = cell_value.text(); //.replace( /[±]+.*$/, ''); this should work but wasn't debugged
+                console.log(row_i, col_label, cell_value.text());
             }
         }
         if (sel_data[row_i]) row_i++;
