@@ -10,9 +10,8 @@ sudo: false
 
 cache:
   - bundler
-# on the second build, it fails with the cache and error
-# java.lang.ClassNotFoundException: org.openscience.cdk.smiles.SmilesParser (RuntimeError)
-#  - $HOME/.m2
+  directories:
+    - $HOME/.m2
 
 env:
   - SUITE="rake test:units" DB_TYPE=mysql

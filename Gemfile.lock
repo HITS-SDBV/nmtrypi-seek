@@ -228,10 +228,6 @@ GEM
     crack (0.4.2)
       safe_yaml (~> 1.0.0)
     curb (0.8.6)
-    d3-rails (3.5.5)
-      railties (>= 3.1)
-    d3-tip-rails (0.0.1)
-      railties (>= 3.1)
     daemon_controller (1.2.0)
     daemons (1.1.9)
     datacite_doi_ify (1.0.0)
@@ -307,7 +303,7 @@ GEM
     httparty (0.12.0)
       json (~> 1.8)
       multi_xml (>= 0.5.2)
-    httpclient (2.8.0)
+    httpclient (2.8.1)
     httpi (1.1.1)
       rack
     i18n (0.7.0)
@@ -388,7 +384,7 @@ GEM
       minitest (>= 2.12, < 5.0)
       powerbar
     modporter-plugin (0.1.0)
-    multi_json (1.11.1)
+    multi_json (1.12.1)
     multi_xml (0.5.5)
     multipart-post (2.0.0)
     mysql2 (0.3.16)
@@ -438,8 +434,8 @@ GEM
       pry (~> 0.9)
       slop (~> 3.0)
     psych (2.0.6)
-    rack (1.4.6)
-    rack-cache (1.2)
+    rack (1.4.7)
+    rack-cache (1.6.1)
       rack (>= 0.4)
     rack-openid (1.4.2)
       rack (>= 1.1.0)
@@ -507,7 +503,7 @@ GEM
       thor (>= 0.14.6, < 2.0)
     rainbow (2.0.0)
     raindrops (0.13.0)
-    rake (10.4.2)
+    rake (11.2.2)
     ratom (0.8.2)
       libxml-ruby (~> 2.6.0)
     rb-fsevent (0.9.4)
@@ -745,8 +741,6 @@ DEPENDENCIES
   convert_office!
   country-select
   coveralls
-  d3-rails
-  d3-tip-rails
   daemons
   datacite_doi_ify
   delayed_job_active_record
@@ -795,6 +789,7 @@ DEPENDENCIES
   rails (= 3.2.21)
   rails-assets-blob-polyfill (~> 1.0.20150320)!
   rails-assets-bxslider-4 (~> 4.1.0)!
+  rails-assets-d3 (~> 3.5.5)!
   rails-assets-d3-tip (~> 0.6.3)!
   rails-assets-d3.svg.multibrush (~> 0.9.1)!
   rails-assets-datatables.net-buttons-jqui (~> 1.2.0)!

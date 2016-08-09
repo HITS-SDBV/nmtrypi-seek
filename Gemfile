@@ -92,9 +92,8 @@ gem 'mimemagic'
 gem 'datacite_doi_ify'
 gem 'rjb', '~> 1.5.3'
 gem 'rcdk', "=0.4.1", :git => "https://github.com/HITS-SDBV/rcdk.git", :tag => "v0.4.1"
-gem "d3-rails"
-gem "d3-tip-rails"
 gem 'seedbank'
+
 group :assets do
   gem 'turbo-sprockets-rails3'
   gem 'therubyracer'
@@ -142,6 +141,7 @@ source 'https://rails-assets.org' do
   gem 'rails-assets-datatables.net-responsive-jqui', '~> 2.1.0'
   gem 'rails-assets-bxslider-4', '~> 4.1.0'
   gem 'rails-assets-underscore', '~> 1.8.3'
+  gem 'rails-assets-d3', '~> 3.5.5'
   gem 'rails-assets-d3-tip', '~> 0.6.3'
   gem 'rails-assets-d3.svg.multibrush', '~> 0.9.1'
   gem 'rails-assets-blob-polyfill', '~> 1.0.20150320'
