@@ -14,7 +14,8 @@ class Time
     alias_method :new, :now
 
     def testing_offset
-      @testing_offset || 0
+      @testing_offset ||= 0
+      return @testing_offset
     end
 
   end
