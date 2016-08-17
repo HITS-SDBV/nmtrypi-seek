@@ -1,12 +1,0 @@
-o: ActiveSupport::Cache::Entry	:@compressedF:@expires_in0:@created_atf1469606764.0686226:@value"ÜI"Ð<div style="text-align: center">
-
-        <div class='favouritable_icon'><script type="text/javascript">
-//<![CDATA[
-var can_click_for_drag_Person_1__c238de8ac06b470f = true;
-//]]>
-</script><a href="/people/1" class="asset" id="drag_Person_1__c238de8ac06b470f" onMouseUp="setTimeout(&#x27;can_click_for_drag_Person_1__c238de8ac06b470f = true;&#x27;, 200);" onclick="if (!can_click_for_drag_Person_1__c238de8ac06b470f) {can_click_for_drag_Person_1__c238de8ac06b470f=true;return(false);} else {return true;}" title="header=[] body=[Admin User] cssheader=[boxoverTooltipHeader] cssbody=[boxoverTooltipBody] delay=[200]"><img alt="" class="framed" height="60" onclick="" src="/assets/avatar-943ca1a86eee2719a1520c842b1d6d02.png" width="60" /></a><script type="text/javascript">
-//<![CDATA[
-new Draggable("drag_Person_1__c238de8ac06b470f", {change:function(element){can_click_for_drag_Person_1__c238de8ac06b470f = false;}, ghosting:false, revert:true})
-//]]>
-</script></div></div>
-:ET

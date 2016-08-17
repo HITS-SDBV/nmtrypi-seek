@@ -1,12 +1,0 @@
-o: ActiveSupport::Cache::Entry	:@compressedF:@expires_in0:@created_atf1469708677.297428:@value"áI"Õ<div style="text-align: center">
-
-        <div class='favouritable_icon'><script type="text/javascript">
-//<![CDATA[
-var can_click_for_drag_Person_3__747647598100420b = true;
-//]]>
-</script><a href="/people/3" class="asset" id="drag_Person_3__747647598100420b" onMouseUp="setTimeout(&#x27;can_click_for_drag_Person_3__747647598100420b = true;&#x27;, 200);" onclick="if (!can_click_for_drag_Person_3__747647598100420b) {can_click_for_drag_Person_3__747647598100420b=true;return(false);} else {return true;}" title="header=[] body=[Patrick Stewart] cssheader=[boxoverTooltipHeader] cssbody=[boxoverTooltipBody] delay=[200]"><img alt="" class="framed" height="60" onclick="" src="/assets/avatar-943ca1a86eee2719a1520c842b1d6d02.png" width="60" /></a><script type="text/javascript">
-//<![CDATA[
-new Draggable("drag_Person_3__747647598100420b", {change:function(element){can_click_for_drag_Person_3__747647598100420b = false;}, ghosting:false, revert:true})
-//]]>
-</script></div></div>
-:ET

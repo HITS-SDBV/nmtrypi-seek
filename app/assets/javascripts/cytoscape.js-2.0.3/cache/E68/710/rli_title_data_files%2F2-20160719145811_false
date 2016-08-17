@@ -1,9 +1,0 @@
-o: ActiveSupport::Cache::Entry	:@compressedF:@expires_in0:@created_atf1469606764.19799:@value"YI"M<div class="list_item_title"><p style="float:left;width:95%;"><script type="text/javascript">
-//<![CDATA[
-var can_click_for_drag_DataFile_2__2814bed9de844f99 = true;
-//]]>
-</script><a href="/data_files/2" class="asset" id="drag_DataFile_2__2814bed9de844f99" onMouseUp="setTimeout(&#x27;can_click_for_drag_DataFile_2__2814bed9de844f99 = true;&#x27;, 200);" onclick="if (!can_click_for_drag_DataFile_2__2814bed9de844f99) {can_click_for_drag_DataFile_2__2814bed9de844f99=true;return(false);} else {return true;}" title="header=[] body=[3 sheets compounds] cssheader=[boxoverTooltipHeader] cssbody=[boxoverTooltipBody] delay=[200]"><img alt="Xls" src="/assets/file_icons/small/xls-c5a5f23533cdb00890b15647582c8446.png" style="width: 24px; height: 24px; vertical-align: middle" /></a><script type="text/javascript">
-//<![CDATA[
-new Draggable("drag_DataFile_2__2814bed9de844f99", {change:function(element){can_click_for_drag_DataFile_2__2814bed9de844f99 = false;}, ghosting:false, revert:true})
-//]]>
-</script> <a href="/data_files/2">3 sheets compounds</a></p>#item_visibility<br style="clear:both"/></div>:ET
