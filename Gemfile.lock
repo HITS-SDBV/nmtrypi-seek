@@ -455,7 +455,6 @@ GEM
     rails-assets-blob-polyfill (1.0.20150320)
     rails-assets-bxslider-4 (4.1.3)
       rails-assets-jquery (>= 1.6)
-    rails-assets-cytoscape (2.0.3)
     rails-assets-d3 (3.5.5)
     rails-assets-d3-tip (0.6.7)
       rails-assets-d3 (= 3.5.5)
@@ -790,7 +789,6 @@ DEPENDENCIES
   rails (= 3.2.21)
   rails-assets-blob-polyfill (~> 1.0.20150320)!
   rails-assets-bxslider-4 (~> 4.1.0)!
-  rails-assets-cytoscape (= 2.0.3)!
   rails-assets-d3 (~> 3.5.5)!
   rails-assets-d3-tip (~> 0.6.3)!
   rails-assets-d3.svg.multibrush (~> 0.9.1)!

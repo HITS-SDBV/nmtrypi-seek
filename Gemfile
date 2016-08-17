@@ -146,6 +146,8 @@ source 'https://rails-assets.org' do
   gem 'rails-assets-d3.svg.multibrush', '~> 0.9.1'
   gem 'rails-assets-blob-polyfill', '~> 1.0.20150320'
   gem 'rails-assets-filesaverjs', '~> 1.3.2'
-  gem 'rails-assets-cytoscape', '2.0.3'
+
+  # the required files are not all contained within these gems, so we use the .js in app/assets/javascripts
+  # gem 'rails-assets-cytoscape', '2.0.3'
   # gem 'rails-assets-easytabs'
 end
