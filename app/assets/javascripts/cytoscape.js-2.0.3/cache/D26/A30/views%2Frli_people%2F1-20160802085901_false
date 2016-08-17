@@ -1,0 +1,29 @@
+o: ActiveSupport::Cache::Entry	:@compressedF:@expires_in0:@created_atf1470128468.427481:@value"wI"k    <div class="list_item_title"><p><a href="/people/1">Admin User</a> <img alt="admin" src="/assets/famfamfam_silk/shield-fadb0c004afbe7ee778bc93d28a3876f.png" style="vertical-align: middle" title="header=[] body=[Admin] cssheader=[boxoverTooltipHeader] cssbody=[boxoverTooltipBody] delay=[200]" /></p></div>
+
+    <div class="list_item_left_column">
+      <p class="list_item_attribute"><b>Disciplines:</b> <span class='none_text'>Not specified</span></p>
+
+      <p class="list_item_attribute"><b>Roles:</b> <span class='none_text'>Not specified</span></p>
+
+      <p class="list_item_attribute"><b>Expertise:</b> <span class='none_text'>Not specified</span></p>
+
+        <p class="list_item_attribute"><b>Email</b>: <a href="mailto:vagrant@example.com">vagrant@example.com</a></p>
+
+        <p class="list_item_attribute"><b>Web page</b>: <span class='none_text'>Not specified</span></p>
+
+    </div>
+
+    <div class="list_item_right_column">
+      <p class="list_item_attribute"><b>Projects:</b> <a href="/projects/1">Vagrant</a></p>
+      <p class="list_item_attribute"><b>Institutions:</b> <a href="/institutions/1">Heidelberg Institute for Theoretical Studies</a></p>
+      <p class="list_item_attribute"><b>Tools:</b> <span class='none_text'>Not specified</span></p>
+
+        <p class="list_item_attribute"><b>Phone</b>: <span class='none_text'>Not specified</span></p>
+
+        <p class="list_item_attribute"><b>Skype</b>: <span class='none_text'>Not specified</span></p>
+    </div>
+
+    <div class="list_item_whole_width">
+      <div class='list_item_desc curved'><span class='none_text'>No description specified</span></div>
+    </div>
+:ET

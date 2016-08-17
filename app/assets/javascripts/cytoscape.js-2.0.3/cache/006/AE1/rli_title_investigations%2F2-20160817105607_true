@@ -1,0 +1,9 @@
+o: ActiveSupport::Cache::Entry	:@compressedF:@expires_in0:@created_atf1471431397.8287656:@value"úI"ê<div class="list_item_title"><p style="float:left;width:95%;"><script type="text/javascript">
+//<![CDATA[
+var can_click_for_drag_Investigation_2__c019b0ff6b1b4781 = true;
+//]]>
+</script><a href="/investigations/2" class="asset" id="drag_Investigation_2__c019b0ff6b1b4781" onMouseUp="setTimeout(&#x27;can_click_for_drag_Investigation_2__c019b0ff6b1b4781 = true;&#x27;, 200);" onclick="if (!can_click_for_drag_Investigation_2__c019b0ff6b1b4781) {can_click_for_drag_Investigation_2__c019b0ff6b1b4781=true;return(false);} else {return true;}" title="header=[] body=[New investigation] cssheader=[boxoverTooltipHeader] cssbody=[boxoverTooltipBody] delay=[200]"><img alt="Mydocuments" src="/assets/crystal_project/64x64/apps/mydocuments-de284376939b57dd048ff898aeda09d0.png" style="width: 24px; height: 24px; vertical-align: middle" /></a><script type="text/javascript">
+//<![CDATA[
+new Draggable("drag_Investigation_2__c019b0ff6b1b4781", {change:function(element){can_click_for_drag_Investigation_2__c019b0ff6b1b4781 = false;}, ghosting:false, revert:true})
+//]]>
+</script> <a href="/investigations/2">New investigation</a></p>#item_visibility<br style="clear:both"/></div>:ET

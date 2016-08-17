@@ -1,0 +1,9 @@
+o: ActiveSupport::Cache::Entry	:@compressedF:@expires_in0:@created_atf1469713448.0067184:@value"nI"b<div class="list_item_title"><p style="float:left;width:95%;"><script type="text/javascript">
+//<![CDATA[
+var can_click_for_drag_Study_1__17338bc205c948e8 = true;
+//]]>
+</script><a href="/studies/1" class="asset" id="drag_Study_1__17338bc205c948e8" onMouseUp="setTimeout(&#x27;can_click_for_drag_Study_1__17338bc205c948e8 = true;&#x27;, 200);" onclick="if (!can_click_for_drag_Study_1__17338bc205c948e8) {can_click_for_drag_Study_1__17338bc205c948e8=true;return(false);} else {return true;}" title="header=[] body=[Jermey&amp;#x27;s new study] cssheader=[boxoverTooltipHeader] cssbody=[boxoverTooltipBody] delay=[200]"><img alt="Package_editors" src="/assets/crystal_project/64x64/apps/package_editors-a22592f4911611b606018f07fccfd749.png" style="width: 24px; height: 24px; vertical-align: middle" /></a><script type="text/javascript">
+//<![CDATA[
+new Draggable("drag_Study_1__17338bc205c948e8", {change:function(element){can_click_for_drag_Study_1__17338bc205c948e8 = false;}, ghosting:false, revert:true})
+//]]>
+</script> <a href="/studies/1">Jermey&#x27;s new study</a></p>#item_visibility<br style="clear:both"/></div>:ET

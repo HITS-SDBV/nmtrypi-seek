@@ -1,0 +1,148 @@
+o: ActiveSupport::Cache::Entry	:@compressedF:@expires_in0:@created_atf1469564340.9850838:@value"'I"�&<?xml version="1.0" encoding="UTF-8"?>
+
+<workbook xmlns="http://www.sysmo-db.org/2010/xml/spreadsheet">
+  <named_ranges/>
+  <styles>
+    <style id="style3">
+      <font-size>11pt</font-size>
+      <color>#000000</color>
+    </style>
+    <style id="style4">
+      <border-top>dashed 1pt</border-top>
+      <border-bottom>dashed 1pt</border-bottom>
+      <border-left>dashed 1pt</border-left>
+      <border-right>dashed 1pt</border-right>
+      <background-color>#EEECE1</background-color>
+      <font-weight>bold</font-weight>
+      <font-size>11pt</font-size>
+      <color>#000000</color>
+    </style>
+    <style id="style5">
+      <border-top>dashed 1pt</border-top>
+      <border-bottom>dashed 1pt</border-bottom>
+      <border-left>dashed 1pt</border-left>
+      <border-right>dashed 1pt</border-right>
+      <font-size>11pt</font-size>
+      <color>#000000</color>
+    </style>
+    <style id="style6">
+      <border-top>dashed 1pt</border-top>
+      <border-bottom>dashed 1pt</border-bottom>
+      <border-left>dashed 1pt</border-left>
+      <border-right>dashed 1pt</border-right>
+      <background-color>#FFFFFF</background-color>
+      <font-weight>bold</font-weight>
+      <font-size>11pt</font-size>
+      <color>#000000</color>
+    </style>
+  </styles>
+  <sheet name="Folha1" index="1" hidden="false" very_hidden="false">
+    <data_validations/>
+    <columns first_column="1" last_column="11">
+      <column index="1" column_alpha="A" width="6180"/>
+      <column index="2" column_alpha="B" width="5302"/>
+      <column index="3" column_alpha="C" width="5302"/>
+      <column index="4" column_alpha="D" width="5302"/>
+      <column index="5" column_alpha="E" width="5302"/>
+      <column index="6" column_alpha="F" width="5302"/>
+      <column index="7" column_alpha="G" width="5302"/>
+      <column index="8" column_alpha="H" width="5302"/>
+      <column index="9" column_alpha="I" width="5302"/>
+      <column index="10" column_alpha="J" width="5302"/>
+      <column index="11" column_alpha="K" width="5302"/>
+    </columns>
+    <rows first_row="1" last_row="7">
+      <row index="1" height="35.1pt">
+        <cell column="1" column_alpha="A" row="1" type="blank" style="style3"></cell>
+        <cell column="2" column_alpha="B" row="1" type="string" style="style4">Erythrocytes (x10^12/L)</cell>
+        <cell column="3" column_alpha="C" row="1" type="string" style="style4">Hemoglobin (g/dL)</cell>
+        <cell column="4" column_alpha="D" row="1" type="string" style="style4">Hematocrit (%)</cell>
+        <cell column="5" column_alpha="E" row="1" type="string" style="style4">Vol.Glob.Average (fL)</cell>
+        <cell column="6" column_alpha="F" row="1" type="string" style="style4">C.Hb.Glob.Average (g/dL)</cell>
+        <cell column="7" column_alpha="G" row="1" type="string" style="style4">Platelets (10^9/L)</cell>
+        <cell column="8" column_alpha="H" row="1" type="string" style="style4">Leukocytes (10^9/L)</cell>
+        <cell column="9" column_alpha="I" row="1" type="string" style="style4">Granulocyte (%)</cell>
+        <cell column="10" column_alpha="J" row="1" type="string" style="style4">Lymphocytes (%)</cell>
+        <cell column="11" column_alpha="K" row="1" type="string" style="style4">Monocytes (%)</cell>
+      </row>
+      <row index="2" height="30.0pt">
+        <cell column="1" column_alpha="A" row="2" type="string" style="style6">Infected (Saline)</cell>
+        <cell column="2" column_alpha="B" row="2" type="string" style="style5">6.7±1.6</cell>
+        <cell column="3" column_alpha="C" row="2" type="string" style="style5">11.4±1.6</cell>
+        <cell column="4" column_alpha="D" row="2" type="string" style="style5">33.7±8.7</cell>
+        <cell column="5" column_alpha="E" row="2" type="string" style="style5">50.2±0.8</cell>
+        <cell column="6" column_alpha="F" row="2" type="string" style="style5">34.7±4.9</cell>
+        <cell column="7" column_alpha="G" row="2" type="string" style="style5">381.2±249.0</cell>
+        <cell column="8" column_alpha="H" row="2" type="string" style="style5">4.6±3.7</cell>
+        <cell column="9" column_alpha="I" row="2" type="string" style="style5">8.6±6.2</cell>
+        <cell column="10" column_alpha="J" row="2" type="string" style="style5">75.9±9.2</cell>
+        <cell column="11" column_alpha="K" row="2" type="string" style="style5">15.4±4.6</cell>
+      </row>
+      <row index="3" height="30.0pt">
+        <cell column="1" column_alpha="A" row="3" type="string" style="style6">MLF</cell>
+        <cell column="2" column_alpha="B" row="3" type="string" style="style5">7.1±0.9</cell>
+        <cell column="3" column_alpha="C" row="3" type="string" style="style5">11.6±1.0</cell>
+        <cell column="4" column_alpha="D" row="3" type="string" style="style5">35.8±4.5</cell>
+        <cell column="5" column_alpha="E" row="3" type="string" style="style5">50.2±0.5</cell>
+        <cell column="6" column_alpha="F" row="3" type="string" style="style5">32.7±1.4</cell>
+        <cell column="7" column_alpha="G" row="3" type="string" style="style5">419.4±112.6</cell>
+        <cell column="8" column_alpha="H" row="3" type="string" style="style5">3.2±1.0</cell>
+        <cell column="9" column_alpha="I" row="3" type="string" style="style5">6.1±4.5</cell>
+        <cell column="10" column_alpha="J" row="3" type="string" style="style5">75.2±33.9</cell>
+        <cell column="11" column_alpha="K" row="3" type="string" style="style5">18.7±8.5</cell>
+      </row>
+      <row index="4" height="30.0pt">
+        <cell column="1" column_alpha="A" row="4" type="string" style="style6">NMT-A001 (10 mg/kg)</cell>
+        <cell column="2" column_alpha="B" row="4" type="string" style="style5">7.3±1.9</cell>
+        <cell column="3" column_alpha="C" row="4" type="string" style="style5">11.9±2.2</cell>
+        <cell column="4" column_alpha="D" row="4" type="string" style="style5">35.1±10.5</cell>
+        <cell column="5" column_alpha="E" row="4" type="string" style="style5">47.8±2.7</cell>
+        <cell column="6" column_alpha="F" row="4" type="string" style="style5">35.1±5.7</cell>
+        <cell column="7" column_alpha="G" row="4" type="string" style="style5">356.6±375.4</cell>
+        <cell column="8" column_alpha="H" row="4" type="string" style="style5">4.3±3.9</cell>
+        <cell column="9" column_alpha="I" row="4" type="string" style="style5">4.5±2.6</cell>
+        <cell column="10" column_alpha="J" row="4" type="string" style="style5">80.5±4.8</cell>
+        <cell column="11" column_alpha="K" row="4" type="string" style="style5">15.1±2.6</cell>
+      </row>
+      <row index="5" height="30.0pt">
+        <cell column="1" column_alpha="A" row="5" type="string" style="style6">NMT-A002 (10 mg/kg)</cell>
+        <cell column="2" column_alpha="B" row="5" type="string" style="style5">7.4±1.5</cell>
+        <cell column="3" column_alpha="C" row="5" type="string" style="style5">11.9±2.1</cell>
+        <cell column="4" column_alpha="D" row="5" type="string" style="style5">35.9±7.5</cell>
+        <cell column="5" column_alpha="E" row="5" type="string" style="style5">48.4±0.4</cell>
+        <cell column="6" column_alpha="F" row="5" type="string" style="style5">33.3±2.0</cell>
+        <cell column="7" column_alpha="G" row="5" type="string" style="style5">199.6±196.3</cell>
+        <cell column="8" column_alpha="H" row="5" type="string" style="style5">4.9±2.5</cell>
+        <cell column="9" column_alpha="I" row="5" type="string" style="style5">8.7±3.7</cell>
+        <cell column="10" column_alpha="J" row="5" type="string" style="style5">75.9±8.1</cell>
+        <cell column="11" column_alpha="K" row="5" type="string" style="style5">15.4±5.7</cell>
+      </row>
+      <row index="6" height="30.0pt">
+        <cell column="1" column_alpha="A" row="6" type="string" style="style6">Healthy (Saline)</cell>
+        <cell column="2" column_alpha="B" row="6" type="string" style="style5">7.3±1.4</cell>
+        <cell column="3" column_alpha="C" row="6" type="string" style="style5">11.8±1.4</cell>
+        <cell column="4" column_alpha="D" row="6" type="string" style="style5">36.3±7.3</cell>
+        <cell column="5" column_alpha="E" row="6" type="string" style="style5">49.9±0.7</cell>
+        <cell column="6" column_alpha="F" row="6" type="string" style="style5">33.0±2.9</cell>
+        <cell column="7" column_alpha="G" row="6" type="string" style="style5">477.0±151.7</cell>
+        <cell column="8" column_alpha="H" row="6" type="string" style="style5">3.8±1.7</cell>
+        <cell column="9" column_alpha="I" row="6" type="string" style="style5">6.8±3.2</cell>
+        <cell column="10" column_alpha="J" row="6" type="string" style="style5">76.9±2.4</cell>
+        <cell column="11" column_alpha="K" row="6" type="string" style="style5">16.4±3.5</cell>
+      </row>
+      <row index="7" height="30.0pt">
+        <cell column="1" column_alpha="A" row="7" type="string" style="style6">Healthy</cell>
+        <cell column="2" column_alpha="B" row="7" type="string" style="style5">6.6±1.1</cell>
+        <cell column="3" column_alpha="C" row="7" type="string" style="style5">11.1±1.3</cell>
+        <cell column="4" column_alpha="D" row="7" type="string" style="style5">33.0±5.6</cell>
+        <cell column="5" column_alpha="E" row="7" type="string" style="style5">50.3±0.3</cell>
+        <cell column="6" column_alpha="F" row="7" type="string" style="style5">34.0±2.3</cell>
+        <cell column="7" column_alpha="G" row="7" type="string" style="style5">294.2±190.6</cell>
+        <cell column="8" column_alpha="H" row="7" type="string" style="style5">3.1±1.8</cell>
+        <cell column="9" column_alpha="I" row="7" type="string" style="style5">5.2±4.4</cell>
+        <cell column="10" column_alpha="J" row="7" type="string" style="style5">78.2±4.9</cell>
+        <cell column="11" column_alpha="K" row="7" type="string" style="style5">16.6±3.1</cell>
+      </row>
+    </rows>
+  </sheet>
+</workbook>:ET

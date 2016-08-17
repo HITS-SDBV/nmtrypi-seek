@@ -1,0 +1,18 @@
+o: ActiveSupport::Cache::Entry	:@compressedF:@expires_in0:@created_atf1469632814.928821:@value"=I"1
+    <ul id="header">
+      <li id="seek_logo">
+        <a href="/"><img alt="SEEK" src="/assets/seek-logo-smaller-91c7da525f5c6b8a3b79e41ee4fb56b8.png" title="header=[] body=[SEEK] cssheader=[boxoverTooltipHeader] cssbody=[boxoverTooltipBody] delay=[200]" /></a>
+      </li>
+
+      <li id="header_text" class=logged_in>
+            <p id='header_text_main'  class="box_standout">
+    Find, share and exchange <b>Data</b>, <b>Models</b> and <b>Processes</b> within the <a href="http://www.fair-dom.org" popup="true">FAIRDOM </a>.
+    </p>
+      </li>
+
+      <li id="image_block" class=logged_in>
+                <a href="http://www.fair-dom.org" class="logo_link"><img alt="http://www.fair-dom.org" src="/assets/logos/fairdom-banner-8dea1ff8e0ceea9b9e9324d518552b1d.png" title="FAIRDOM" /></a>
+      </li>
+    </ul>
+
+:ET

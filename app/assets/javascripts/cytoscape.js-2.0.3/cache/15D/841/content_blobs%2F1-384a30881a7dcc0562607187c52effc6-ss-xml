@@ -1,0 +1,84 @@
+o: ActiveSupport::Cache::Entry	:@compressedF:@expires_in0:@created_atf1469564342.3883965:@value"uI"i<?xml version="1.0" encoding="UTF-8"?>
+
+<workbook xmlns="http://www.sysmo-db.org/2010/xml/spreadsheet">
+  <named_ranges/>
+  <styles>
+    <style id="style0">
+      <font-size>11pt</font-size>
+      <color>#000000</color>
+    </style>
+    <style id="style2">
+      <text-decoration>underline</text-decoration>
+      <font-size>11pt</font-size>
+      <color>#0000FF</color>
+    </style>
+  </styles>
+  <sheet name="Sheet1" index="1" hidden="false" very_hidden="false">
+    <data_validations/>
+    <columns first_column="1" last_column="5">
+      <column index="1" column_alpha="A" width="6436"/>
+      <column index="2" column_alpha="B" width="6436"/>
+      <column index="3" column_alpha="C" width="21577"/>
+      <column index="4" column_alpha="D" width="5156"/>
+      <column index="5" column_alpha="E" width="5339"/>
+    </columns>
+    <rows first_row="1" last_row="7">
+      <row index="1">
+        <cell column="1" column_alpha="A" row="1" type="string" style="style0">compoundID</cell>
+        <cell column="2" column_alpha="B" row="1" type="string" style="style0">name</cell>
+        <cell column="3" column_alpha="C" row="1" type="string" style="style0">smiles</cell>
+        <cell column="4" column_alpha="D" row="1" type="string" style="style0">Formula</cell>
+      </row>
+      <row index="2">
+        <cell column="1" column_alpha="A" row="2" type="string" style="style0">NMT-A12345</cell>
+        <cell column="2" column_alpha="B" row="2" type="string" style="style0">Pyruvate</cell>
+        <cell column="3" column_alpha="C" row="2" type="string" style="style0">CC(=O)C([O-])=O</cell>
+        <cell column="4" column_alpha="D" row="2" type="string" style="style0">C3H3O3</cell>
+        <cell column="5" column_alpha="E" row="2" type="blank" style="style0"></cell>
+      </row>
+      <row index="3">
+        <cell column="1" column_alpha="A" row="3" type="string" style="style0">NMT-A23456</cell>
+        <cell column="2" column_alpha="B" row="3" type="string" style="style0">Acetate</cell>
+        <cell column="3" column_alpha="C" row="3" type="string" style="style0">CC([O-])=O</cell>
+        <cell column="4" column_alpha="D" row="3" type="string" style="style0">C2H3O2</cell>
+      </row>
+      <row index="4">
+        <cell column="1" column_alpha="A" row="4" type="string" style="style0">NMT-B12345</cell>
+        <cell column="2" column_alpha="B" row="4" type="string" style="style0">ATP</cell>
+        <cell column="3" column_alpha="C" row="4" type="string" style="style0">Nc1ncnc2n(cnc12)[C@@H]1O[C@H](COP(O)(=O)OP(O)(=O)OP(O)(O)=O)[C@@H](O)[C@H]1O</cell>
+        <cell column="4" column_alpha="D" row="4" type="string" style="style0">C10H16N5O13P3</cell>
+        <cell column="5" column_alpha="E" row="4" type="blank" style="style0"></cell>
+      </row>
+      <row index="5">
+        <cell column="1" column_alpha="A" row="5" type="string" style="style0">NMT-B23456</cell>
+        <cell column="2" column_alpha="B" row="5" type="string" style="style0">ADP</cell>
+        <cell column="3" column_alpha="C" row="5" type="string" style="style0">Nc1ncnc2n(cnc12)[C@@H]1O[C@H](COP(O)(=O)OP(O)(O)=O)[C@@H](O)[C@H]1O</cell>
+        <cell column="4" column_alpha="D" row="5" type="string" style="style0">C10H15N5O10P2</cell>
+      </row>
+      <row index="6">
+        <cell column="1" column_alpha="A" row="6" type="string" style="style0">NMT-C12345</cell>
+        <cell column="2" column_alpha="B" row="6" type="string" style="style0">Phosphoenolpyruvate</cell>
+        <cell column="3" column_alpha="C" row="6" type="string" style="style0">OP(O)(=O)OC(=C)C([O-])=O</cell>
+        <cell column="4" column_alpha="D" row="6" type="string" style="style0">C3H4O6P</cell>
+      </row>
+      <row index="7">
+        <cell column="4" column_alpha="D" row="7" type="blank" style="style0"></cell>
+        <cell column="5" column_alpha="E" row="7" type="blank" style="style2"></cell>
+      </row>
+    </rows>
+  </sheet>
+  <sheet name="Sheet2" index="2" hidden="false" very_hidden="false">
+    <data_validations/>
+    <columns first_column="1" last_column="1">
+      <column index="1" column_alpha="A" width="2048"/>
+    </columns>
+    <rows first_row="1" last_row="1"/>
+  </sheet>
+  <sheet name="Sheet3" index="3" hidden="false" very_hidden="false">
+    <data_validations/>
+    <columns first_column="1" last_column="1">
+      <column index="1" column_alpha="A" width="2048"/>
+    </columns>
+    <rows first_row="1" last_row="1"/>
+  </sheet>
+</workbook>:ET

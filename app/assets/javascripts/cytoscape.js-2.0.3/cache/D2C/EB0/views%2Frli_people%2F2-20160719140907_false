@@ -1,0 +1,29 @@
+o: ActiveSupport::Cache::Entry	:@compressedF:@expires_in0:@created_atf1469626373.6592166:@value"ÞI"Ò    <div class="list_item_title"><p><a href="/people/2">Jermey Irons</a> </p></div>
+
+    <div class="list_item_left_column">
+      <p class="list_item_attribute"><b>Disciplines:</b> <span class='none_text'>Not specified</span></p>
+
+      <p class="list_item_attribute"><b>Roles:</b> <span class='none_text'>Not specified</span></p>
+
+      <p class="list_item_attribute"><b>Expertise:</b> <span class='none_text'>Not specified</span></p>
+
+        <p class="list_item_attribute"><b>Email</b>: <a href="mailto:jermey.irons@email.com">jermey.irons@email.com</a></p>
+
+        <p class="list_item_attribute"><b>Web page</b>: <span class='none_text'>Not specified</span></p>
+
+    </div>
+
+    <div class="list_item_right_column">
+      <p class="list_item_attribute"><b>Projects:</b> <a href="/projects/1">Vagrant</a>, <a href="/projects/2">Project X</a>, <a href="/projects/3">NMTrypI</a></p>
+      <p class="list_item_attribute"><b>Institutions:</b> <a href="/institutions/2">DKFZ - Deutsche Krebs Forschung Zentrum</a></p>
+      <p class="list_item_attribute"><b>Tools:</b> <span class='none_text'>Not specified</span></p>
+
+        <p class="list_item_attribute"><b>Phone</b>: <span class='none_text'>Not specified</span></p>
+
+        <p class="list_item_attribute"><b>Skype</b>: <span class='none_text'>Not specified</span></p>
+    </div>
+
+    <div class="list_item_whole_width">
+      <div class='list_item_desc curved'><span class='none_text'>No description specified</span></div>
+    </div>
+:ET

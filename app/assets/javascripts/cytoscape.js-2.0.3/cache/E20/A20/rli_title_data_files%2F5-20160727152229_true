@@ -1,0 +1,9 @@
+o: ActiveSupport::Cache::Entry	:@compressedF:@expires_in0:@created_atf1469710527.4323528:@value"{I"o<div class="list_item_title"><p style="float:left;width:95%;"><script type="text/javascript">
+//<![CDATA[
+var can_click_for_drag_DataFile_5__8d3bd16165c14d39 = true;
+//]]>
+</script><a href="/data_files/5" class="asset" id="drag_DataFile_5__8d3bd16165c14d39" onMouseUp="setTimeout(&#x27;can_click_for_drag_DataFile_5__8d3bd16165c14d39 = true;&#x27;, 200);" onclick="if (!can_click_for_drag_DataFile_5__8d3bd16165c14d39) {can_click_for_drag_DataFile_5__8d3bd16165c14d39=true;return(false);} else {return true;}" title="header=[] body=[test for parcoords uploaded by user] cssheader=[boxoverTooltipHeader] cssbody=[boxoverTooltipBody] delay=[200]"><img alt="Xls" src="/assets/file_icons/small/xls-c5a5f23533cdb00890b15647582c8446.png" style="width: 24px; height: 24px; vertical-align: middle" /></a><script type="text/javascript">
+//<![CDATA[
+new Draggable("drag_DataFile_5__8d3bd16165c14d39", {change:function(element){can_click_for_drag_DataFile_5__8d3bd16165c14d39 = false;}, ghosting:false, revert:true})
+//]]>
+</script> <a href="/data_files/5">test for parcoords uploaded by user</a></p>#item_visibility<br style="clear:both"/></div>:ET

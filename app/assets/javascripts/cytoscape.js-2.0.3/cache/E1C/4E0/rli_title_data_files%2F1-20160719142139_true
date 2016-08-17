@@ -1,0 +1,9 @@
+o: ActiveSupport::Cache::Entry	:@compressedF:@expires_in0:@created_atf1469606764.2508857:@value"SI"G<div class="list_item_title"><p style="float:left;width:95%;"><script type="text/javascript">
+//<![CDATA[
+var can_click_for_drag_DataFile_1__624f735a3e944c69 = true;
+//]]>
+</script><a href="/data_files/1" class="asset" id="drag_DataFile_1__624f735a3e944c69" onMouseUp="setTimeout(&#x27;can_click_for_drag_DataFile_1__624f735a3e944c69 = true;&#x27;, 200);" onclick="if (!can_click_for_drag_DataFile_1__624f735a3e944c69) {can_click_for_drag_DataFile_1__624f735a3e944c69=true;return(false);} else {return true;}" title="header=[] body=[compound smiles] cssheader=[boxoverTooltipHeader] cssbody=[boxoverTooltipBody] delay=[200]"><img alt="Xls" src="/assets/file_icons/small/xls-c5a5f23533cdb00890b15647582c8446.png" style="width: 24px; height: 24px; vertical-align: middle" /></a><script type="text/javascript">
+//<![CDATA[
+new Draggable("drag_DataFile_1__624f735a3e944c69", {change:function(element){can_click_for_drag_DataFile_1__624f735a3e944c69 = false;}, ghosting:false, revert:true})
+//]]>
+</script> <a href="/data_files/1">compound smiles</a></p>#item_visibility<br style="clear:both"/></div>:ET

@@ -1,0 +1,20 @@
+o: ActiveSupport::Cache::Entry	:@compressedF:@expires_in0:@created_atf1469564347.008012:@value"ƒI"w  <div id="drop_favourites" class="contents curved_bottom" style="min-height:100px; text-align: left">
+    <div id="favourite_list">
+              <script type="text/javascript">
+//<![CDATA[
+var can_click_for_fav_2 = true;
+//]]>
+</script><a href="/saved_searches/2" class="favourite" id="fav_2" onMouseUp="setTimeout(&#x27;can_click_for_fav_2 = true;&#x27;, 200);" onclick="if (!can_click_for_fav_2) {can_click_for_fav_2=true;return(false);} else {return true;}" title="header=[] body=[Search: &amp;#x27;ATP&amp;#x27; (projects)] cssheader=[boxoverTooltipHeader] cssbody=[boxoverTooltipBody] delay=[200]"><img alt="Find" class="fav_icon" src="/assets/crystal_project/32x32/actions/find-673a5371fbb087125f168005b0c029e6.png" /></a><script type="text/javascript">
+//<![CDATA[
+new Draggable("fav_2", {change:function(element){can_click_for_fav_2 = false;}, ghosting:false, revert:true})
+//]]>
+</script>
+  
+<script type="text/javascript">
+//<![CDATA[
+Droppables.add("content", {accept:'favourite', onDrop:function(element){Element.show('fav_ajax-loader'); new Ajax.Request('/favourites/delete', {asynchronous:true, evalScripts:true, method:'delete', onComplete:function(request){Element.hide('fav_ajax-loader');}, parameters:'id=' + encodeURIComponent(element.id) + '&authenticity_token=' + encodeURIComponent('9UiuHrsqquDRwdpHJajbMc/Nz3y4pZ1h8mQm13GkG4o=')})}})
+//]]>
+</script>
+    </div>    
+  </div>
+:ET

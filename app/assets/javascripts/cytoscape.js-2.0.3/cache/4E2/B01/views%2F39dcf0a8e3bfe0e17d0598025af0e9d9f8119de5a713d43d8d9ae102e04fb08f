@@ -1,0 +1,52 @@
+o: ActiveSupport::Cache::Entry	:@compressedF:@expires_in0:@created_atf1469633026.1812193:@value"õI"é<div style="text-align: center">
+
+        <div class='favouritable_icon'><script type="text/javascript">
+//<![CDATA[
+var can_click_for_drag_Person_2__0738283f472f456e = true;
+//]]>
+</script><a href="/people/2" class="asset" id="drag_Person_2__0738283f472f456e" onMouseUp="setTimeout(&#x27;can_click_for_drag_Person_2__0738283f472f456e = true;&#x27;, 200);" onclick="if (!can_click_for_drag_Person_2__0738283f472f456e) {can_click_for_drag_Person_2__0738283f472f456e=true;return(false);} else {return true;}" title="header=[] body=[Jermey Irons] cssheader=[boxoverTooltipHeader] cssbody=[boxoverTooltipBody] delay=[200]"><img alt="" class="framed" height="60" onclick="" src="/assets/avatar-943ca1a86eee2719a1520c842b1d6d02.png" width="60" /></a><script type="text/javascript">
+//<![CDATA[
+new Draggable("drag_Person_2__0738283f472f456e", {change:function(element){can_click_for_drag_Person_2__0738283f472f456e = false;}, ghosting:false, revert:true})
+//]]>
+</script></div>        <div class='favouritable_icon'><script type="text/javascript">
+//<![CDATA[
+var can_click_for_drag_Person_3__8ebd0a2ac8414de3 = true;
+//]]>
+</script><a href="/people/3" class="asset" id="drag_Person_3__8ebd0a2ac8414de3" onMouseUp="setTimeout(&#x27;can_click_for_drag_Person_3__8ebd0a2ac8414de3 = true;&#x27;, 200);" onclick="if (!can_click_for_drag_Person_3__8ebd0a2ac8414de3) {can_click_for_drag_Person_3__8ebd0a2ac8414de3=true;return(false);} else {return true;}" title="header=[] body=[Patrick Stewart] cssheader=[boxoverTooltipHeader] cssbody=[boxoverTooltipBody] delay=[200]"><img alt="" class="framed" height="60" onclick="" src="/assets/avatar-943ca1a86eee2719a1520c842b1d6d02.png" width="60" /></a><script type="text/javascript">
+//<![CDATA[
+new Draggable("drag_Person_3__8ebd0a2ac8414de3", {change:function(element){can_click_for_drag_Person_3__8ebd0a2ac8414de3 = false;}, ghosting:false, revert:true})
+//]]>
+</script></div>      <div>
+         <a href="#" id="authorAvatarListLink87377220" onclick="toggleAuthorAvatarList(87377220); return false;">(Show All)</a>
+      </div>
+      <div id="authorAvatarList87377220" class="avatar_list_popup" style="display:none;">
+          <div class='favouritable_icon'><script type="text/javascript">
+//<![CDATA[
+var can_click_for_drag_Person_2__50cc9daadc694ce9 = true;
+//]]>
+</script><a href="/people/2" class="asset" id="drag_Person_2__50cc9daadc694ce9" onMouseUp="setTimeout(&#x27;can_click_for_drag_Person_2__50cc9daadc694ce9 = true;&#x27;, 200);" onclick="if (!can_click_for_drag_Person_2__50cc9daadc694ce9) {can_click_for_drag_Person_2__50cc9daadc694ce9=true;return(false);} else {return true;}" title="header=[] body=[Jermey Irons] cssheader=[boxoverTooltipHeader] cssbody=[boxoverTooltipBody] delay=[200]"><img alt="" class="framed" height="60" onclick="" src="/assets/avatar-943ca1a86eee2719a1520c842b1d6d02.png" width="60" /></a><script type="text/javascript">
+//<![CDATA[
+new Draggable("drag_Person_2__50cc9daadc694ce9", {change:function(element){can_click_for_drag_Person_2__50cc9daadc694ce9 = false;}, ghosting:false, revert:true})
+//]]>
+</script></div>          <div class='favouritable_icon'><script type="text/javascript">
+//<![CDATA[
+var can_click_for_drag_Person_3__a2f5811775154460 = true;
+//]]>
+</script><a href="/people/3" class="asset" id="drag_Person_3__a2f5811775154460" onMouseUp="setTimeout(&#x27;can_click_for_drag_Person_3__a2f5811775154460 = true;&#x27;, 200);" onclick="if (!can_click_for_drag_Person_3__a2f5811775154460) {can_click_for_drag_Person_3__a2f5811775154460=true;return(false);} else {return true;}" title="header=[] body=[Patrick Stewart] cssheader=[boxoverTooltipHeader] cssbody=[boxoverTooltipBody] delay=[200]"><img alt="" class="framed" height="60" onclick="" src="/assets/avatar-943ca1a86eee2719a1520c842b1d6d02.png" width="60" /></a><script type="text/javascript">
+//<![CDATA[
+new Draggable("drag_Person_3__a2f5811775154460", {change:function(element){can_click_for_drag_Person_3__a2f5811775154460 = false;}, ghosting:false, revert:true})
+//]]>
+</script></div>          <div class='favouritable_icon'><script type="text/javascript">
+//<![CDATA[
+var can_click_for_drag_Person_1__05ee2396fa2246b3 = true;
+//]]>
+</script><a href="/people/1" class="asset" id="drag_Person_1__05ee2396fa2246b3" onMouseUp="setTimeout(&#x27;can_click_for_drag_Person_1__05ee2396fa2246b3 = true;&#x27;, 200);" onclick="if (!can_click_for_drag_Person_1__05ee2396fa2246b3) {can_click_for_drag_Person_1__05ee2396fa2246b3=true;return(false);} else {return true;}" title="header=[] body=[Admin User] cssheader=[boxoverTooltipHeader] cssbody=[boxoverTooltipBody] delay=[200]"><img alt="" class="framed" height="60" onclick="" src="/assets/avatar-943ca1a86eee2719a1520c842b1d6d02.png" width="60" /></a><script type="text/javascript">
+//<![CDATA[
+new Draggable("drag_Person_1__05ee2396fa2246b3", {change:function(element){can_click_for_drag_Person_1__05ee2396fa2246b3 = false;}, ghosting:false, revert:true})
+//]]>
+</script></div>        <br/>
+        <a href="#" onclick="toggleAuthorAvatarList(87377220); return false;">(Close)</a>
+      </div>
+
+</div>
+:ET
