@@ -147,5 +147,5 @@ source 'https://rails-assets.org' do
   gem 'rails-assets-blob-polyfill', '~> 1.0.20150320'
   gem 'rails-assets-filesaverjs', '~> 1.3.2'
   gem 'rails-assets-cytoscape', '2.0.3'
-  gem 'rails-assets-easytabs'
+  # gem 'rails-assets-easytabs'
 end
