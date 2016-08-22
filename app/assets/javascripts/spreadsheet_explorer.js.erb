@@ -1,7 +1,7 @@
 //these two are needed for exporting the heatmap to an SVG file
 //= require blob-polyfill
 //= require filesaverjs
-
+//= require spreadsheet_json
 function annotation_source(id, type, name, url) {
     this.id = id;
     this.type = type;
@@ -732,12 +732,6 @@ function select_cells(startCol, startRow, endCol, endRow, sheetNumber, ctrl_key,
     return [minRow, maxRow, minCol, maxCol];
 }
 
-function post_selection_updates() {
-    //Update the selection display (mini selection or entire ?)
-    //Update cell coverage in annotation form
-    //Show selection-dependent controls
-}
-
 function activateSheet(sheet, sheetTab) {
     if (sheetTab == null) {
         var i = sheet - 1;
@@ -998,12 +992,97 @@ function selection_for_parcoords() {
                 };
 
                 sel_data[row_i][col_label] = cell_value.text(); //.replace( /[±]+.*$/, ''); this should work but wasn't debugged
-                console.log(row_i, col_label, cell_value.text());
+                //console.log(row_i, col_label, cell_value.text());
             }
         }
         if (sel_data[row_i]) row_i++;
     });
     return sel_data;
+}
+
+/* set up parallel coordinates data such that
+ parcoord_data[row_i][col_name] = value
+ */
+
+function init_parcoords_data(obj) {
+    var parcoord_data = []; //array of objects
+    var workbook_arr = [];
+
+  /* 1. currently does not handle multiple sheets with the same column name -
+   these will most probably be merged and may have unexpected behaviour
+   2. a. "selected" is a json cell attribute
+   b. column titles are selected automatically from row 0 (not checked for above attribute)
+   c. TO DO handle zero selections
+   */
+    var column_names = {};
+    var cr = 0; //cumulative rows index (across workbooks and sheets)
+    if ((workbook_arr = obj["workbook"]) != null) {
+      var sheet_arr = [];
+      //Workbook objects loop
+      for (var w=0; w<workbook_arr.length; w++) {
+        if ((sheet_arr = workbook_arr[w]["sheet"]) != null) {
+          //Sheet objects loop
+          for (var s=0; s<sheet_arr.length; s++) {
+            //is sheet visible?
+            if ((sheet_arr[s]["@hidden"] == "false") && (sheet_arr[s]["@very_hidden"] == "false")) {
+              console.log("sheet \"",sheet_arr[s]["@name"],"\" is visible");
+              //Rows loop if the sheet is not empty
+              if (sheet_arr[s].rows.row != null) {
+                //get titles, assuming first row is always the titles
+                //TO DO:  make smarter, by looking into the json and assigning title?
+                var columns = [];
+                for (var c=0; c < sheet_arr[s].rows.row[0].cell.length; c++) {
+                  columns[c] = sheet_arr[s].rows.row[0].cell[c]["#text"];
+                }
+                console.log("columns are: ", columns);
+
+                /* 1. creating data structure: Array of Objects of length 0..#cumulative_rows
+                  where parcoord_data[row_i][col_name] = value
+                  2. get data - starting from second row (r=1)
+                 */
+                for (var r=1; r<sheet_arr[s].rows["@last_row"]; r++) {
+                  if (sheet_arr[s].rows.row[r].cell.length > 0) {
+                    parcoord_data[cr] = {}; //object initialization
+                    for (var c=0;  c < sheet_arr[s].rows.row[r].cell.length; c++) {
+                      //metadata
+                      //col_index = sheet_arr[s].rows.row[r].cell[c]["@column"]
+                      //col_alpha =  sheet_arr[s].rows.row[r].cell[c]["@column_alpha"]
+                      //row_index = sheet_arr[s].rows.row[r]["@index"] or row.cell[c]["@row"]
+                      // if (sheet_arr[s].rows.row[r].cell[c]["@selected"])
+                      parcoord_data[cr][columns[c]] = sheet_arr[s].rows.row[r].cell[c]["#text"];
+                    }
+                    //if at least one cell in the row was not empty, advance cumulative row counter
+                    if (Object.keys(parcoord_data[cr]).length != 0) cr++;
+                  }
+                } // END row loop
+              }
+            }
+          } // END sheet loop
+       }
+      } //END workbook loop
+    }
+
+  return parcoord_data;
+}
+
+function get_data() {
+  // http://some-base-url/data_files/2/explore?version=1#"
+  var xml_url = (window.location.href).replace(new RegExp("(\\d+)/explore.*$"), "$1/data.xml");
+  console.log("Get XML file: ", xml_url);
+  var json_obj = {workbook: [xml2json(get_xml_file(xml_url), "")]};
+  //add "selected" to certain cells
+  console.log("before adding selected json: ", json_obj);
+  json_obj = add_selected_to_json(json_obj, wb=0);
+  console.log("json: ", json_obj);
+
+  var selected_json = get_selected_json(json_obj);
+  console.log("selected json: ", selected_json);
+  return selected_json;
+  //pc_data = init_parcoords_data(selected_json);
+  //console.log("pc_data: ", pc_data)
+
+  //for merging different files - can take a list of many objects
+  //var super_json = merge_json_workbooks([json_obj, json_obj2]);
 }
 
 function heatmap_plot(){
@@ -1014,7 +1093,9 @@ function heatmap_plot(){
 }
 
 function parallel_coord_plot(){
-    var parcoord_data = selection_for_parcoords();
+    var selected_json = get_data();
+    var parcoord_data = init_parcoords_data(selected_json);//selection_for_parcoords();
+    console.log("pc data: ", parcoord_data);
     draw_parallel_coord(parcoord_data);
     $j('#parcoords_container').show();
     //doUpdate();
