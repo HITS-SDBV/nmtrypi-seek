@@ -75,7 +75,6 @@ function draw_parallel_coord(data) {
      });
      initialize(data, textLength);
 
-
  // add instruction text
      var instructions = "- Drag along axis to create filter(s), or click axis outside the filters to clear" + "</br>" +  "- Text labels:  click a label to color the data based on axis values"+
          " / double-click to invert the axis / drag label to move reorder the axis / roll mouse wheel over the label to rotate it" + "</br> " + "- Hover on each line to highlight" + "</br>" +

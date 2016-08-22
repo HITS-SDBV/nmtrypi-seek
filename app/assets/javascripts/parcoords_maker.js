@@ -212,7 +212,6 @@ function without(arr, item) {
   return arr.filter(function(elem) { return item.indexOf(elem) === -1; });
 };
 pc.autoscale = function() {
-   // console.log(__.data)
   // yscale
   var defaultScales = {
     "date": function(k) {
@@ -364,12 +363,17 @@ pc.toTypeCoerceNumbers = function(v) {
   return pc.toType(v);
 };
 
-// attempt to determine types of each dimension based on first row of data
+// attempt to determine types of each dimension based on first non empty element in each col
 pc.detectDimensionTypes = function(data) {
   var types = {};
   d3.keys(data[0])
     .forEach(function(col) {
-      types[col] = pc.toTypeCoerceNumbers(data[0][col]);
+        var column_data = data.map(function (el) {
+             return el[col];
+        });
+        var first_el = column_data.find(function(el) { return el != "";});
+        types[col] = pc.toTypeCoerceNumbers(first_el);
+        //types[col] = pc.toTypeCoerceNumbers(data[0][col]);
     });
 
   return types;

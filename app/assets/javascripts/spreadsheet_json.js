@@ -11,7 +11,6 @@ function get_selected_json(json_obj) {
             if ((sheet_arr = workbook_arr[w]["sheet"]) != null) {
                 //Sheet objects loop
                 for (var s =0; s<sheet_arr.length; s++) {
-                    console.log("in sheet: ", s)
                     if (sheet_arr[s].rows.row != null) {
                         //Rows loop 1
                         for (var r = 0 ; r < sheet_arr[s].rows["@last_row"]; r++) {
