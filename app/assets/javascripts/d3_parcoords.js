@@ -303,15 +303,16 @@ function addTooltip(clicked, clickedCenPts){
     // add tooltip to multiple clicked lines
     var clickedDataSet = [];
     var margins = graph.margin();
-
+    var dims = graph.dimensions();
+    console.log(clicked, clickedCenPts)
     // get all the values into a single list
-    // I'm pretty sure there is a better way to write this is Javascript
     for (var i=0; i<clicked.length; i++){
         for (var j=0; j<clickedCenPts[i].length; j++){
-            var reordered_col = graph.get_reorderDim_i(j);
+            //var reordered_col = graph.get_reorderDim_i(j);
             //if nothing was reordered, reordered_col = j
             //clicked[i] is a row (hash type object). d3.values(row)[j] gets the value of col j
-            var text = d3.values(clicked[i])[reordered_col];
+           // var text = d3.values(clicked[i])[reordered_col]; //--> doesn't work anymore with multiple sheets?
+            var text = clicked[i][dims[j]];
             var x = clickedCenPts[i][j][0] - margins.left;
             var y = clickedCenPts[i][j][1] - margins.top;
             clickedDataSet.push([x, y,text]);
