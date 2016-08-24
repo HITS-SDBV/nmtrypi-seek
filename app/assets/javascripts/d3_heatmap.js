@@ -23,36 +23,55 @@ function update_heatmap(values) {
 }
 function draw_heatmap(data) {
     set_heatmap_data(data);
+    var toRemove = new Array();         //index of cells to remove (compound id cells typically)
     var rows = new Array(),
         cols = new Array(),
-        col_labels = new Array(),
-        row_labels= new Array();
-    $j.each(data, function (i, json) {
-        $j.each(json, function (key, val) {
-            //ignore cells with compound id as recorded data/label cells
-            if (skip_col.indexOf(json.col_label.toLowerCase()) === -1) {
+        col_alphas = new Array(),
+        col_labels = new Array(),       // array for column titles ("compound", "inhibition" ..)
+        row_labels= new Array();        // row titles ( "compound A", "compound B" ...)
+    $j.each(data, function (i, json) {          //each cells
+        //console.log("i, json: ", i, json)
+        //ignore cells with compound id as recorded data/label cells
+        if (skip_col.indexOf(json.col_label.toLowerCase()) === -1) {
+            $j.each(json, function (key, val) {     //each property in the cell
                 if (key === "row" && rows.indexOf(val) === -1) {
-                    if (val === 0 && col_labels.indexOf(val) === -1) {
-
+                    //remove "if" part?
+                    //if (val === 0 && col_labels.indexOf(val) === -1) {
+                        //console.log("row value = 0 and not in col_labels");
                         //col_labels.push(json.value);
                         //remove first row-header, do not include compound id column in presented data
-                        data = $j.grep(data, function (jjson) {
-                            return (jjson != json && skip_col.indexOf(jjson.col_label.toLowerCase()) === -1);
-                        });
-                        // data.splice(i,1)
+                        //data = $j.grep(data, function (jjson) {
+                        //    return (jjson != json && skip_col.indexOf(jjson.col_label.toLowerCase()) === -1);
+                        //});
+                        //data.splice(i,1)
 
-                    } else {
-                        rows.push(val);
-                        row_labels.push(json["row_label"]);
-                    }
+                    //} else {
+                    rows.push(val);
+                    row_labels.push(json["row_label"]);
+                    //}
                 }
                 if (key === "col" && cols.indexOf(val) === -1 && col_labels.indexOf(val) === -1){
                     col_labels.push(json["col_label"]);
                     cols.push(val);
+                    col_alphas.push(json["col_alpha"]);
                 }
-            }
-        });
+            });
+         } else {
+             //column is on the skip list. mark cell for deletion if content=row_label (compound ID column)
+             if (json.row_label == json.value ) toRemove.push(i);
+         }
     });
+    for (var i=toRemove.length-1; i>=0; i--) {
+        var removed = data.splice(toRemove[i], 1);
+    }
+
+    console.log("data: ", data)
+    console.log("cols: ", cols);
+    console.log("col alphas: ", col_alphas);
+    console.log("rows: ", rows);
+    console.log("col labels: ", col_labels);
+    console.log("row labels: ", row_labels);
+
     var margin = { top: 25, right: 0, bottom: 100, left: 100 },
         gridSize = 38,
         legendElementWidth = gridSize * 2,
@@ -100,12 +119,11 @@ function draw_heatmap(data) {
            return  d;
             });
     colLabelRotate = 270;
-    var colLabels = svg.selectAll(".colLabel")
-        //.data(col_labels)
-        .data(cols)
+    var colLabels = svg.selectAll(".colLabel")      //grid col labels ("Col_A", ..)
+        .data(col_alphas)
         .enter().append("text")
         .text(function (d) {
-            return "Col_" + num2alpha(d+1);
+            return "Col_" + d; //num2alpha(d+1);    //num2alpha conversion doesn't work with multiple sheets
         })
         .attr("x", function (d, i) {
             return (i) * gridSize;
@@ -120,7 +138,7 @@ function draw_heatmap(data) {
         .attr("class", "colLabel mono axis axis-worktime")
         .append("title")
         .text(function(d,i){
-            return  "Column "+ num2alpha(d) + ": "+col_labels[i];
+            return  "Column "+ d + ": "+col_labels[i];
         });
 //        .attr("dy",".78em")
 //        .call(wrap, x.rangeBand());
@@ -130,8 +148,9 @@ function draw_heatmap(data) {
         .attr('class', 'd3-tip')
         .offset([-10, 0])
         .html(function(d){
-            return d.row_label + ", Col_" + num2alpha(d.col+1) +
-            " ( " + d.col_label + "): <span style='color:#ff810c'>"
+            return d.row_label + " ", d.col_label
+            + " (Sheet " + d.sheet + ", Col_" +  d.col_alpha          //num2alpha(d.col+1) +
+             + "): <span style='color:#ff810c'>"
                 + d3.format(".2f")(d.value)+ "</span>";
      });
     // svg.selectAll("#heatmap_matrix").call(tip);
