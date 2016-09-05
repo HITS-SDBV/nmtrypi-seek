@@ -964,7 +964,6 @@ function init_heatmap_data(obj) {
   var heatmap_data = []; //array of objects
   var workbook_arr = [];
   var cr = 1;
-//  cr++;
   if ((workbook_arr = obj["workbook"]) != null) {
     var sheet_arr = [];
     //Workbook objects loop
@@ -1009,77 +1008,66 @@ function init_heatmap_data(obj) {
   return heatmap_data;
 }
 
-/* set up parallel coordinates data such that parcoord_data[row_i][col_name] =  (parcoords_data[row_i] = {c1: v1, c2: v2 ...} )
- 1. currently does not specifically handle multiple sheets with the same column name
- 2. a. "selected" is a json cell attribute
-    b. column titles are selected automatically from row 0 (not checked for above attribute)
-    c. TO DO handle zero selections
- */
-function init_parcoords_data(obj) {
-    var parcoord_data = []; //array of objects
-    var workbook_arr = [];
-    var cr = 0;     //cumulative rows index (across workbooks and sheets)
-    if ((workbook_arr = obj["workbook"]) != null) {
-      var sheet_arr = [];
-      //Workbook objects loop
-      for (var w=0; w<workbook_arr.length; w++) {
-        if ((sheet_arr = workbook_arr[w]["sheet"]) != null) {
-          //Sheet objects loop
-          for (var s=0; s<sheet_arr.length; s++) {
-            if ((sheet_arr[s]["@hidden"] == "false") && (sheet_arr[s]["@very_hidden"] == "false")) {
-              //Rows loop if the sheet is not empty
-              if (sheet_arr[s].rows.row != null) {
-                //get titles, assuming first row is always the titles
-                //TO DO:  make smarter, by looking into the json and assigning title?
-                var columns = [];
-                for (var c=0; c < sheet_arr[s].rows.row[0].cell.length; c++) {
-                  columns[c] = sheet_arr[s].rows.row[0].cell[c]["#text"];
-                }
+function init_pc_row(obj, w, s, r, opt) {
+  sheet_obj = obj["workbook"][w]["sheet"][s];
 
-                /*    creating data structure: Array of Objects of length 0...#cr
-                      where parcoord_data[row_i][col_name] = value
-                 */
-                for (var r=1; r<sheet_arr[s].rows["@last_row"]; r++) {
-                  if (sheet_arr[s].rows.row[r].cell.length > 0) {
-                    parcoord_data[cr] = {}; //object initialization
-                    for (var c=0;  c < sheet_arr[s].rows.row[r].cell.length; c++) {
-                      parcoord_data[cr][columns[c]] = sheet_arr[s].rows.row[r].cell[c]["#text"];
-                      //metadata
-                      //col_index = sheet_arr[s].rows.row[r].cell[c]["@column"]
-                      //col_alpha =  sheet_arr[s].rows.row[r].cell[c]["@column_alpha"]
-                      //row_index = sheet_arr[s].rows.row[r]["@index"] or row.cell[c]["@row"]
-                      // if (sheet_arr[s].rows.row[r].cell[c]["@selected"])
-                    }
-                    //if at least one cell in the row was not empty, advance cumulative row counter
-                    if (Object.keys(parcoord_data[cr]).length != 0) cr++;
-                  }
-                } // END row loop
-              }
-            }
-          } // END sheet loop
-       }
-      } //END workbook loop
+  if (r == 0) {
+    for (var c = 0; c < sheet_obj.rows.row[0].cell.length; c++) {
+      //actual excel sheet column index to avoid shifting of columns (B-->A) on partial selection of columns
+      var col_i = sheet_obj.rows.row[0].cell[c]["@column_alpha"];
+      opt.columns[col_i] = sheet_obj.rows.row[0].cell[c]["#text"];
     }
-  return parcoord_data;
+    console.log(opt.columns);
+
+  /*    create the Parallel Coordinates data structure: Array of Objects of length 0...#cr
+   where parcoord_data[row_i][col_name] = value */
+  } else {
+    if (sheet_obj.rows.row[r].cell.length > 0) {
+      opt.pc_data[opt.cr] = {}; //object initialization
+      for (var c = 0; c < sheet_obj.rows.row[r].cell.length; c++) {
+        var col_i = sheet_obj.rows.row[r].cell[c]["@column_alpha"];
+        opt.pc_data[opt.cr][opt.columns[col_i]] = sheet_obj.rows.row[r].cell[c]["#text"];
+       // console.log("c: ", c, "cr: ", opt.cr, "col_i", col_i, "col: ", opt.columns[col_i])
+       // console.log(opt.pc_data[opt.cr][opt.columns[col_i]])
+      }
+        //if at least one cell in the row was not empty, advance cumulative row counter
+        if (Object.keys(opt.pc_data[opt.cr]).length != 0)
+          opt.cr++;
+    }
+  }
+  return obj;
 }
 
-function get_data() {
+/* set up parallel coordinates data such that parcoord_data[row_i][col_name] =  (parcoords_data[row_i] = {c1: v1, c2: v2 ...} )
+ 1. column titles are selected automatically from row 0 (not checked for above attribute) --> to improve
+ 2. TO DO handle zero selections
+ */
+function init_parcoords_data(json_obj) {
+  // cr = cumulative rows across workbooks/sheets
+  var options = {cr: 0, pc_data: [], columns: {}};
+  iterate_on_rows(json_obj, init_pc_row, options);
+  return options.pc_data;
+}
+
+/* Fetch XML --> convert to JSON --> add "selected" attribute to selected cells.
+  - currently wb=0, because we only have one workbook each time. later when we combine different files, this should be changed.
+  - for merging different files - can take a list of many objects:
+      var super_json = merge_json_workbooks([json_obj, json_obj2]);
+*/
+function get_data(rb=false) {
   // http://some-base-url/data_files/2/explore?version=1#"
   var xml_url = (window.location.href).replace(new RegExp("(\\d+)/explore.*$"), "$1/data.xml");
   console.log("Get XML file: ", xml_url);
   var json_obj = {workbook: [xml2json(get_xml_file(xml_url), "")]};
-  //add "selected" to certain cells
-  json_obj = add_selected_to_json(json_obj, wb=0);
 
-  var selected_json = get_selected_json(json_obj);
+  json_obj = add_selected_to_json(json_obj, wb=0, row_labels=rb);
+  var selected_json = iterate_on_rows(json_obj, get_selected_from_row);
   console.log("selected json: ", selected_json);
   return selected_json;
-  //for merging different files - can take a list of many objects
-  //var super_json = merge_json_workbooks([json_obj, json_obj2]);
 }
 
 function heatmap_plot(){
-    var selected_json = get_data();
+    var selected_json = get_data(rb=true);
     var heatmap_data = init_heatmap_data(selected_json); //plotting_selected_cells();
     draw_heatmap(heatmap_data);
     $j('#heatmap_container').show();

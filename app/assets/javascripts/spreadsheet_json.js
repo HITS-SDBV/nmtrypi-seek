@@ -1,9 +1,9 @@
 
-/*
+/* replaced by iterate_on_rows + callback to get_selected_from_row
  Input: json object which might have the "selected" attribute on <cell> records
  Output: json_object with the title row + all selected cells. object structure is kept.
- */
-function get_selected_json(json_obj) {
+
+function get_selected_json2(json_obj) {
     if ((workbook_arr = json_obj["workbook"]) != null) {
         var sheet_arr = [];
         //Workbook objects loop
@@ -31,19 +31,70 @@ function get_selected_json(json_obj) {
         } // End Workbook loop
     }
     return json_obj;
+}*/
+
+function get_selected_from_row(json_obj, w ,s ,r, options={}) {
+    var cell_arr_len = json_obj["workbook"][w]["sheet"][s].rows.row[r].cell.length - 1;
+    //descending order to enable quick and painless deletions.
+    for (var c = cell_arr_len; c > -1; c--) {
+        if (!(json_obj["workbook"][w]["sheet"][s].rows.row[r].cell[c]["@selected"])) {
+            //console.log("removing in workbook, sheet, row, cell", w, s, r, c)
+            json_obj["workbook"][w]["sheet"][s].rows.row[r].cell.splice(c, 1);
+        }
+    }
+    return json_obj;
 }
+
+/*  function iterate_on_rows(json_obj, callback)
+    Input: json object, options, function rowAction
+    iterates on the json object (workkbook --> sheet --> row) and execute callback for each row.
+    - callback works on the object itself with indices w,s,r (workbook, sheet, row), rather than a row object
+      because the indices could point to other features in the sheet except the row which may become important later on.
+ */
+function iterate_on_rows(json_obj, callback, options={}) {
+    if ((workbook_arr = json_obj["workbook"]) != null) {
+        var sheet_arr = [];
+        //Workbook objects loop
+        for (var w = 0; w < workbook_arr.length; w++) {
+            if ((sheet_arr = workbook_arr[w]["sheet"]) != null) {
+//                if ((sheet_arr[s]["@hidden"] == "false") && (sheet_arr[s]["@very_hidden"] == "false")) {
+                    //Sheet objects loop
+                for (var s =0; s<sheet_arr.length; s++) {
+                    if (sheet_arr[s].rows.row != null) {
+                        //Rows loop 1
+                        for (var r = 0 ; r < sheet_arr[s].rows["@last_row"]; r++) {
+                            //console.log("calling callback with: ", json_obj, w, s, r, options)
+                            if (typeof callback === 'function') {
+                                json_obj = callback(json_obj, w,s,r, options);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    return json_obj;
+}
+
+// function iterate_on_cells(json_obj, w, s ,r) {
+//     for (var c = 0; c < json_obj["workbook"][w]["sheet"][s].rows.row[r].cell.length; c++) {
+//
+//     }
+// }
 
 /*
  Input: json object, workbook number, sheet number
  Output: json_object with added "selected" attributes on cells
  */
-function add_selected_to_json(json_obj, wb=0) {
+function add_selected_to_json(json_obj, wb=0, row_labels=false) {
     var selected = $j(".selected_cell")
     for (var sel=0; sel<selected.length; sel++) {
         var row = selected[sel].attributes.row.value-1;
         var col = selected[sel].attributes.col.value-1;
         var sheet = selected[sel].ancestors()[3].id.split('_')[1]-1;
         json_obj["workbook"][wb]["sheet"][sheet].rows.row[row].cell[col]["@selected"] = "1";
+        //if (row_labels)
+
     }
     return json_obj;
 }
@@ -71,7 +122,6 @@ function get_xml_file(url) {
     var connect;
     if (window.XMLHttpRequest) connect = new XMLHttpRequest(); 		// all browsers except IE
     else connect = new ActiveXObject("Microsoft.XMLHTTP"); 		// for IE
-    console.log(connect);
 
     /* (async: false) makes it a synchronous request, bringing up a warning (deprecated).
        (async: true) fails because we don't get the answer on time.
@@ -87,7 +137,6 @@ function get_xml_file(url) {
     connect.send(null);
     if (connect.readyState === 4 && connect.status === 200) {
         var xmlDocument = connect.responseXML;
-        console.log("read with http request: ", xmlDocument);
         return xmlDocument;
     } else {
         console.log("Error in getting XML file, readyState, status: ", connect.readyState, connect.status);

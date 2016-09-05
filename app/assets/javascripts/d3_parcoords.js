@@ -304,7 +304,7 @@ function addTooltip(clicked, clickedCenPts){
     var clickedDataSet = [];
     var margins = graph.margin();
     var dims = graph.dimensions();
-    console.log(clicked, clickedCenPts)
+    //console.log(clicked, clickedCenPts)
     // get all the values into a single list
     for (var i=0; i<clicked.length; i++){
         for (var j=0; j<clickedCenPts[i].length; j++){
