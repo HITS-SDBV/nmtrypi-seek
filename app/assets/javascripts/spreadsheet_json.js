@@ -51,7 +51,7 @@ function get_selected_from_row(json_obj, w ,s ,r, options={}) {
     - callback works on the object itself with indices w,s,r (workbook, sheet, row), rather than a row object
       because the indices could point to other features in the sheet except the row which may become important later on.
  */
-function iterate_on_rows(json_obj, callback, options={}) {
+function iterate_on_rows(json_obj, row_callback, sheet_callback, options={}) {
     if ((workbook_arr = json_obj["workbook"]) != null) {
         var sheet_arr = [];
         //Workbook objects loop
@@ -61,11 +61,14 @@ function iterate_on_rows(json_obj, callback, options={}) {
                     //Sheet objects loop
                 for (var s =0; s<sheet_arr.length; s++) {
                     if (sheet_arr[s].rows.row != null) {
+                        if (typeof sheet_callback === 'function') {
+                            json_obj = sheet_callback(json_obj, w, s, options);
+                        }
                         //Rows loop 1
                         for (var r = 0 ; r < sheet_arr[s].rows["@last_row"]; r++) {
                             //console.log("calling callback with: ", json_obj, w, s, r, options)
-                            if (typeof callback === 'function') {
-                                json_obj = callback(json_obj, w,s,r, options);
+                            if (typeof row_callback === 'function') {
+                                json_obj = row_callback(json_obj, w,s,r, options);
                             }
                         }
                     }
@@ -88,7 +91,7 @@ function iterate_on_rows(json_obj, callback, options={}) {
         row_label = N, to represent which col should be chosen as row labels column (-1 if none)
  Output: json_object with added "selected" attributes on cells
  */
-function add_selected_to_json(json_obj, wb=0, row_labels=-1, col_labels=0) {
+function add_selected_to_json(json_obj, wb=0, row_labels=-1, col_labels=-1) {
     var selected = $j(".selected_cell")
     for (var sel=0; sel<selected.length; sel++) {
         var row = selected[sel].attributes.row.value-1;

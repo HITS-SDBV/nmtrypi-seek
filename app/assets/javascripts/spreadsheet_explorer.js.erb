@@ -1008,48 +1008,19 @@ function init_heatmap_data(obj) {
   return heatmap_data;
 }
 
-/* set up parallel coordinates data such that parcoord_data[row_i][col_name] =  (parcoords_data[row_i] = {c1: v1, c2: v2 ...} )
- 1. column titles are selected automatically from row 0 (not checked for above attribute) --> to improve
- 2. TO DO handle zero selections
- */
-function init_pc_row(obj, w, s, r, opt) {
+function init_heatmap_row(obj, w, s, r, opt) {
   sheet_obj = obj["workbook"][w]["sheet"][s];
-
-  if (r == 0) {
-    // TO DO - reset opt.columns here? or make it an onNewSheet action (callback from iterate_on_rows)
-    opt.columns = {}
-    for (var c = 0; c < sheet_obj.rows.row[0].cell.length; c++) {
-      //actual excel sheet column index to avoid shifting of columns (B-->A) on partial selection of columns
-      var col_i = sheet_obj.rows.row[0].cell[c]["@column_alpha"];
-      opt.columns[col_i] = sheet_obj.rows.row[0].cell[c]["#text"];
-    }
-    console.log(opt.columns);
-
-  /*    create the Parallel Coordinates data structure: Array of Objects of length 0...#cr
-   where parcoord_data[row_i][col_name] = value */
-  } else {
-    if (sheet_obj.rows.row[r].cell.length > 0) {
-      opt.pc_data[opt.cr] = {}; //object initialization
-      for (var c = 0; c < sheet_obj.rows.row[r].cell.length; c++) {
-        var col_i = sheet_obj.rows.row[r].cell[c]["@column_alpha"];
-        opt.pc_data[opt.cr][opt.columns[col_i]] = sheet_obj.rows.row[r].cell[c]["#text"];
-       // console.log("c: ", c, "cr: ", opt.cr, "col_i", col_i, "col: ", opt.columns[col_i])
-       // console.log(opt.pc_data[opt.cr][opt.columns[col_i]])
-      }
-        //if at least one cell in the row was not empty, advance cumulative row counter
-        if (Object.keys(opt.pc_data[opt.cr]).length != 0)
-          opt.cr++;
-    }
-  }
   return obj;
 }
+
 
 /* Fetch XML --> convert to JSON --> add "selected" attribute to selected cells.
   - currently wb=0, because we only have one workbook each time. later when we combine different files, this should be changed.
   - for merging different files - can take a list of many objects:
       var super_json = merge_json_workbooks([json_obj, json_obj2]);
 */
-function get_data(rb=-1, cb=0) {
+function get_data(rb=-1, cb=-1) {
+  console.log("get data rb, cb: ", rb, cb)
   // http://some-base-url/data_files/2/explore?version=1#"
   var xml_url = (window.location.href).replace(new RegExp("(\\d+)/explore.*$"), "$1/data.xml");
   console.log("Get XML file: ", xml_url);
@@ -1062,18 +1033,69 @@ function get_data(rb=-1, cb=0) {
 }
 
 function heatmap_plot(){
-    var selected_json = get_data(rb=0);
+    var options = {cr: 0, hm_data: [], row_labels: 0, col_labels: 0};
+    var selected_json = get_data(rb=options.row_labels, cb=options.col_labels);
+    iterate_on_rows(selected_json, init_heatmap_row, null, options);
     var heatmap_data = init_heatmap_data(selected_json); //plotting_selected_cells();
     draw_heatmap(heatmap_data);
+  //draw_heatmap(options.hm_data);
     $j('#heatmap_container').show();
     doUpdate();
 }
 
+function reset_on_sheet(obj, w, s, opt) {
+   console.log("reset on sheet s: ", s)
+   opt.columns = {};
+   return obj;
+}
+
 function parallel_coord_plot(){
-    var selected_json = get_data(cb=0);
-    var options = {cr: 0, pc_data: [], columns: {}, cb: 0};  // cr = cumulative rows across workbooks/sheets
-    iterate_on_rows(selected_json, init_pc_row, options);
+    var options = {cr: 0, pc_data: [], columns: {}, col_labels: 0, row_labels: -1};  // cr = cumulative rows across workbooks/sheets
+    var selected_json = get_data(rb=options.row_labels, cb=options.col_labels);
+    iterate_on_rows(selected_json, init_pc_row, add_pc_titles_from_sheet, options);
     draw_parallel_coord(options.pc_data);
     $j('#parcoords_container').show();
     //doUpdate();
+}
+
+/* Set up parallel coordinates data such that
+   parcoord_data[row_i][col_name] =  (parcoords_data[row_i] = {c1: v1, c2: v2 ...} )
+   TO DO handle zero selections
+*/
+
+function add_pc_titles_from_sheet(obj, w, s, opt) {
+  var sheet_obj = obj["workbook"][w]["sheet"][s];
+  opt.columns = {};
+  var cb = opt.col_labels;
+  //if (sheet_obj.rows.row[cb].cell.length > 0) {
+  for (var c = 0; c < sheet_obj.rows.row[cb].cell.length; c++) {
+    //actual excel sheet column index to avoid shifting of columns (B-->A) on partial selection of columns
+    var col_i = sheet_obj.rows.row[cb].cell[c]["@column_alpha"];
+    opt.columns[col_i] = sheet_obj.rows.row[cb].cell[c]["#text"];
+  }
+  //}
+  console.log(opt.columns);
+  return obj;
+}
+
+/*  Create the Parallel Coordinates data structure: Array of Objects of length 0...#cr
+ where parcoord_data[row_i][col_name] = value */
+function init_pc_row(obj, w, s, r, opt) {
+  //console.log("init pc row s, r: ", s, r);
+  sheet_obj = obj["workbook"][w]["sheet"][s];
+  if (r != opt.col_labels) {
+    if (sheet_obj.rows.row[r].cell.length > 0) {
+      opt.pc_data[opt.cr] = {}; //object initialization
+      for (var c = 0; c < sheet_obj.rows.row[r].cell.length; c++) {
+        var col_i = sheet_obj.rows.row[r].cell[c]["@column_alpha"];
+        opt.pc_data[opt.cr][opt.columns[col_i]] = sheet_obj.rows.row[r].cell[c]["#text"];
+        // console.log("c: ", c, "cr: ", opt.cr, "col_i", col_i, "col: ", opt.columns[col_i])
+        // console.log(opt.pc_data[opt.cr][opt.columns[col_i]])
+      }
+      //if at least one cell in the row was not empty, advance cumulative row counter
+      if (Object.keys(opt.pc_data[opt.cr]).length != 0)
+        opt.cr++;
+    }
+  }
+  return obj;
 }
