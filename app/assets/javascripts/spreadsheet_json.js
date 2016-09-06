@@ -83,18 +83,24 @@ function iterate_on_rows(json_obj, callback, options={}) {
 // }
 
 /*
- Input: json object, workbook number, sheet number
+ Input: json object, workbook number, 
+        col_labels = N, to represent which row should be chosen as a column labels row. (-1 if none should be chosen)
+        row_label = N, to represent which col should be chosen as row labels column (-1 if none)
  Output: json_object with added "selected" attributes on cells
  */
-function add_selected_to_json(json_obj, wb=0, row_labels=false) {
+function add_selected_to_json(json_obj, wb=0, row_labels=-1, col_labels=0) {
     var selected = $j(".selected_cell")
     for (var sel=0; sel<selected.length; sel++) {
         var row = selected[sel].attributes.row.value-1;
         var col = selected[sel].attributes.col.value-1;
         var sheet = selected[sel].ancestors()[3].id.split('_')[1]-1;
         json_obj["workbook"][wb]["sheet"][sheet].rows.row[row].cell[col]["@selected"] = "1";
-        //if (row_labels)
-
+        if (col_labels > -1 && json_obj["workbook"][wb]["sheet"][sheet].rows.row[col_labels].cell[col]["@selected"] === undefined) {
+            json_obj["workbook"][wb]["sheet"][sheet].rows.row[col_labels].cell[col]["@selected"] = "1";
+        }
+        if (row_labels > -1 && json_obj["workbook"][wb]["sheet"][sheet].rows.row[row].cell[row_labels]["@selected"] === undefined) {
+            json_obj["workbook"][wb]["sheet"][sheet].rows.row[row].cell[row_labels]["@selected"] = "1";
+        }
     }
     return json_obj;
 }

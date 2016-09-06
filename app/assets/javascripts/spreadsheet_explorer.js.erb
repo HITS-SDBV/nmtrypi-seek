@@ -1008,10 +1008,16 @@ function init_heatmap_data(obj) {
   return heatmap_data;
 }
 
+/* set up parallel coordinates data such that parcoord_data[row_i][col_name] =  (parcoords_data[row_i] = {c1: v1, c2: v2 ...} )
+ 1. column titles are selected automatically from row 0 (not checked for above attribute) --> to improve
+ 2. TO DO handle zero selections
+ */
 function init_pc_row(obj, w, s, r, opt) {
   sheet_obj = obj["workbook"][w]["sheet"][s];
 
   if (r == 0) {
+    // TO DO - reset opt.columns here? or make it an onNewSheet action (callback from iterate_on_rows)
+    opt.columns = {}
     for (var c = 0; c < sheet_obj.rows.row[0].cell.length; c++) {
       //actual excel sheet column index to avoid shifting of columns (B-->A) on partial selection of columns
       var col_i = sheet_obj.rows.row[0].cell[c]["@column_alpha"];
@@ -1038,36 +1044,25 @@ function init_pc_row(obj, w, s, r, opt) {
   return obj;
 }
 
-/* set up parallel coordinates data such that parcoord_data[row_i][col_name] =  (parcoords_data[row_i] = {c1: v1, c2: v2 ...} )
- 1. column titles are selected automatically from row 0 (not checked for above attribute) --> to improve
- 2. TO DO handle zero selections
- */
-function init_parcoords_data(json_obj) {
-  // cr = cumulative rows across workbooks/sheets
-  var options = {cr: 0, pc_data: [], columns: {}};
-  iterate_on_rows(json_obj, init_pc_row, options);
-  return options.pc_data;
-}
-
 /* Fetch XML --> convert to JSON --> add "selected" attribute to selected cells.
   - currently wb=0, because we only have one workbook each time. later when we combine different files, this should be changed.
   - for merging different files - can take a list of many objects:
       var super_json = merge_json_workbooks([json_obj, json_obj2]);
 */
-function get_data(rb=false) {
+function get_data(rb=-1, cb=0) {
   // http://some-base-url/data_files/2/explore?version=1#"
   var xml_url = (window.location.href).replace(new RegExp("(\\d+)/explore.*$"), "$1/data.xml");
   console.log("Get XML file: ", xml_url);
   var json_obj = {workbook: [xml2json(get_xml_file(xml_url), "")]};
 
-  json_obj = add_selected_to_json(json_obj, wb=0, row_labels=rb);
+  json_obj = add_selected_to_json(json_obj, wb=0, row_labels=rb, col_labels=cb);
   var selected_json = iterate_on_rows(json_obj, get_selected_from_row);
   console.log("selected json: ", selected_json);
   return selected_json;
 }
 
 function heatmap_plot(){
-    var selected_json = get_data(rb=true);
+    var selected_json = get_data(rb=0);
     var heatmap_data = init_heatmap_data(selected_json); //plotting_selected_cells();
     draw_heatmap(heatmap_data);
     $j('#heatmap_container').show();
@@ -1075,9 +1070,10 @@ function heatmap_plot(){
 }
 
 function parallel_coord_plot(){
-    var selected_json = get_data();
-    var parcoord_data = init_parcoords_data(selected_json);   //selection_for_parcoords();
-    draw_parallel_coord(parcoord_data);
+    var selected_json = get_data(cb=0);
+    var options = {cr: 0, pc_data: [], columns: {}, cb: 0};  // cr = cumulative rows across workbooks/sheets
+    iterate_on_rows(selected_json, init_pc_row, options);
+    draw_parallel_coord(options.pc_data);
     $j('#parcoords_container').show();
     //doUpdate();
 }
