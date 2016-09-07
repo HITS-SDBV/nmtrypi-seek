@@ -918,101 +918,6 @@ function deselect_heatmap_cells(col, totalRow, sheetNumber){
 
 }
 */
-function plotting_selected_cells() {
-    var sel_data= new Array();
-    var col_header_cells =  $j("table.active_sheet tr").first().children("td");
-    //var col_header_cells =  $j("div.sheet table tr").first().children("td");
-
-    $j("table.active_sheet tr").each(function () {
-    // $j("div.sheet table tr").each(function () {
-        var this_tr = $j(this);
-        var row_header_cell = this_tr.children("td").filter(function () {
-            return matchRegEx.test($j(this).text()) == true;
-            //return /^nmt[-_][a-zA-Z]+\d+/i.test($j(this).text()) == true;
-        });
-
-        var row_label = row_header_cell.text();
-        var heatmap_cells = $j(this).children("td.selected_cell");
-      /*  if (heatmap_cells.length > 0) {
-            console.log("length of selected heatmap cells for row : ", row_label, heatmap_cells.length);
-            console.log(heatmap_cells);
-        }*/
-        for (var i = 0; i < heatmap_cells.length; i++) {
-            var col_index = heatmap_cells.eq(i).index();
-            var cell_value = heatmap_cells.eq(i);
-            if(cell_value[0].firstChild != null) {
-                sel_data.push({
-                    row_label: row_label,
-                    col_label: col_header_cells.eq(col_index).text(),
-                    row: $j(this).index(),
-                    col: col_index,
-                    value: cell_value.text() // heatmap_cells.eq(i).text()
-                });
-            }
-        }
-
-    });
-    console.log(sel_data);
-    return sel_data;
-}
-
-
-/* set up heat map data such that heatmap_data[row_i] = { col_label: .., row_label: .., row: .., col: .., value: ..}
-Note: the way d3_heatmap was programmed, it's easier to set up the cumulative rows from here. because  data.row will be accessed
- */
-function init_heatmap_data(obj) {
-  var heatmap_data = []; //array of objects
-  var workbook_arr = [];
-  var cr = 1;
-  if ((workbook_arr = obj["workbook"]) != null) {
-    var sheet_arr = [];
-    //Workbook objects loop
-    for (var w=0; w<workbook_arr.length; w++) {
-      if ((sheet_arr = workbook_arr[w]["sheet"]) != null) {
-        //Sheet objects loop
-        for (var s=0; s<sheet_arr.length; s++) {
-          if ((sheet_arr[s]["@hidden"] == "false") && (sheet_arr[s]["@very_hidden"] == "false")) {
-            //Rows loop if the sheet is not empty
-            if (sheet_arr[s].rows.row != null) {
-              //get titles, assuming first row is always the titles
-              //TO DO:  make smarter, by looking into the json and assigning title?
-              var columns = [];
-              for (var c=0; c < sheet_arr[s].rows.row[0].cell.length; c++) {
-                columns[c] = sheet_arr[s].rows.row[0].cell[c]["#text"];
-              }
-              /*
-              TO DO: Currently row labels are hard coded to be in the first column of the sheet. change.
-               */
-              for (var r=1; r<sheet_arr[s].rows["@last_row"]; r++) {
-                if (sheet_arr[s].rows.row[r].cell.length > 0) {
-                  for (var c=0;  c < sheet_arr[s].rows.row[r].cell.length; c++) {
-                    heatmap_data.push({
-                      row_label: sheet_arr[s].rows.row[r].cell[0]["#text"],
-                      col_label: columns[c],
-                      sheet: sheet_arr[s]["@name"],
-                      row: cr, //sheet_arr[s].rows.row[r]["@index"],
-                      col: sheet_arr[s].rows.row[r].cell[c]["@column"],
-                      col_alpha: sheet_arr[s].rows.row[r].cell[c]["@column_alpha"],
-                      value: sheet_arr[s].rows.row[r].cell[c]["#text"]
-                    });
-                   }
-                  cr++;
-                }
-              } // END row loop
-            }
-          }
-        } // END sheet loop
-      }
-    } //END workbook loop
-  }
-  return heatmap_data;
-}
-
-function init_heatmap_row(obj, w, s, r, opt) {
-  sheet_obj = obj["workbook"][w]["sheet"][s];
-  return obj;
-}
-
 
 /* Fetch XML --> convert to JSON --> add "selected" attribute to selected cells.
   - currently wb=0, because we only have one workbook each time. later when we combine different files, this should be changed.
@@ -1033,37 +938,33 @@ function get_data(rb=-1, cb=-1) {
 }
 
 function heatmap_plot(){
-    var options = {cr: 0, hm_data: [], row_labels: 0, col_labels: 0};
+    var options = {cr: 0, hm_data: [], columns: {}, row_labels: 0, col_labels: 0};
     var selected_json = get_data(rb=options.row_labels, cb=options.col_labels);
-    iterate_on_rows(selected_json, init_heatmap_row, null, options);
-    var heatmap_data = init_heatmap_data(selected_json); //plotting_selected_cells();
-    draw_heatmap(heatmap_data);
-  //draw_heatmap(options.hm_data);
+    iterate_on_rows(selected_json, init_heatmap_row, add_col_titles_from_sheet, options);
+    //var heatmap_data = init_heatmap_data(selected_json); //plotting_selected_cells();
+    //draw_heatmap(heatmap_data);
+    draw_heatmap(options.hm_data);
     $j('#heatmap_container').show();
     doUpdate();
 }
 
-function reset_on_sheet(obj, w, s, opt) {
-   console.log("reset on sheet s: ", s)
-   opt.columns = {};
-   return obj;
-}
-
 function parallel_coord_plot(){
-    var options = {cr: 0, pc_data: [], columns: {}, col_labels: 0, row_labels: -1};  // cr = cumulative rows across workbooks/sheets
+    // cr = cumulative rows across workbooks/sheets
+    // not using row labels. compounds are not necessarily a part of the plot.
+    var options = {cr: 0, pc_data: [], columns: {}, col_labels: 0, row_labels: -1};
     var selected_json = get_data(rb=options.row_labels, cb=options.col_labels);
-    iterate_on_rows(selected_json, init_pc_row, add_pc_titles_from_sheet, options);
+    iterate_on_rows(selected_json, init_pc_row, add_col_titles_from_sheet, options);
     draw_parallel_coord(options.pc_data);
     $j('#parcoords_container').show();
     //doUpdate();
 }
 
-/* Set up parallel coordinates data such that
-   parcoord_data[row_i][col_name] =  (parcoords_data[row_i] = {c1: v1, c2: v2 ...} )
-   TO DO handle zero selections
-*/
+/*
+  Read column labels from the row number specified in opt.col_labels
+  Modify opt.columns ( = {col_alpha1: "title1", col_alpha2: "title2" ... }
+ */
 
-function add_pc_titles_from_sheet(obj, w, s, opt) {
+function add_col_titles_from_sheet(obj, w, s, opt) {
   var sheet_obj = obj["workbook"][w]["sheet"][s];
   opt.columns = {};
   var cb = opt.col_labels;
@@ -1078,8 +979,41 @@ function add_pc_titles_from_sheet(obj, w, s, opt) {
   return obj;
 }
 
-/*  Create the Parallel Coordinates data structure: Array of Objects of length 0...#cr
- where parcoord_data[row_i][col_name] = value */
+
+/* set up heat map data such that heatmap_data[row_i] = { col_label: .., row_label: .., row: .., col: .., value: ..}
+ Note: the way d3_heatmap was programmed, it's easier to set up the cumulative rows from here. because  data.row will be accessed
+ */
+
+function init_heatmap_row(obj, w, s, r, opt) {
+  sheet_obj = obj["workbook"][w]["sheet"][s];
+  if (r != opt.col_labels) {
+    if (sheet_obj.rows.row[r].cell.length > 0) {
+      //opt.pc_data[opt.cr] = {}; //object initialization
+      for (var c = 0; c < sheet_obj.rows.row[r].cell.length; c++) {
+        var col_i = sheet_obj.rows.row[r].cell[c]["@column_alpha"];
+        (opt.hm_data).push({
+          row_label: sheet_obj.rows.row[r].cell[opt.row_labels]["#text"],
+          col_label: opt.columns[col_i],
+          sheet: sheet_obj["@name"],
+          row: opt.cr, //sheet_arr[s].rows.row[r]["@index"],
+          col: sheet_obj.rows.row[r].cell[c]["@column"],
+          col_alpha: sheet_obj.rows.row[r].cell[c]["@column_alpha"],
+          value: sheet_obj.rows.row[r].cell[c]["#text"]
+        });
+      }
+      //if at least one cell in the row was not empty, advance cumulative row counter
+      if (Object.keys(opt.hm_data[opt.cr]).length != 0)
+        opt.cr++;
+    }
+  }
+  return obj;
+}
+
+/* Set up parallel coordinates data, Array of Objects of length 0...#cr, such that
+ parcoord_data[row_i][col_name] =  (parcoords_data[row_i] = {c1: v1, c2: v2 ...} )
+ TO DO handle zero selections
+ */
+
 function init_pc_row(obj, w, s, r, opt) {
   //console.log("init pc row s, r: ", s, r);
   sheet_obj = obj["workbook"][w]["sheet"][s];
