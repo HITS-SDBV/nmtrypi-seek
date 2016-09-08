@@ -235,18 +235,20 @@ function update_colors(dimension) {
 function getCentroids(data){
     // this function returns centroid points for data. I had to change the source
     // for parallelcoordinates and make compute_centroids public.
-    // I assume this should be already somewhere in graph and I don't need to recalculate it
-    // but I couldn't find it so I just wrote this for now
     var margins = graph.margin();
     var graphCentPts = [];
-
     data.forEach(function(d){
 
-        var initCenPts = graph.compute_centroids(d).filter(function(d, i){return i%2==0;});
-
-        // move points based on margins
-        var cenPts = initCenPts.map(function(d){
-            return [d[0] + margins["left"], d[1]+ margins["top"]];
+        var initCenPts = graph.compute_centroids(d).filter(function(e, i){return i%2==0;});
+        // move points based on margins, and on missing value offset if there's no value
+        // need to traverse object d with col_key
+        var gdim = graph.dimensions();
+        var cenPts = initCenPts.map(function(p, i){
+            if ( (d[gdim[i]] === undefined) || (d[gdim[i]] == "NaN")  || (d[gdim[i]] == "") ) {
+                return [p[0] + margins["left"], p[1] + margins["top"] + +graph.get_missingVOffset()]; //extra + converts to float
+            } else {
+                return [p[0] + margins["left"], p[1] + margins["top"]];
+            }
         });
 
         graphCentPts.push(cenPts);
@@ -272,7 +274,6 @@ function isOnLine(startPt, endPt, testPt, tol){
     var Dx = x2 - x1;
     var Dy = y2 - y1;
     var delta = Math.abs(Dy*x0 - Dx*y0 - x1*y2+x2*y1)/Math.sqrt(Math.pow(Dx, 2) + Math.pow(Dy, 2));
-
     if (delta <= tol) return true;
     return false;
 }
@@ -281,7 +282,6 @@ function findAxes(testPt, cenPts){
     // finds between which two axis the mouse is
     var x = testPt[0];
     var y = testPt[1];
-
     // make sure it is inside the range of x
     if (cenPts[0][0] > x) return false;
     if (cenPts[cenPts.length-1][0] < x) return false;
@@ -304,7 +304,6 @@ function addTooltip(clicked, clickedCenPts){
     var clickedDataSet = [];
     var margins = graph.margin();
     var dims = graph.dimensions();
-    //console.log(clicked, clickedCenPts)
     // get all the values into a single list
     for (var i=0; i<clicked.length; i++){
         for (var j=0; j<clickedCenPts[i].length; j++){
@@ -355,7 +354,10 @@ function getClickedLines(mouseClick){
     // find which data is activated right now
     var activeData = getActiveData();
 
-    // find centriod points
+    // find centriod points: get pc axis intersection points
+    // graphCentPts = Array[ #rows ] where
+    // graphCentPts[row] =  Array[#dim] where
+    // graphCentPts[row][dim] = [x_dim, y_dim] == where line row intersects with axis of dimension dim
     var graphCentPts = getCentroids(activeData);
     if (graphCentPts.length==0) return false;
 
@@ -377,14 +379,13 @@ function highlightLineOnClick(mouseClick, drawTooltip){
 
     var clicked = [];
     var clickedCenPts = [];
-
     clickedData = getClickedLines(mouseClick);
+
     if (clickedData && clickedData[0].length!=0){
         clicked = clickedData[0];
         clickedCenPts = clickedData[1];
         // highlight clicked line
         graph.highlight(clicked);
-
         if (drawTooltip){
             // clean if anything is there
             cleanTooltip();

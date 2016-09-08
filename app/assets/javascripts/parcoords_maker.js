@@ -251,7 +251,9 @@ pc.autoscale = function() {
       domain = Object.getOwnPropertyNames(counts).sort(function(a, b) {
         return counts[a] - counts[b];
       });
-
+      remove_i = domain.indexOf("");
+      if (remove_i > -1)
+          domain.splice(remove_i,1)
       return d3.scale.ordinal()
         .domain(domain)
         .rangePoints([h()+1, 1]);
@@ -757,7 +759,9 @@ function rotateLabels() {
 pc.get_reorderDim_i = function (i) {
     return __.reorder_dim[i];
 };
-
+pc.get_missingVOffset = function () {
+    return __.missingAxisOffset;
+}
 pc.removeAxes = function() {
   g.remove();
   return this;
