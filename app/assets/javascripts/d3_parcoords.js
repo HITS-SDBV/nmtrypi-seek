@@ -244,10 +244,10 @@ function getCentroids(data){
         // need to traverse object d with col_key
         var gdim = graph.dimensions();
         var cenPts = initCenPts.map(function(p, i){
-            if ( (d[gdim[i]] === undefined) || (d[gdim[i]] == "NaN")  || (d[gdim[i]] == "") ) {
-                return [p[0] + margins["left"], p[1] + margins["top"] + +graph.get_missingVOffset()]; //extra + converts to float
-            } else {
+            if (graph.value_exists(d[gdim[i]])) {
                 return [p[0] + margins["left"], p[1] + margins["top"]];
+            } else {
+                return [p[0] + margins["left"], p[1] + margins["top"] + +graph.get_missingVOffset()]; //extra + converts to float
             }
         });
 
@@ -359,6 +359,7 @@ function getClickedLines(mouseClick){
     // graphCentPts[row] =  Array[#dim] where
     // graphCentPts[row][dim] = [x_dim, y_dim] == where line row intersects with axis of dimension dim
     var graphCentPts = getCentroids(activeData);
+    //console.log("in clicked lines: ", graphCentPts)
     if (graphCentPts.length==0) return false;
 
     // find between which axes the point is

@@ -462,10 +462,15 @@ function compute_centroids(row) {
 	for (var i = 0; i < cols; ++i) {
 		// centroids on 'real' axes
 		var x = position(p[i]);
-		var y = yscale[p[i]](row[p[i]]);
+        var y;// = yscale[p[i]](row[p[i]]);
+        if (pc.value_exists(row[p[i]])) {
+            y = yscale[p[i]](row[p[i]]);
+        } else {
+            y = h();
+        }
     centroids.push([x, y]);
 		//centroids.push($V([x, y]));
-
+        // TO DO: change to include check for value_exists?
 		// centroids on 'virtual' axes
 		if (i < cols - 1) {
 			var cx = x + a * (position(p[i+1]) - x);
@@ -577,12 +582,12 @@ function single_path(d, ctx) {
     //console.log(arrMin)
 	__.dimensions.map(function(p, i) {
         var yval;
-        if ( (d[p] === undefined) || (d[p] == "NaN")  || (d[p] == "") ) {
-        //  console.log("in single_path: ", p, __.minValues[p]);
-        //    d[p] = __.minValues[p];
-            yval = h()+(__.missingAxisOffset-1);
-        } else {
+        if (pc.value_exists(d[p])) {
             yval = yscale[p](d[p]);
+        } else {
+            //  console.log("in single_path: ", p, __.minValues[p]);
+            //    d[p] = __.minValues[p];
+            yval = h()+(__.missingAxisOffset-1);
         }
 		if (i == 0) {
 			ctx.moveTo(position(p), yval);//yscale[p](d[p]));
@@ -761,6 +766,13 @@ pc.get_reorderDim_i = function (i) {
 };
 pc.get_missingVOffset = function () {
     return __.missingAxisOffset;
+}
+pc.value_exists = function(v) {
+    if ( (v === undefined) || (v == "NaN")  || (v == "") ) {
+        return false;
+    } else {
+        return true;
+    }
 }
 pc.removeAxes = function() {
   g.remove();
