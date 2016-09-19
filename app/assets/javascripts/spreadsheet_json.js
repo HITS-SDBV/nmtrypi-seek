@@ -51,7 +51,8 @@ function get_selected_from_row(json_obj, w ,s ,r, options={}) {
     - callback works on the object itself with indices w,s,r (workbook, sheet, row), rather than a row object
       because the indices could point to other features in the sheet except the row which may become important later on.
  */
-function iterate_on_rows(json_obj, row_callback, sheet_callback, options={}) {
+function iterate_on_rows(json_obj, row_callback, sheet_callback, options) {
+    if (options == null) options = {};
     if ((workbook_arr = json_obj["workbook"]) != null) {
         var sheet_arr = [];
         //Workbook objects loop
@@ -86,12 +87,16 @@ function iterate_on_rows(json_obj, row_callback, sheet_callback, options={}) {
 // }
 
 /*
- Input: json object, workbook number, 
+ Input: json object, workbook number,
         col_labels = N, to represent which row should be chosen as a column labels row. (-1 if none should be chosen)
         row_label = N, to represent which col should be chosen as row labels column (-1 if none)
  Output: json_object with added "selected" attributes on cells
  */
-function add_selected_to_json(json_obj, wb=0, row_labels=-1, col_labels=-1) {
+function add_selected_to_json(json_obj, wb, row_labels, col_labels) {
+    if (wb == null ) wb=0;
+    if (row_labels == null) row_labels = -1;
+    if (col_labels == null) col_labels = -1;
+    var selected = $j(".selected_cell")
     var selected = $j(".selected_cell")
     for (var sel=0; sel<selected.length; sel++) {
         var row = selected[sel].attributes.row.value-1;
@@ -326,7 +331,7 @@ function xml2json(xml, tab) {
 }
 
 // Converts XML to JSON
-// shorter and cleaner - but need to change it to remove empty text elements. 
+// shorter and cleaner - but need to change it to remove empty text elements.
 //var jsonText = JSON.stringify(xmlToJson(xmlDoc));
 function xmlToJson(xml) {
 
