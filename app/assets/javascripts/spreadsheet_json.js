@@ -33,7 +33,8 @@ function get_selected_json2(json_obj) {
     return json_obj;
 }*/
 
-function get_selected_from_row(json_obj, w ,s ,r, options={}) {
+function get_selected_from_row(json_obj, w ,s ,r, options) {
+    if (options == null) options = {};
     var cell_arr_len = json_obj["workbook"][w]["sheet"][s].rows.row[r].cell.length - 1;
     //descending order to enable quick and painless deletions.
     for (var c = cell_arr_len; c > -1; c--) {
