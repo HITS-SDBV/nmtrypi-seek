@@ -924,7 +924,9 @@ function deselect_heatmap_cells(col, totalRow, sheetNumber){
   - for merging different files - can take a list of many objects:
       var super_json = merge_json_workbooks([json_obj, json_obj2]);
 */
-function get_data(rb=-1, cb=-1) {
+function get_data(rb, cb) {
+  if (rb == null) rb = -1;
+  if (cb == null) cb = -1;
   console.log("get data rb, cb: ", rb, cb)
   // http://some-base-url/data_files/2/explore?version=1#"
   var xml_url = (window.location.href).replace(new RegExp("(\\d+)/explore.*$"), "$1/data.xml");
