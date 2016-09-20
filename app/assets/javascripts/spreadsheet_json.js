@@ -103,12 +103,16 @@ function add_selected_to_json(json_obj, wb, row_labels, col_labels) {
         var row = selected[sel].attributes.row.value-1;
         var col = selected[sel].attributes.col.value-1;
         var sheet = selected[sel].ancestors()[3].id.split('_')[1]-1;
-        json_obj["workbook"][wb]["sheet"][sheet].rows.row[row].cell[col]["@selected"] = "1";
-        if (col_labels > -1 && json_obj["workbook"][wb]["sheet"][sheet].rows.row[col_labels].cell[col]["@selected"] === undefined) {
-            json_obj["workbook"][wb]["sheet"][sheet].rows.row[col_labels].cell[col]["@selected"] = "1";
-        }
-        if (row_labels > -1 && json_obj["workbook"][wb]["sheet"][sheet].rows.row[row].cell[row_labels]["@selected"] === undefined) {
-            json_obj["workbook"][wb]["sheet"][sheet].rows.row[row].cell[row_labels]["@selected"] = "1";
+        if (json_obj["workbook"][wb]["sheet"][sheet].rows.row[row] != undefined &&
+            json_obj["workbook"][wb]["sheet"][sheet].rows.row[row].cell[col] != undefined) {
+
+            json_obj["workbook"][wb]["sheet"][sheet].rows.row[row].cell[col]["@selected"] = "1";
+            if (col_labels > -1 && json_obj["workbook"][wb]["sheet"][sheet].rows.row[col_labels].cell[col]["@selected"] === undefined) {
+                json_obj["workbook"][wb]["sheet"][sheet].rows.row[col_labels].cell[col]["@selected"] = "1";
+            }
+            if (row_labels > -1 && json_obj["workbook"][wb]["sheet"][sheet].rows.row[row].cell[row_labels]["@selected"] === undefined) {
+                json_obj["workbook"][wb]["sheet"][sheet].rows.row[row].cell[row_labels]["@selected"] = "1";
+            }
         }
     }
     return json_obj;
