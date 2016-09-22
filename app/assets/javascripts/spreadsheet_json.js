@@ -1,38 +1,7 @@
 
-/* replaced by iterate_on_rows + callback to get_selected_from_row
- Input: json object which might have the "selected" attribute on <cell> records
- Output: json_object with the title row + all selected cells. object structure is kept.
-
-function get_selected_json2(json_obj) {
-    if ((workbook_arr = json_obj["workbook"]) != null) {
-        var sheet_arr = [];
-        //Workbook objects loop
-        for (var w = 0; w < workbook_arr.length; w++) {
-            if ((sheet_arr = workbook_arr[w]["sheet"]) != null) {
-                //Sheet objects loop
-                for (var s =0; s<sheet_arr.length; s++) {
-                    if (sheet_arr[s].rows.row != null) {
-                        //Rows loop 1
-                        for (var r = 0 ; r < sheet_arr[s].rows["@last_row"]; r++) {
-                            //descending order to enable quick and painless deletions.
-                            var cell_arr_len = sheet_arr[s].rows.row[r].cell.length -1
-                            ///Cell loop to filter selections
-                            for (var c = cell_arr_len; c > -1; c--) {
-                                if (!sheet_arr[s].rows.row[r].cell[c]["@selected"]) {
-                                    //if (s == 0)
-                                       //console.log("removing in sheet, row, cell", s, r,c)
-                                    json_obj["workbook"][w]["sheet"][s].rows.row[r].cell.splice(c, 1)
-                                }
-                            }
-                        }
-                    }
-                } //End Sheet loop
-            }
-        } // End Workbook loop
-    }
-    return json_obj;
-}*/
-
+/* Input: json object, reference to worksheet w, sheet s and row r + options (currently unused)
+   Returns: json object modified to contain only the "selected" cells from row r
+ */
 function get_selected_from_row(json_obj, w ,s ,r, options) {
     if (options == null) options = {};
     var cell_arr_len = json_obj["workbook"][w]["sheet"][s].rows.row[r].cell.length - 1;
@@ -80,6 +49,31 @@ function iterate_on_rows(json_obj, row_callback, sheet_callback, options) {
     }
     return json_obj;
 }
+//
+// function get_json_col(obj, w,s,r,c) {
+//     return obj["workbook"][w]["sheet"][s].rows.row[r].cell[c];
+// }
+//
+// function get_json_row(obj, w,s,r) {
+//     return obj["workbook"][w]["sheet"][s].rows.row[r];
+// }
+
+function json_col_exists(obj, w,s,r,c) {
+    return (obj["workbook"][w]["sheet"][s].rows.row[r].cell[c] != undefined);
+}
+
+function json_row_exists(obj, w,s,r) {
+    return (obj["workbook"][w]["sheet"][s].rows.row[r] != undefined);
+}
+
+// function json_col_attr_exists(obj, w,s,r,c, attr) {
+//     return obj["workbook"][w]["sheet"][s].rows.row[r].cell[c][attr] != undefined;
+// }
+
+function set_json_col_attr(obj, w,s,r,c, attr, val) {
+    obj["workbook"][w]["sheet"][s].rows.row[r].cell[c][attr] = val;
+    return obj;
+}
 
 // function iterate_on_cells(json_obj, w, s ,r) {
 //     for (var c = 0; c < json_obj["workbook"][w]["sheet"][s].rows.row[r].cell.length; c++) {
@@ -93,7 +87,7 @@ function iterate_on_rows(json_obj, row_callback, sheet_callback, options) {
         row_label = N, to represent which col should be chosen as row labels column (-1 if none)
  Output: json_object with added "selected" attributes on cells
  */
-function add_selected_to_json(json_obj, wb, row_labels, col_labels) {
+function add_selected_to_json(json, wb, row_labels, col_labels) {
     if (wb == null ) wb=0;
     if (row_labels == null) row_labels = -1;
     if (col_labels == null) col_labels = -1;
@@ -103,20 +97,28 @@ function add_selected_to_json(json_obj, wb, row_labels, col_labels) {
         var row = selected[sel].attributes.row.value-1;
         var col = selected[sel].attributes.col.value-1;
         var sheet = selected[sel].ancestors()[3].id.split('_')[1]-1;
-        if (json_obj["workbook"][wb]["sheet"][sheet].rows.row[row] != undefined &&
-            json_obj["workbook"][wb]["sheet"][sheet].rows.row[row].cell[col] != undefined) {
-
-            json_obj["workbook"][wb]["sheet"][sheet].rows.row[row].cell[col]["@selected"] = "1";
-            if (col_labels > -1 && json_obj["workbook"][wb]["sheet"][sheet].rows.row[col_labels].cell[col]["@selected"] === undefined) {
-                json_obj["workbook"][wb]["sheet"][sheet].rows.row[col_labels].cell[col]["@selected"] = "1";
+        if ( json_row_exists(json, wb, sheet, row)  && json_col_exists(json, wb, sheet, row, col) ) {
+            json = set_json_col_attr(json, wb, sheet, row, col, "@selected", "1");
+            //select column which provides row labels specifically for 'row', row existence was already checked for
+            if (row_labels > -1 && json_col_exists(json,  wb, sheet, row,  row_labels))  {
+                json = set_json_col_attr(json, wb, sheet, row, row_labels, "@selected", "1");
+                //json_obj["workbook"][wb]["sheet"][sheet].rows.row[row].cell[row_labels]["@selected"] = "1";
             }
-            if (row_labels > -1 && json_obj["workbook"][wb]["sheet"][sheet].rows.row[row].cell[row_labels]["@selected"] === undefined) {
-                json_obj["workbook"][wb]["sheet"][sheet].rows.row[row].cell[row_labels]["@selected"] = "1";
+            //select row that provides col labels, need to check for both row and col existence.
+            if (col_labels > -1 && json_row_exists(json, wb, sheet, col_labels)
+                                && json_col_exists(json, wb, sheet, col_labels, col)) {
+                json = set_json_col_attr(json, wb, sheet, col_labels, col, "@selected", "1");
             }
         }
+        //if row_labels column was not actively selected, the row_labels column-title needs to be cherry-picked
+        if (row_labels > -1 && col_labels > -1 && json_row_exists(json, wb, sheet, col_labels) &&
+            json_col_exists(json, wb, sheet, col_labels, row_labels) ) {
+            json = set_json_col_attr(json, wb,  sheet, col_labels, row_labels, "@selected", "1");
+        }
     }
-    return json_obj;
+    return json;
 }
+
 
 /*
  Merge JSON objects
