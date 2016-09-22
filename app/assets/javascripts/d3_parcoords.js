@@ -143,12 +143,16 @@ function draw_parallel_coord(data) {
   d3.select("#keepData").on("click", keep_data);
   d3.select("#excludeData").on("click", exclude_data);
   d3.select('#btnReset').on('click', function() {graph.brushReset();});
-  d3.select('#sltPredicate').on('change', function() {
+  d3.select("#resetData").on("click", reset_data);
+    d3.select('#sltPredicate').on('change', function() {
       graph.brushPredicate(this.value);
   });
 
 } //end of draw_parallel_coord function
-
+function reset_data() {
+    console.log("reset");
+    graph.rescale_for_selection(parcoord_data);
+};
 // Inspired by Nutrient Explorer: http://bl.ocks.org/syntagmatic/raw/3150059/
 function keep_data() {
     new_data = getActiveData();
