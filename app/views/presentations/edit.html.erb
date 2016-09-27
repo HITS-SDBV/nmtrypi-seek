@@ -27,7 +27,7 @@
         <%# only the owner should be able to change sharing permissions -%>
         <% if current_user_authorized_to_manage -%>
 
-		<%= render :partial=>"assets/asset_form_bottom", :locals=> {:f => f} -%>
+		<%= render :partial=>"assets/asset_form_bottom", :locals=> {:f => f, :manage => @presentation.can_manage?} -%>
         
         <p>
             <% if Seek::Config.events_enabled -%>
