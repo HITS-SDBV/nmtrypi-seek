@@ -59,7 +59,8 @@ function iterate_on_rows(json_obj, row_callback, sheet_callback, options) {
 // }
 
 function json_col_exists(obj, w,s,r,c) {
-    return (obj["workbook"][w]["sheet"][s].rows.row[r].cell[c] != undefined);
+    return ( (obj["workbook"][w]["sheet"][s].rows.row[r].cell[c] != undefined) &&
+             (obj["workbook"][w]["sheet"][s].rows.row[r].cell[c]["#text"] != undefined));
 }
 
 function json_row_exists(obj, w,s,r) {
@@ -91,8 +92,7 @@ function add_selected_to_json(json, wb, row_labels, col_labels) {
     if (wb == null ) wb=0;
     if (row_labels == null) row_labels = -1;
     if (col_labels == null) col_labels = -1;
-    var selected = $j(".selected_cell")
-    var selected = $j(".selected_cell")
+    var selected = $j(".selected_cell");
     for (var sel=0; sel<selected.length; sel++) {
         var row = selected[sel].attributes.row.value-1;
         var col = selected[sel].attributes.col.value-1;
