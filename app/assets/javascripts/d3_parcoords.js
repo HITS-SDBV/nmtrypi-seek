@@ -7,9 +7,7 @@ var color_range = ["#fed98e", "#a1dab4" , "#41b6c4", "#2c7fb8", "#253494"];
 //['#fc8d59','#ffffbf','#91bfdb'];// (red-white-blue)
 //['#fc8d59','#ffffbf','#91cf60']; //(red-yellow-green)
 var color_set;
-var MAX_ROWS = 50;
-var DEFAULT_HEIGHT = 520;
-var H_OFFSET = 10;
+var pcHeight = 600;
 
 function initialize(data, textLength){
     parcoord_data = data;
@@ -40,7 +38,6 @@ function initialize(data, textLength){
     //color_set = d3.scale.linear()
      //          .range(color_range);
 
-    pcHeight = data_length < MAX_ROWS ? DEFAULT_HEIGHT : (data_length / MAX_ROWS) * DEFAULT_HEIGHT;
     //can only get style of visible elements, not the new popup.
     pcWidth =   d3.select("div.spreadsheet_container").style("width").replace("px","");
     d3.select("div.spreadsheet_popup").style("width", pcWidth+"px");
@@ -149,9 +146,18 @@ function draw_parallel_coord(data) {
   });
 
 } //end of draw_parallel_coord function
+
+function getActiveDim() {
+    var all_dims = graph.svg.selectAll(".dimension");
+    for (var i = 0; i < all_dims[0].length; i++) {
+        if (all_dims[0][i].style["font-weight"] == 'bold') {return i;}
+    }
+}
+
 function reset_data() {
     console.log("reset");
     graph.rescale_for_selection(parcoord_data);
+    update_colors(d3.keys(parcoord_data[0])[getActiveDim()]);
 };
 // Inspired by Nutrient Explorer: http://bl.ocks.org/syntagmatic/raw/3150059/
 function keep_data() {
@@ -162,6 +168,8 @@ function keep_data() {
         return false;
     }
     graph.rescale_for_selection(new_data);
+    update_colors(d3.keys(parcoord_data[0])[getActiveDim()]);
+
 };
 
 function exclude_data() {
@@ -171,7 +179,9 @@ function exclude_data() {
         return false;
     }
     graph.rescale_for_selection(new_data);
+    update_colors(d3.keys(parcoord_data[0])[getActiveDim()]);
 };
+
 //   //from here: tooltip code + highlighting
 // update color and font weight of chart based on axis selection
 // modified from here: http://bl.ocks.org/mostaphaRoudsari/b4e090bb50146d88aec4
