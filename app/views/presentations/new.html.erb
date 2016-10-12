@@ -23,7 +23,7 @@
             <%= render :partial => "scales/scales_selector",:locals=>{:object=>@presentation} if show_scales?%>
           </p>
 		<%= fields_for(@presentation) {|f|  f.hidden_field :parent_name } -%>
-  	<%= fields_for(@presentation) {|f| render :partial=>"assets/asset_form_bottom", :locals=> {:f => f}} -%>
+  	<%= fields_for(@presentation) {|f| render :partial=>"assets/asset_form_bottom", :locals=> {:f => f, :manage => @presentation.can_manage?}} -%>
        
         <p>
             <% if Seek::Config.events_enabled -%>

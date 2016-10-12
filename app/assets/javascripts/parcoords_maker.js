@@ -42,6 +42,7 @@ d3.parcoords = function(config) {
     rate: 20,
     x_translate: 0, //-40??
     y_translate: -60,
+    maxOrdinalTicks: 50,
     width: "1400",
     height: 520,
     missingAxisOffset: "30",
@@ -673,21 +674,32 @@ String.prototype.width = function(font) {
   return w;
 };
 
-function rotateLabels() {
-  var delta = d3.event.deltaY;
-  delta = delta < 0 ? -5 : delta;
-  delta = delta > 0 ? 5 : delta;
+    function rotateLabels() {
+        var delta = d3.event.deltaY;
+        delta = delta < 0 ? -5 : delta;
+        delta = delta > 0 ? 5 : delta;
 
-  __.dimensionTitleRotation += delta;
-  //pc.svg.selectAll("text.label")
-    pc.svg.selectAll(".label")
-    //  .attr("transform", "translate(0,0) rotate(" + __.dimensionTitleRotation + ")");
-    //no need to translate again
-    .attr("transform", "translate("+__.x_translate+","+__.y_translate +") " +
-        //"rotate(" + __.dimensionTitleRotation + "," +__.x_translate/2 + "," +__.y_translate/2 + ")");
-        "rotate(" + __.dimensionTitleRotation + ")");
-  d3.event.preventDefault();
-}
+        __.dimensionTitleRotation += delta;
+        //pc.svg.selectAll("text.label")
+        pc.svg.selectAll(".label")
+        //  .attr("transform", "translate(0,0) rotate(" + __.dimensionTitleRotation + ")");
+        //no need to translate again
+            .attr("transform", "translate("+__.x_translate+","+__.y_translate +") " +
+                //"rotate(" + __.dimensionTitleRotation + "," +__.x_translate/2 + "," +__.y_translate/2 + ")");
+                "rotate(" + __.dimensionTitleRotation + ")");
+        d3.event.preventDefault();
+    }
+
+    function reduceOrdinalLabels(d, sel) {
+        var axis = d3.svg.axis().orient("left").ticks(5);
+        if (typeof(yscale[d].rangePoints) === 'function') {
+            d3.select(sel).call(axis.scale(yscale[d]).tickValues(yscale[d].domain().filter(function(e,i){
+                return !(i% Math.ceil(yscale[d].domain().length /__.maxOrdinalTicks) );
+            } )));
+        } else if (typeof(yscale[d].rangePoints) === 'undefined') {
+            d3.select(sel).call(axis.scale(yscale[d]));
+        }
+    }
 
     pc.createAxes = function() {
   if (g) pc.removeAxes();
@@ -703,7 +715,7 @@ function rotateLabels() {
   g.append("svg:g")
       .attr("class", "axis")
       .attr("transform", "translate(0,0)")
-      .each(function(d) { d3.select(this).call(axis.scale(yscale[d])); })
+      .each(function(d) { reduceOrdinalLabels(d, this);})
       .append("svg:text")
       .attr("transform", "translate("+__.x_translate+","+__.y_translate +") rotate(" + __.dimensionTitleRotation + ")")
       .text(function(d) {
@@ -783,7 +795,7 @@ pc.updateAxesScale = function() {
     pc.svg.selectAll(".axis:not(#haxis)")
         .transition()
         .duration(1100)
-        .each(function(d) { d3.select(this).call(axis.scale(yscale[d])); });
+        .each(function(d) { reduceOrdinalLabels(d, this);});
 };
 
     /* This function is never used? the wrap call does not work, not clear why.
@@ -799,7 +811,7 @@ pc.updateAxes = function() {
     .append("svg:g")
       .attr("class", "axis")
       .attr("transform", "translate(0,0)")
-      .each(function(d) { d3.select(this).call(axis.scale(yscale[d])); })
+      .each(function(d) { reduceOrdinalLabels(d, this);})
       .append("svg:text")
       .attr("transform", "translate("+__.x_translate+","+__.y_translate +") rotate(" + __.dimensionTitleRotation + ")")
       .text(String)
@@ -823,9 +835,8 @@ pc.updateAxes = function() {
   g_data.select(".axis")
     .transition()
       .duration(1100)
-      .each(function(d) {
-        d3.select(this).call(axis.scale(yscale[d]));
-      });
+      .each(function(d) { reduceOrdinalLabels(d, this);})
+
   g_data.select(".label")
     .transition()
       .duration(1100)
@@ -843,7 +854,7 @@ pc.updateAxes = function() {
   pc.svg.selectAll(".axis:not(#haxis)")
     .transition()
       .duration(1100)
-      .each(function(d) { d3.select(this).call(axis.scale(yscale[d])); });
+      .each(function(d) { reduceOrdinalLabels(d, this);})
    //pc.svg.selectAll(".label").call(wrap);
 
   if (flags.shadows) paths(__.data, ctx.shadows);

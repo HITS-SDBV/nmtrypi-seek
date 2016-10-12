@@ -16,14 +16,21 @@
       <% @compounds_hash.each do |id,datafile_attributes| %>
       <tr data-compoundid="<%= id %>">
         <td>
+          <!-- normalized id value -->
           <%= id %>
         </td>
         <% @header.keys.each do |name| %>
         <td>
           <% datafile_attributes.each do |file_id,attributes| %>
             <% if attributes.has_key? name %>
-              <%= attributes[name] %>
-              <% break %>
+                  <% @@compound_prefix = I18n.t('special.compound_id_prefix') %>
+                  <% if (attributes[name] =~ /#{@@compound_prefix}[-_][a-zA-Z]+\d+/i) %>
+                     <%= cell_link(attributes[name].to_s, file_id) %>
+                      <%  %>
+                  <% else %>
+                      <%= attributes[name] %>
+                  <% end %>
+                  <% break %>
             <% end %>
           <% end %>
         </td>
@@ -33,7 +40,7 @@
     </tbody>
     <tfoot>
       <tr>
-        <th>In Datafile:</th>
+        <th>In Data file(s):</th>
         <% @header.each do |name,datafile_ids| %>
         <td>
           <ul>
@@ -53,9 +60,10 @@
     </tfoot>
   </table>
 </div>
+<ul id="cell_menu" class='dynamic_menu with_smaller_shadow' style="display:none;margin-top: 0.5em; width:auto;">
 
-<div class="warning">Please note: If an attribute is found in multiple data_files, only the value from the first is shown in this table.</div>
-
+<div class="warning">
+  Please note: If an attribute is found in multiple data_files, only the value from the first is shown in this table. </div>
 <script type="text/javascript">
 
 jQuery(document).ready(function(){
@@ -71,7 +79,7 @@ jQuery(document).ready(function(){
   var table = jQuery('#compounds_attributes').DataTable({
     // responsive: true,
     "scrollX": true,
-    "lengthMenu": [[5,20,-1],[5,20,"All"]],
+    "lengthMenu": [[10,25, 50,-1],[10,25,50,"All"]],
     buttons: [
       {
         extend: 'collection',
@@ -103,7 +111,18 @@ jQuery(document).ready(function(){
   jQuery('#compounds_attributes tbody').on( 'click', 'tr', function () {
     jQuery(this).toggleClass('selected');
   });
- 
+  jQuery("td a.context_menu_link")
+      .on("context_menu", function(evt, menu_content){
+        //why we need this offset here and not in the parallel function in spreadsheet_explorer.js.erb. perhaps too many "parents" here for "relative" to work.
+        var offset =  jQuery('td a.context_menu_link').parent().parent().parent().parent().parent().parent().outerHeight(true);
+        jQuery('#cell_menu').css('top',  offset + jQuery(this).position().top + jQuery(this).height() );
+        jQuery('#cell_menu').css('left',jQuery(this).position().left);
+        jQuery('#cell_menu').html(menu_content);
+        if( jQuery('#cell_menu').css("display") === "none"){
+          jQuery('#cell_menu').show();
+        }
+      })
+  ;
   table.buttons().container().insertBefore( '#compounds_attributes_filter' );
 });
 </script>
