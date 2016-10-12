@@ -7,6 +7,7 @@ var color_range = ["#fed98e", "#a1dab4" , "#41b6c4", "#2c7fb8", "#253494"];
 //['#fc8d59','#ffffbf','#91bfdb'];// (red-white-blue)
 //['#fc8d59','#ffffbf','#91cf60']; //(red-yellow-green)
 var color_set;
+var H_OFFSET = 10;
 var pcHeight = 600;
 
 function initialize(data, textLength){
