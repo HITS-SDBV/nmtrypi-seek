@@ -138,11 +138,11 @@ class Policy < ActiveRecord::Base
           new_permission_data["Project"] = {} unless new_permission_data["Project"]
           projects.each {|project| new_permission_data["Project"][project.id] = {"access_type" => sharing[:your_proj_access_type].to_i}}
         end
-
         # --- Synchronise All Permissions for the Policy ---
         # first delete or update any old memberships
+        # removed the .to_s in the :delete argument, but why does it work in the main SEEK branch?
         policy.permissions.each do |p|
-          if permission_access = (new_permission_data[p.contributor_type.to_s].try :delete, p.contributor_id.to_s)
+          if permission_access = (new_permission_data[p.contributor_type.to_s].try :delete, p.contributor_id)
             p.access_type = permission_access["access_type"]
           else
             p.mark_for_destruction
