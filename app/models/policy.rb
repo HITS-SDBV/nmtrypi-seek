@@ -144,6 +144,8 @@ class Policy < ActiveRecord::Base
         policy.permissions.each do |p|
           if permission_access = (new_permission_data[p.contributor_type.to_s].try :delete, p.contributor_id)
             p.access_type = permission_access["access_type"]
+          elsif permission_access = (new_permission_data[p.contributor_type.to_s].try :delete, p.contributor_id.to_s)
+            p.access_type = permission_access["access_type"]
           else
             p.mark_for_destruction
           end
