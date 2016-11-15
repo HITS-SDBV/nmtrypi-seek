@@ -106,7 +106,8 @@ function jsmeOnLoad() {
 	};
 
   var table = jQuery('#structure_query_result').DataTable({
-    buttons: [ 
+    "lengthMenu": [[10,25, 50,75,100, -1],[10,25,50,75,100, "All"]],
+    buttons: [
       {
         extend: 'collection',
         text: 'Export',
@@ -148,7 +149,7 @@ function jsmeOnLoad() {
   });
   table.buttons().container().insertAfter( '#structure_query_result_length');
   
-  jQuery('#structure_query_result tbody tr').on( 'click', 'td:not(.not_selectable)', function () {
+  jQuery('#structure_query_result tbody').on( 'click', 'td:not(.not_selectable)', function () {
     jQuery(this).parent().toggleClass('selected');
   });
 }

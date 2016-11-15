@@ -41,7 +41,7 @@ seek_initd:
   - solr-seek
 www_user: vagrant
 seek_project_root: /project
-rails_env: vagrant
+rails_env: production
 
 # nginx setup
 nginx_remove_default_vhost: true
