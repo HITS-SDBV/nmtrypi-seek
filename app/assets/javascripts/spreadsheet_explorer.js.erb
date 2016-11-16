@@ -1,7 +1,7 @@
 //these two are needed for exporting the heatmap to an SVG file
 //= require blob-polyfill
 //= require filesaverjs
-
+//= require spreadsheet_json
 function annotation_source(id, type, name, url) {
     this.id = id;
     this.type = type;
@@ -31,6 +31,10 @@ var $j = jQuery.noConflict(); //To prevent conflicts with prototype
 window.I18n = <%= I18n.backend.send(:translations).to_json.html_safe %>
 var compound_prefix = window.I18n["en"]["special"]["compound_id_prefix"];
 var matchRegEx = new RegExp("^"+compound_prefix+"[-_][a-zA-Z]+\\d+", "i");
+// http://some-base-url/data_files/2/explore?version=1#"
+var xml_url = (window.location.href).replace(new RegExp("(\\d+)/explore.*$"), "$1/data.xml");
+console.log("Get XML file: ", xml_url);
+var full_json_obj = {workbook: [xml2json(get_xml_file(xml_url), "")]};
 
 $j(window)
     .resize(function(e) {
@@ -38,7 +42,6 @@ $j(window)
     });
 
 $j(document).ready(function ($) {
-
     //Auto scrolling
     var xInc = "+=0";
     var yInc = "+=0";
@@ -245,7 +248,7 @@ $j(document).ready(function ($) {
 
         //for (single_sel of selections_arr) {
         for (k=0; k<selections_arr.length; k++ ){
-            console.log("single_sel: ", selections_arr[k]);
+            //console.log("single_selection: ", selections_arr[k]);
 
             //loc_element[0] = sheet information, could be multiple sheets, one sheet, or none (default: active_sheet)
             //loc_element[1] = range of cells, unless previous doesn't exist.
@@ -732,6 +735,7 @@ function select_cells(startCol, startRow, endCol, endRow, sheetNumber, ctrl_key,
     return [minRow, maxRow, minCol, maxCol];
 }
 
+
 function post_selection_updates() {
     //Update the selection display (mini selection or entire ?)
     //Update cell coverage in annotation form
@@ -936,98 +940,118 @@ function deselect_heatmap_cells(col, totalRow, sheetNumber){
 
 }
 */
-function plotting_selected_cells() {
-    var sel_data= new Array();
-    var col_header_cells =  $j("table.active_sheet tr").first().children("td");
-    //var col_header_cells =  $j("div.sheet table tr").first().children("td");
 
-    $j("table.active_sheet tr").each(function () {
-    // $j("div.sheet table tr").each(function () {
-        var this_tr = $j(this);
-        var row_header_cell = this_tr.children("td").filter(function () {
-            return matchRegEx.test($j(this).text()) == true;
-            //return /^nmt[-_][a-zA-Z]+\d+/i.test($j(this).text()) == true;
-        });
-
-        var row_label = row_header_cell.text();
-        var heatmap_cells = $j(this).children("td.selected_cell");
-      /*  if (heatmap_cells.length > 0) {
-            console.log("length of selected heatmap cells for row : ", row_label, heatmap_cells.length);
-            console.log(heatmap_cells);
-        }*/
-        for (var i = 0; i < heatmap_cells.length; i++) {
-            var col_index = heatmap_cells.eq(i).index();
-            var cell_value = heatmap_cells.eq(i);
-            if(cell_value[0].firstChild != null) {
-                sel_data.push({
-                    row_label: row_label,
-                    col_label: col_header_cells.eq(col_index).text(),
-                    row: $j(this).index(),
-                    col: col_index,
-                    value: cell_value.text() // heatmap_cells.eq(i).text()
-                });
-            }
-        }
-
-    });
-    console.log(sel_data);
-    return sel_data;
-}
-
-/* create the suitable structure for parallel coordinates:
-  An array of objects, each representing a row in the table, and containing
-  a value for every column in a hash format "col label: value"
-  TO DO 1: account for missing columns? (give it a "" value)
-  TO DO 2: account for missing column headers (use col_N)
+/* Fetch XML --> convert to JSON --> add "selected" attribute to selected cells.
+  - currently wb=0, because we only have one workbook each time. later when we combine different files, this should be changed.
+  - for merging different files - can take a list of many objects:
+      var super_json = merge_json_workbooks([json_obj, json_obj2]);
 */
-function selection_for_parcoords() {
-    var sel_data= new Array();
-    var col_header_cells =  $j("table.active_sheet tr").first().children("td");
-    //loop by rows
-    var row_i = 0;  //row counter for inserted rows
-    $j("table.active_sheet tr").each(function () {
-        var this_tr = $j(this);
-        var row_header_cell = this_tr.children("td").filter(function () {
-            return matchRegEx.test($j(this).text()) == true;
-        });
-        var row_label = row_header_cell.text();
-        var heatmap_cells = $j(this).children("td.selected_cell");
+function get_data(rb, cb) {
+  if (rb == null) rb = -1;
+  if (cb == null) cb = -1;
+  console.log("get data rb, cb: ", rb, cb)
 
-        //loop by (selected) columns, first row of each col might be a header
-        for (var j = 0; j < heatmap_cells.length; j++) {
-            var col_index = heatmap_cells.eq(j).index(); //col
-            var cell_value = heatmap_cells.eq(j);
-            //up to here, the code was the same as in heatmap selection. but now
-            //generate a different object
-            var col_label = col_header_cells.eq(col_index).text();
-          //  console.log("col_label: ", col_label);
-
-          //  if(cell_value[0].firstChild != null && col_label != cell_value.text()) {
-          //keep empty cells
-            if(col_label != cell_value.text()) {
-                if (sel_data[row_i] == null) {
-                  sel_data.push({});  //initialize row object
-                };
-
-                sel_data[row_i][col_label] = cell_value.text(); //.replace( /[±]+.*$/, ''); this should work but wasn't debugged
-                console.log(row_i, col_label, cell_value.text());
-            }
-        }
-        if (sel_data[row_i]) row_i++;
-    });
-    return sel_data;
+  var json_copy = JSON.parse(JSON.stringify(full_json_obj));
+  json_obj = add_selected_to_json(json_copy, wb=0, row_labels=rb, col_labels=cb);
+  var selected_json = iterate_on_rows(json_obj, get_selected_from_row);
+  console.log("selected json: ", selected_json);
+  return selected_json;
 }
 
 function heatmap_plot(){
-    var heatmap_data = plotting_selected_cells();
-    draw_heatmap(heatmap_data);
+    var options = {cr: 0, hm_data: [], columns: {}, row_labels: 0, col_labels: 0};
+    var selected_json = get_data(rb=options.row_labels, cb=options.col_labels);
+    iterate_on_rows(selected_json, init_heatmap_row, add_col_titles_from_sheet, options);
+    //var heatmap_data = init_heatmap_data(selected_json); //plotting_selected_cells();
+    //draw_heatmap(heatmap_data);
+    draw_heatmap(options.hm_data);
     $j('#heatmap_container').show();
     doUpdate();
 }
 
 function parallel_coord_plot(){
-    var parcoord_data = selection_for_parcoords();
-    draw_parallel_coord(parcoord_data);
+    // cr = cumulative rows across workbooks/sheets
+    // not using row labels. compounds are not necessarily a part of the plot.
+    var options = {cr: 0, pc_data: [], columns: {}, col_labels: 0, row_labels: -1};
+    var selected_json = get_data(rb=options.row_labels, cb=options.col_labels);
+    iterate_on_rows(selected_json, init_pc_row, add_col_titles_from_sheet, options);
+    draw_parallel_coord(options.pc_data);
     $j('#parcoords_container').show();
     //doUpdate();
+}
+
+/*
+  Read column labels from the row number specified in opt.col_labels
+  Modify opt.columns ( = {col_alpha1: "title1", col_alpha2: "title2" ... }
+  Note: opt.columns remains valid per sheet s, because it tracks according to column_alpha as a dictionary key.
+ */
+
+function add_col_titles_from_sheet(obj, w, s, opt) {
+  var sheet_obj = obj["workbook"][w]["sheet"][s];
+  opt.columns = {};
+  var cb = opt.col_labels;
+  //if (sheet_obj.rows.row[cb].cell.length > 0) {
+  for (var c = 0; c < sheet_obj.rows.row[cb].cell.length; c++) {
+    //actual excel sheet column index to avoid shifting of columns (B-->A) on partial selection of columns
+    var col_i = sheet_obj.rows.row[cb].cell[c]["@column_alpha"];
+    opt.columns[col_i] = sheet_obj.rows.row[cb].cell[c]["#text"];
+  }
+  //}
+  console.log(opt.columns);
+  return obj;
+}
+
+
+/* set up heat map data such that heatmap_data[row_i] = { col_label: .., row_label: .., row: .., col: .., value: ..}
+ Note: the way d3_heatmap was programmed, it's easier to set up the cumulative rows from here. because  data.row will be accessed
+ */
+
+function init_heatmap_row(obj, w, s, r, opt) {
+  sheet_obj = obj["workbook"][w]["sheet"][s];
+  if (r != opt.col_labels) {
+    if (sheet_obj.rows.row[r].cell.length > 0) {
+      //opt.pc_data[opt.cr] = {}; //object initialization
+      for (var c = 0; c < sheet_obj.rows.row[r].cell.length; c++) {
+        var col_i = sheet_obj.rows.row[r].cell[c]["@column_alpha"];
+        (opt.hm_data).push({
+          row_label: sheet_obj.rows.row[r].cell[opt.row_labels]["#text"],
+          col_label: (opt.columns[col_i] || ""),
+          sheet: sheet_obj["@name"],
+          row: opt.cr, //sheet_arr[s].rows.row[r]["@index"],
+          col: sheet_obj.rows.row[r].cell[c]["@column"],
+          col_alpha: sheet_obj.rows.row[r].cell[c]["@column_alpha"],
+          value: sheet_obj.rows.row[r].cell[c]["#text"]
+        });
+      }
+      //if at least one cell in the row was not empty, advance cumulative row counter
+      if (Object.keys(opt.hm_data[opt.cr]).length != 0)
+        opt.cr++;
+    }
+  }
+  return obj;
+}
+
+/* Set up parallel coordinates data, Array of Objects of length 0...#cr, such that
+ parcoord_data[row_i][col_name] =  (parcoords_data[row_i] = {c1: v1, c2: v2 ...} )
+ TO DO handle zero selections
+ */
+
+function init_pc_row(obj, w, s, r, opt) {
+  //console.log("init pc row s, r: ", s, r);
+  sheet_obj = obj["workbook"][w]["sheet"][s];
+  if (r != opt.col_labels) {
+    if (sheet_obj.rows.row[r].cell.length > 0) {
+      opt.pc_data[opt.cr] = {}; //object initialization
+      for (var c = 0; c < sheet_obj.rows.row[r].cell.length; c++) {
+        var col_i = sheet_obj.rows.row[r].cell[c]["@column_alpha"];
+        opt.pc_data[opt.cr][opt.columns[col_i]] = sheet_obj.rows.row[r].cell[c]["#text"];
+        // console.log("c: ", c, "cr: ", opt.cr, "col_i", col_i, "col: ", opt.columns[col_i])
+        // console.log(opt.pc_data[opt.cr][opt.columns[col_i]])
+      }
+      //if at least one cell in the row was not empty, advance cumulative row counter
+      if (Object.keys(opt.pc_data[opt.cr]).length != 0)
+        opt.cr++;
+    }
+  }
+  return obj;
 }

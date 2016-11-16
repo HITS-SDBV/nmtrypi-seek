@@ -73,7 +73,6 @@ function draw_parallel_coord(data) {
      });
      initialize(data, textLength);
 
-
  // add instruction text
      var instructions = "- Drag along axis to create filter(s), or click axis outside the filters to clear" + "</br>" +  "- Text labels:  click a label to color the data based on axis values"+
          " / double-click to invert the axis / drag label to move reorder the axis / roll mouse wheel over the label to rotate it" + "</br> " + "- Hover on each line to highlight" + "</br>" +
@@ -251,18 +250,20 @@ function update_colors(dimension) {
 function getCentroids(data){
     // this function returns centroid points for data. I had to change the source
     // for parallelcoordinates and make compute_centroids public.
-    // I assume this should be already somewhere in graph and I don't need to recalculate it
-    // but I couldn't find it so I just wrote this for now
     var margins = graph.margin();
     var graphCentPts = [];
-
     data.forEach(function(d){
 
-        var initCenPts = graph.compute_centroids(d).filter(function(d, i){return i%2==0;});
-
-        // move points based on margins
-        var cenPts = initCenPts.map(function(d){
-            return [d[0] + margins["left"], d[1]+ margins["top"]];
+        var initCenPts = graph.compute_centroids(d).filter(function(e, i){return i%2==0;});
+        // move points based on margins, and on missing value offset if there's no value
+        // need to traverse object d with col_key
+        var gdim = graph.dimensions();
+        var cenPts = initCenPts.map(function(p, i){
+            if (graph.value_exists(d[gdim[i]])) {
+                return [p[0] + margins["left"], p[1] + margins["top"]];
+            } else {
+                return [p[0] + margins["left"], p[1] + margins["top"] + +graph.get_missingVOffset()]; //extra + converts to float
+            }
         });
 
         graphCentPts.push(cenPts);
@@ -288,7 +289,6 @@ function isOnLine(startPt, endPt, testPt, tol){
     var Dx = x2 - x1;
     var Dy = y2 - y1;
     var delta = Math.abs(Dy*x0 - Dx*y0 - x1*y2+x2*y1)/Math.sqrt(Math.pow(Dx, 2) + Math.pow(Dy, 2));
-
     if (delta <= tol) return true;
     return false;
 }
@@ -297,7 +297,6 @@ function findAxes(testPt, cenPts){
     // finds between which two axis the mouse is
     var x = testPt[0];
     var y = testPt[1];
-
     // make sure it is inside the range of x
     if (cenPts[0][0] > x) return false;
     if (cenPts[cenPts.length-1][0] < x) return false;
@@ -319,15 +318,15 @@ function addTooltip(clicked, clickedCenPts){
     // add tooltip to multiple clicked lines
     var clickedDataSet = [];
     var margins = graph.margin();
-
+    var dims = graph.dimensions();
     // get all the values into a single list
-    // I'm pretty sure there is a better way to write this is Javascript
     for (var i=0; i<clicked.length; i++){
         for (var j=0; j<clickedCenPts[i].length; j++){
-            var reordered_col = graph.get_reorderDim_i(j);
+            //var reordered_col = graph.get_reorderDim_i(j);
             //if nothing was reordered, reordered_col = j
             //clicked[i] is a row (hash type object). d3.values(row)[j] gets the value of col j
-            var text = d3.values(clicked[i])[reordered_col];
+           // var text = d3.values(clicked[i])[reordered_col]; //--> doesn't work anymore with multiple sheets?
+            var text = clicked[i][dims[j]];
             var x = clickedCenPts[i][j][0] - margins.left;
             var y = clickedCenPts[i][j][1] - margins.top;
             clickedDataSet.push([x, y,text]);
@@ -370,8 +369,12 @@ function getClickedLines(mouseClick){
     // find which data is activated right now
     var activeData = getActiveData();
 
-    // find centriod points
+    // find centriod points: get pc axis intersection points
+    // graphCentPts = Array[ #rows ] where
+    // graphCentPts[row] =  Array[#dim] where
+    // graphCentPts[row][dim] = [x_dim, y_dim] == where line row intersects with axis of dimension dim
     var graphCentPts = getCentroids(activeData);
+    //console.log("in clicked lines: ", graphCentPts)
     if (graphCentPts.length==0) return false;
 
     // find between which axes the point is
@@ -392,14 +395,13 @@ function highlightLineOnClick(mouseClick, drawTooltip){
 
     var clicked = [];
     var clickedCenPts = [];
-
     clickedData = getClickedLines(mouseClick);
+
     if (clickedData && clickedData[0].length!=0){
         clicked = clickedData[0];
         clickedCenPts = clickedData[1];
         // highlight clicked line
         graph.highlight(clicked);
-
         if (drawTooltip){
             // clean if anything is there
             cleanTooltip();

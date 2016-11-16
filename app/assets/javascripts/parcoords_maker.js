@@ -213,7 +213,6 @@ function without(arr, item) {
   return arr.filter(function(elem) { return item.indexOf(elem) === -1; });
 };
 pc.autoscale = function() {
-   // console.log(__.data)
   // yscale
   var defaultScales = {
     "date": function(k) {
@@ -253,7 +252,9 @@ pc.autoscale = function() {
       domain = Object.getOwnPropertyNames(counts).sort(function(a, b) {
         return counts[a] - counts[b];
       });
-
+      remove_i = domain.indexOf("");
+      if (remove_i > -1)
+          domain.splice(remove_i,1)
       return d3.scale.ordinal()
         .domain(domain)
         .rangePoints([h()+1, 1]);
@@ -365,12 +366,17 @@ pc.toTypeCoerceNumbers = function(v) {
   return pc.toType(v);
 };
 
-// attempt to determine types of each dimension based on first row of data
+// attempt to determine types of each dimension based on first non empty element in each col
 pc.detectDimensionTypes = function(data) {
   var types = {};
   d3.keys(data[0])
     .forEach(function(col) {
-      types[col] = pc.toTypeCoerceNumbers(data[0][col]);
+        var column_data = data.map(function (el) {
+             return el[col];
+        });
+        var first_el = column_data.find(function(el) { return el != "";});
+        types[col] = pc.toTypeCoerceNumbers(first_el);
+        //types[col] = pc.toTypeCoerceNumbers(data[0][col]);
     });
 
   return types;
@@ -457,10 +463,15 @@ function compute_centroids(row) {
 	for (var i = 0; i < cols; ++i) {
 		// centroids on 'real' axes
 		var x = position(p[i]);
-		var y = yscale[p[i]](row[p[i]]);
+        var y;// = yscale[p[i]](row[p[i]]);
+        if (pc.value_exists(row[p[i]])) {
+            y = yscale[p[i]](row[p[i]]);
+        } else {
+            y = h();
+        }
     centroids.push([x, y]);
 		//centroids.push($V([x, y]));
-
+        // TO DO: change to include check for value_exists?
 		// centroids on 'virtual' axes
 		if (i < cols - 1) {
 			var cx = x + a * (position(p[i+1]) - x);
@@ -572,12 +583,12 @@ function single_path(d, ctx) {
     //console.log(arrMin)
 	__.dimensions.map(function(p, i) {
         var yval;
-        if ( (d[p] === undefined) || (d[p] == "NaN")  || (d[p] == "") ) {
-        //  console.log("in single_path: ", p, __.minValues[p]);
-        //    d[p] = __.minValues[p];
-            yval = h()+(__.missingAxisOffset-1);
-        } else {
+        if (pc.value_exists(d[p])) {
             yval = yscale[p](d[p]);
+        } else {
+            //  console.log("in single_path: ", p, __.minValues[p]);
+            //    d[p] = __.minValues[p];
+            yval = h()+(__.missingAxisOffset-1);
         }
 		if (i == 0) {
 			ctx.moveTo(position(p), yval);//yscale[p](d[p]));
@@ -765,7 +776,16 @@ String.prototype.width = function(font) {
 pc.get_reorderDim_i = function (i) {
     return __.reorder_dim[i];
 };
-
+pc.get_missingVOffset = function () {
+    return __.missingAxisOffset;
+}
+pc.value_exists = function(v) {
+    if ( (v === undefined) || (v == "NaN")  || (v == "") ) {
+        return false;
+    } else {
+        return true;
+    }
+}
 pc.removeAxes = function() {
   g.remove();
   return this;
