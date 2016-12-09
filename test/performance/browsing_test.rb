@@ -8,5 +8,6 @@ class BrowsingTest < ActionDispatch::PerformanceTest
 
   def test_homepage
     get '/'
+    assert_response :success
   end
 end
