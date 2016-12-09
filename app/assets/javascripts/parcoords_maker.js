@@ -256,7 +256,7 @@ pc.autoscale = function() {
       if (remove_i > -1)
           domain.splice(remove_i,1)
       return d3.scale.ordinal()
-        .domain(domain)
+        .domain(domain.sort())
         .rangePoints([h()+1, 1]);
     }
   };

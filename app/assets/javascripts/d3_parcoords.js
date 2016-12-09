@@ -220,7 +220,7 @@ function update_colors(dimension) {
     //categorical data
     } else {
         var vals = graph.data().map(function(d){return d[dimension];}).sort();
-
+        vals = eliminateDuplicates(vals)
         /* ---
         domain + range are not enough here to define the mapping to the colors
         as in typical linear scales. Therefore we map the range of vals [0,vals.length]
@@ -245,6 +245,23 @@ function update_colors(dimension) {
     graph.color(function(d){return color_set([d[dimension]]);}).render();
 };
 
+/* Taken from:
+* https://dreaminginjavascript.wordpress.com/2008/08/22/eliminating-duplicates/
+* */
+function eliminateDuplicates(arr) {
+    var i,
+        len=arr.length,
+        out=[],
+        obj={};
+
+    for (i=0;i<len;i++) {
+        obj[arr[i]]=0;
+    }
+    for (i in obj) {
+        out.push(i);
+    }
+    return out;
+}
 
 // Add highlight for every line on click
 function getCentroids(data){
