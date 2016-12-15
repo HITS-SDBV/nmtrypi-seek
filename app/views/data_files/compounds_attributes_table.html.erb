@@ -89,10 +89,16 @@ jQuery(document).ready(function(){
       },
       {
         extend: 'colvis',
-        columns: ':not(:first-child)',
+        columns: ':not(:nth-child(2))', //(:first-child)
         collectionLayout: 'fixed three-column',
-        postfixButtons: [ 'colvisRestore' ]
-      }, 
+
+        //added a button to show none of the columns except the default first.
+        postfixButtons: [ {extend: 'colvisGroup',
+                           text: 'Show none',
+                           hide: ':not(:nth-child(2))'},
+                        'colvisRestore']
+      },
+
       {
         text: "Filter selected",
         action: function(){
