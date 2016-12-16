@@ -118,12 +118,22 @@ jQuery(document).ready(function(){
   jQuery('#compounds_attributes tbody').on( 'click', 'tr', function () {
     jQuery(this).toggleClass('selected');
   });
+  jQuery("div")
+      .mousedown(function (evt) {
+        if( jQuery('#cell_menu').css("display") === "block"){
+          jQuery('#cell_menu').hide();
+        }
+      }
+  );
   jQuery("td a.context_menu_link")
       .on("context_menu", function(evt, menu_content){
         //why we need this offset here and not in the parallel function in spreadsheet_explorer.js.erb. perhaps too many "parents" here for "relative" to work.
-        var offset =  jQuery('td a.context_menu_link').parent().parent().parent().parent().parent().parent().outerHeight(true);
+        // var offset =  jQuery('td a.context_menu_link').parent().parent().parent().parent().parent().parent().outerHeight(true);
+        var offset = jQuery('td a.context_menu_link').parent().parent().parent().parent().parent().parent()[0].offsetTop +
+                      jQuery('td a.context_menu_link').parent().parent()[0].clientHeight/2; //add row_height/2
+        //console.log(offset);
         jQuery('#cell_menu').css('top',  offset + jQuery(this).position().top + jQuery(this).height() );
-        jQuery('#cell_menu').css('left',jQuery(this).position().left);
+        jQuery('#cell_menu').css('left',jQuery(this).position().left+10);
         jQuery('#cell_menu').html(menu_content);
         if( jQuery('#cell_menu').css("display") === "none"){
           jQuery('#cell_menu').show();
