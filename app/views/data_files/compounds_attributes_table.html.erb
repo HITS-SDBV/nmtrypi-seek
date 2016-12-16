@@ -64,7 +64,8 @@
 
 <div class="warning">
   Please note: If an attribute is found in multiple data_files, only the value from the first is shown in this table. </div>
-<script type="text/javascript">
+  <script type="text/javascript" src="https://cdn.datatables.net/fixedcolumns/3.2.1/js/dataTables.fixedColumns.min.js"></script>
+  <script type="text/javascript">
 
 jQuery(document).ready(function(){
 	// the current version of datatables.net-buttons collection still uses the deprecated 'addSelf' instead of 'addBack'
@@ -77,9 +78,14 @@ jQuery(document).ready(function(){
 	};
 
   var table = jQuery('#compounds_attributes').DataTable({
-    // responsive: true,
-    "scrollX": true,
+    // responsive: true,//0.67*jQuery("body")[0].clientHeight,
+    scrollX: true,
+    scrollY: '65vh',         //% of vertical browser height
+    scrollCollapse: true,
     "lengthMenu": [[10,25, 50,-1],[10,25,50,"All"]],
+    fixedColumns:   {
+      leftColumns: 2
+    },
     buttons: [
       {
         extend: 'collection',
@@ -112,6 +118,7 @@ jQuery(document).ready(function(){
         }
       }
     ],
+
     order: [[ 0, 'asc' ]],
     asStripeClasses: []
   });
