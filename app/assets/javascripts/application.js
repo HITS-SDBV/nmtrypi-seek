@@ -39,3 +39,4 @@
 //= require datatables.net-buttons-jqui
 //= require datatables.net-responsive
 //= require datatables.net-responsive-jqui
+//= require datatables.net-fixedcolumns
