@@ -122,8 +122,10 @@ jQuery(document).ready(function(){
     order: [[ 0, 'asc' ]],
     asStripeClasses: []
   });
-  jQuery('#compounds_attributes tbody').on( 'click', 'tr', function () {
-    jQuery(this).toggleClass('selected');
+  jQuery('#compounds_attributes_wrapper tbody').on( 'click', 'tr', function () {
+    var cmpid = jQuery(this).attr('data-compoundid');
+    jQuery('*[data-compoundid='+cmpid+']').toggleClass('selected');
+    //jQuery(this).toggleClass('selected');
   });
   jQuery("div")
       .mousedown(function (evt) {
@@ -136,7 +138,8 @@ jQuery(document).ready(function(){
       .on("context_menu", function(evt, menu_content){
         //why we need this offset here and not in the parallel function in spreadsheet_explorer.js.erb. perhaps too many "parents" here for "relative" to work.
         // var offset =  jQuery('td a.context_menu_link').parent().parent().parent().parent().parent().parent().outerHeight(true);
-        var offset = jQuery('td a.context_menu_link').parent().parent().parent().parent().parent().parent()[0].offsetTop +
+        // without fixed columns, one less  .parent()
+        var offset = jQuery('td a.context_menu_link').parent().parent().parent().parent().parent().parent().parent()[0].offsetTop +
                       jQuery('td a.context_menu_link').parent().parent()[0].clientHeight/2; //add row_height/2
         //console.log(offset);
         jQuery('#cell_menu').css('top',  offset + jQuery(this).position().top + jQuery(this).height() );
