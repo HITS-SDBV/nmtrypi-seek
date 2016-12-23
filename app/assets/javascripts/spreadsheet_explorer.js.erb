@@ -34,7 +34,11 @@ var matchRegEx = new RegExp("^"+compound_prefix+"[-_][a-zA-Z]+\\d+", "i");
 // http://some-base-url/data_files/2/explore?version=1#"
 var xml_url = (window.location.href).replace(new RegExp("(\\d+)/explore.*$"), "$1/data.xml");
 console.log("Get XML file: ", xml_url);
-var full_json_obj = {workbook: [xml2json(get_xml_file(xml_url), "")]};
+var full_json_obj;
+if (xml_url.indexOf("data.xml") != -1) {
+  console.log("Get XML file: ", xml_url);
+  full_json_obj = {workbook: [xml2json(get_xml_file(xml_url), "")]};
+}
 
 $j(window)
     .resize(function(e) {
