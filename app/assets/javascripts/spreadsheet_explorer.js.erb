@@ -297,10 +297,10 @@ $j(document).ready(function ($) {
             minWidth: 20,
             handles: 'e',
             stop: function () {
-              var obj_id = $(this)[0].parentNode.parentNode.parentNode.id.split('_')[1];
+              var obj_id = activate_sheet_from_resizable(this);
               //use table number in search preview mode, cause "active_sheet" is irrelevant.
               if ($("table." + obj_id).length > 0) {
-                $("table." + obj_id + " col:eq(" + ($(this).index() - 1) + ")").width($(this).width());
+                $("table." + obj_id + ".active_sheet col:eq(" + ($(this).index() - 1) + ")").width($(this).width());
                 //when in spreadsheet "explore"
               } else {
                 $("table.active_sheet col:eq(" + ($(this).index() - 1) + ")").width($(this).width());
@@ -345,10 +345,10 @@ $j(document).ready(function ($) {
             handles: 's',
             stop: function () {
               var height = $(this).height();
-              var obj_id = $(this)[0].parentNode.parentNode.parentNode.id.split('_')[1];
+              var obj_id = activate_sheet_from_resizable(this);
               //use table number in search preview mode, cause "active_sheet" is irrelevant.
               if ($("table." + obj_id).length > 0) {
-                $("table." + obj_id + " tr:eq(" + $(this).index() + ")").height(height).css('line-height', height - 2 + "px");
+                $("table." + obj_id + ".active_sheet tr:eq(" + $(this).index() + ")").height(height).css('line-height', height - 2 + "px");
                 //when in spreadsheet "explore"
               } else {
                 $("table.active_sheet tr:eq(" + $(this).index() + ")").height(height).css('line-height', height - 2 + "px");
@@ -389,8 +389,15 @@ $j(document).ready(function ($) {
     ;
 
     adjust_container_dimensions();
+  adjust_container_dimensions();
+
 });
 
+function activate_sheet_from_resizable(div_obj) {
+   var obj_id_sheetN = div_obj.parentNode.parentNode.parentNode.id.split('_');
+   activateSheet(null, $j($j("a.sheet_tab."+ obj_id_sheetN[1] )[obj_id_sheetN[2]-1] ) );
+   return obj_id_sheetN[1];
+}
 function max_container_width() {
     var max_width = $j(".corner_heading").width();
     $j(".col_heading:visible").each(function() {
@@ -400,21 +407,22 @@ function max_container_width() {
 }
 
 function adjust_container_dimensions() {
-    var max_width = max_container_width();
-    var spreadsheet_container_width = $j("div.spreadsheet_container").width();
-    if (spreadsheet_container_width>=max_width) {
-        $j(".spreadsheet_container").width(max_width);
-        spreadsheet_container_width=max_width;
-    }
-    else {
-        $j(".spreadsheet_container").width("95%");
-        spreadsheet_container_width = $j("div.spreadsheet_container").width();
-    }
-    var sheet_container_width = spreadsheet_container_width - 2;
-    var sheet_width = spreadsheet_container_width - 45;
-    $j(".sheet_container").width(sheet_container_width);
-    $j(".sheet").width(sheet_width);
+  var selector = $j("div.spreadsheet_container");
 
+  var max_width = max_container_width();
+  var spreadsheet_container_width = selector.width();
+  if (spreadsheet_container_width >= max_width) {
+    selector.width(max_width);
+    spreadsheet_container_width = max_width;
+  }
+  else {
+    selector.width("95%");
+    spreadsheet_container_width = selector.width();
+  }
+  var sheet_container_width = spreadsheet_container_width - 2;
+  var sheet_width = spreadsheet_container_width - 45;
+  $j(".sheet_container").width(sheet_container_width);
+  $j(".sheet").width(sheet_width);
 }
 
 //Convert a numeric column index to an alphabetic one
@@ -760,20 +768,20 @@ function post_selection_updates() {
     //Show selection-dependent controls
 }
 
+/* search_matched_spreadsheets_content.html.erb calls with a third argument - fileIndex = item_id
+* will have more than one spreadsheet_container div */
 function activateSheet(sheet, sheetTab, fileIndex) {
     var root_element = null;
     if (sheetTab == null) {
       var i = sheet - 1;
       if (fileIndex == null) {
         sheetTab = $j("a.sheet_tab:eq(" + i + ")");
-        /* this is entered only when coming from a search_matched_spreadsheets_content.html.erb,
-         being the only caller with a third argument (fileIndex).
-         Handles the case where there are many spreadsheet containers in the page, not just one.
-         */
       } else {
         sheetTab = $j("a.sheet_tab." + fileIndex + ":eq(" + i + ")");
         root_element = sheetTab.closest("div.spreadsheet_container");
       }
+    } else {
+      root_element = sheetTab.closest("div.spreadsheet_container");
     }
 
     var sheetIndex = sheetTab.attr("index");
@@ -791,9 +799,11 @@ function activateSheet(sheet, sheetTab, fileIndex) {
 
     //Hide sheets
     if (root_element == null) {
-      $j("div.sheet_container."+sheetIndex.split('_')[0]).hide();
-      //$j('div.sheet_container').hide();
+      //$j("div.sheet_container."+sheetIndex.split('_')[0]).hide();
+      //gets here on file explore
+      $j('div.sheet_container').hide();
     } else {
+      //gets here from search results preview
       $j('div.sheet_container', root_element).hide();
     }
     //Hide paginates
