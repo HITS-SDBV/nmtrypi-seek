@@ -75,7 +75,7 @@ jQuery(document).ready(function(){
 		console.log( "jQuery.fn.andSelf() is deprecated and removed. Remove this code once datatables.net-buttons is updated to 1.2.2 or higher" );
 		return oldSelf.apply( this, arguments );
 	};
-
+  var colvis_ncol = 'four';
   var table = jQuery('#compounds_attributes').DataTable({
     // responsive: true,//0.67*jQuery("body")[0].clientHeight,
     scrollX: true,
@@ -94,15 +94,16 @@ jQuery(document).ready(function(){
       },
       {
         extend: 'colvis',
-        columns: ':not(:nth-child(2))', //(:first-child)
-        collectionLayout: 'fixed three-column',
+        collectionLayout: 'fixed '+colvis_ncol+'-column',
 
-        //added a button to show none of the columns except the default first.
-        postfixButtons: [ {extend: 'colvisGroup',
+        //added a button to show none of the columns except the default first. use postfixButtons to add them at the end
+        prefixButtons: [ {extend: 'colvisGroup',
                            text: 'Show none',
                            show: ':hidden',
                            hide: ':not(:nth-child(2))'},
-                        'colvisRestore']
+                        'colvisRestore'],
+        columns: ':not(:nth-child(2))' //(:first-child) // disable option of removing the compound-ID
+
       },
 
       {
@@ -149,6 +150,12 @@ jQuery(document).ready(function(){
         }
       })
   ;
+  //fixes the problem when colvis has too many columns and overflows page height
+  jQuery(document).on('click', 'a.buttons-colvis', function () {
+    jQuery("div.dt-button-collection.fixed."+colvis_ncol+"-column").css({width: "auto"});
+  });
   table.buttons().container().insertBefore( '#compounds_attributes_filter' );
+
 });
+
 </script>
