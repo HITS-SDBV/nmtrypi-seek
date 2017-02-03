@@ -103,6 +103,7 @@
 
 <script type = "text/javascript">
   var perPage = <%= default_per_page %>;
+  var $j = jQuery.noConflict(); //To prevent conflicts with prototype
 
   <% if params[:page_rows] %>
       perPage = <%= params[:page_rows] %>;
@@ -113,6 +114,11 @@
     activateSheet(<%= params[:sheet] || 1 %>);
     displayAnnotation();
     displayRowsPerPage();
+    //if font-size in sheet is bigger what our default row height accomodates
+    var MAX_TD_FONTSIZE = "20px"
+    if ($j('td.cell[class*="style"]').css('font-size') > MAX_TD_FONTSIZE) {
+      $j('td.cell[class*="style"]').css({'font-size': MAX_TD_FONTSIZE});
+    }
   }
 
   function displayAnnotation(){
