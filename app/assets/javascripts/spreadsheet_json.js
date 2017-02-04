@@ -3,13 +3,17 @@
    Returns: json object modified to contain only the "selected" cells from row r
  */
 function get_selected_from_row(json_obj, w ,s ,r, options) {
-    if (options == null) options = {};
-    var cell_arr_len = json_obj["workbook"][w]["sheet"][s].rows.row[r].cell.length - 1;
-    //descending order to enable quick and painless deletions.
-    for (var c = cell_arr_len; c > -1; c--) {
-        if (!(json_obj["workbook"][w]["sheet"][s].rows.row[r].cell[c]["@selected"])) {
-            //console.log("removing in workbook, sheet, row, cell", w, s, r, c)
-            json_obj["workbook"][w]["sheet"][s].rows.row[r].cell.splice(c, 1);
+    //if (options == null) options = {};
+    var one_row = json_obj["workbook"][w]["sheet"][s].rows.row[r];
+   // console.log(one_row.cell);
+    if ((a=one_row.cell !== undefined) && (a=one_row.cell !== null)) {
+        var cell_arr_len = json_obj["workbook"][w]["sheet"][s].rows.row[r].cell.length - 1;
+        //descending order to enable quick and painless deletions.
+        for (var c = cell_arr_len; c > -1; c--) {
+            if (!(json_obj["workbook"][w]["sheet"][s].rows.row[r].cell[c]["@selected"])) {
+                //console.log("removing in workbook, sheet, row, cell", w, s, r, c)
+                json_obj["workbook"][w]["sheet"][s].rows.row[r].cell.splice(c, 1);
+            }
         }
     }
     return json_obj;

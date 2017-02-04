@@ -1036,7 +1036,8 @@ function add_col_titles_from_sheet(obj, w, s, opt) {
 function init_heatmap_row(obj, w, s, r, opt) {
   sheet_obj = obj["workbook"][w]["sheet"][s];
   if (r != opt.col_labels) {
-    if (sheet_obj.rows.row[r].cell.length > 0) {
+    if ((a=sheet_obj.rows.row[r].cell !== undefined) && (a=sheet_obj.rows.row[r].cell !== null)
+        && (a=sheet_obj.rows.row[r].cell.length > 0)) {
       //opt.pc_data[opt.cr] = {}; //object initialization
       for (var c = 0; c < sheet_obj.rows.row[r].cell.length; c++) {
         var col_i = sheet_obj.rows.row[r].cell[c]["@column_alpha"];
@@ -1067,7 +1068,8 @@ function init_pc_row(obj, w, s, r, opt) {
   //console.log("init pc row s, r: ", s, r);
   sheet_obj = obj["workbook"][w]["sheet"][s];
   if (r != opt.col_labels) {
-    if (sheet_obj.rows.row[r].cell.length > 0) {
+    if ((a=sheet_obj.rows.row[r].cell !== undefined) && (a=sheet_obj.rows.row[r].cell !== null)
+       &&(a=sheet_obj.rows.row[r].cell.length > 0)) {
       opt.pc_data[opt.cr] = {}; //object initialization
       for (var c = 0; c < sheet_obj.rows.row[r].cell.length; c++) {
         var col_i = sheet_obj.rows.row[r].cell[c]["@column_alpha"];
