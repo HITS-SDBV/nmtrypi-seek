@@ -67,14 +67,6 @@
   <script type="text/javascript">
 
 jQuery(document).ready(function(){
-	// the current version of datatables.net-buttons collection still uses the deprecated 'addSelf' instead of 'addBack'
-	// https://github.com/jquery/jquery-migrate/blob/dc1d703f7747d71f471316bc66a2ea32b6197046/src/traversing.js
-	// this is already fixed in the master branch, but has not been in the release yet
-	var oldSelf = jQuery.fn.andSelf || jQuery.fn.addBack;
-	jQuery.fn.andSelf = function() {
-		console.log( "jQuery.fn.andSelf() is deprecated and removed. Remove this code once datatables.net-buttons is updated to 1.2.2 or higher" );
-		return oldSelf.apply( this, arguments );
-	};
   var colvis_ncol = 'four';
   var table = jQuery('#compounds_attributes').DataTable({
     // responsive: true,//0.67*jQuery("body")[0].clientHeight,
