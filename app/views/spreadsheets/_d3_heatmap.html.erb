@@ -10,7 +10,6 @@
   <button class="zoomin" type="button">+</button>
   <button class="zoomout" type="button">--</button>
   <button class="export_svg">Save as SVG</button>
-<!--<script src="http://labratrevenge.com/d3-tip/javascripts/d3.tip.v0.6.3.js"></script>-->
 </div>
   <div>
     <label for="amount">Screening (slider change):</label>
@@ -77,7 +76,8 @@
       //Scaling
       var matrixTransformVal = $j('#heatmap_matrix').attr("transform").match(/[\d\.\d]+/g);
 
-      if(matrixTransformVal[3] <= 0.9) {  //Don't allow to zoom in than actual size
+      //Don't allow to zoom in than actual size
+      if(matrixTransformVal[3] <= 0.9) {
           if(matrixTransformVal[3] >= .5){
           //$j('text.rowLabel').attr('style', 'opacity:1');}
           }
