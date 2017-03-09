@@ -335,13 +335,13 @@ class DataFilesController < ApplicationController
   # given a list of compounds ids as they are used in data_files generate a table view
   def compounds_attributes_table
     # standardize all compound ids
-    compound_ids = params[:ids].collect{ |id| Seek::Data::DataMatch.standardize_compound_name(id)}
-    
-    # collect all compound attributes for all compound ids given
-    @compounds_hash = Seek::Data::CompoundsExtraction.get_compounds_hash.keep_if { |key,value| compound_ids.include? key}
-    @header = Hash.new
-    @compounds_hash.each do |compound_id,datafile|
-      datafile.each do |datafile_id,attributes|
+    # rescue against NoMethodError when params=Nil (bot crawling does that)
+    begin
+      compound_ids = params[:ids].collect{ |id| Seek::Data::DataMatch.standardize_compound_name(id)}
+      # collect all compound attributes for all compound ids given
+      @compounds_hash = Seek::Data::CompoundsExtraction.get_compounds_hash.keep_if { |key,value| compound_ids.include? key}
+      @compounds_hash.each do |compound_id,datafile|
+        datafile.each do |datafile_id,attributes|
         attributes.each do |name, value|
           if !@header.has_key? name
             @header[name] = [datafile_id]
@@ -350,6 +350,10 @@ class DataFilesController < ApplicationController
           end
         end
       end
+      end
+    rescue NoMethodError
+      @header = Hash.new
+      @compounds_hash = Hash.new
     end
   end
 

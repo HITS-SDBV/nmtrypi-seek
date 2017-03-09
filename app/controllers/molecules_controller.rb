@@ -80,20 +80,23 @@ class MoleculesController < ApplicationController
       molecule = smiles_parser.parseSmiles(smiles)
     rescue InvalidSmilesException
     end
-
-    # add coordinates
-    sdg = Cdk::Layout::StructureDiagramGenerator.new()
-    sdg.setMolecule(molecule,false)
-    sdg.generateCoordinates()
-    layed_out_mol = sdg.getMolecule();
-
+    #we get molecule=Nil if a bot crawls here and it blows things up
     writer = Java::Io::StringWriter.new()
-    molwriter = Cdk::Io::MDLV2000Writer.new(writer)
-    molwriter.writeMolecule(layed_out_mol)
-        
-    render :partial => 'molfile',
-           :content_type => "text/plain",
-           :locals => { frame: writer.toString().to_s }
+    if molecule
+      # add coordinates
+      sdg = Cdk::Layout::StructureDiagramGenerator.new()
+      sdg.setMolecule(molecule,false)
+      sdg.generateCoordinates()
+      layed_out_mol = sdg.getMolecule();
+
+
+      molwriter = Cdk::Io::MDLV2000Writer.new(writer)
+      molwriter.writeMolecule(layed_out_mol)
+    end
+      render :partial => 'molfile',
+             :content_type => "text/plain",
+             :locals => { frame: writer.toString().to_s}
+
   end
 
   private
