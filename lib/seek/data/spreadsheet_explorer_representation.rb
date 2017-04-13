@@ -41,6 +41,7 @@ module Seek
               puts content_blob.original_filename, content_blob.uuid
               puts e.message
               puts e.backtrace.inspect
+              '<workbook> </workbook>'
             #rescue SysMODB::SpreadsheetExtractionException, Errno::EPIPE => e
             end
           end
