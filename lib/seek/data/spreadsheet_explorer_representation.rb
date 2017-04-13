@@ -35,15 +35,7 @@ module Seek
       def spreadsheet_xml
         if content_blob.is_extractable_spreadsheet?
           Rails.cache.fetch("#{content_blob.cache_key}-ss-xml") do
-            begin
               spreadsheet_to_xml(open(content_blob.filepath))
-            rescue Exception  => e
-              puts content_blob.original_filename, content_blob.uuid
-              puts e.message
-              puts e.backtrace.inspect
-              '<workbook> </workbook>'
-            #rescue SysMODB::SpreadsheetExtractionException, Errno::EPIPE => e
-            end
           end
         else
           nil
@@ -168,13 +160,7 @@ module Seek
 
       #Cache the data file's spreadsheet XML, and returns it
       def cache_spreadsheet
-        begin
-          xml = spreadsheet_to_xml(open(content_blob.filepath))
-        rescue Exception => e
-          puts content_blob.original_filename, content_blob.uuid
-          puts e.message
-          puts e.backtrace.inspect
-        end
+        xml = spreadsheet_to_xml(open(content_blob.filepath))
         File.open(cached_spreadsheet_path, "w") {|f| f.write(xml)}
         return xml
       end
