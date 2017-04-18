@@ -286,7 +286,7 @@ class DataFilesController < ApplicationController
       respond_to do |format|
         file = open(content_blob.filepath)
         format.html #currently complains about a missing template, but we don't want people using this for now - its purely XML
-        format.xml {render :xml=>spreadsheet_to_xml(file) }
+        format.xml {render :xml=>spreadsheet_to_xml(file, '2048M') }
         format.csv {render :text=>spreadsheet_to_csv(file,sheet,trim) }
       end
     else

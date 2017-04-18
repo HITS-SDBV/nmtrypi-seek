@@ -35,7 +35,7 @@ module Seek
       def spreadsheet_xml
         if content_blob.is_extractable_spreadsheet?
           Rails.cache.fetch("#{content_blob.cache_key}-ss-xml") do
-              spreadsheet_to_xml(open(content_blob.filepath))
+              spreadsheet_to_xml(open(content_blob.filepath), '2048M')
           end
         else
           nil
@@ -160,7 +160,7 @@ module Seek
 
       #Cache the data file's spreadsheet XML, and returns it
       def cache_spreadsheet
-        xml = spreadsheet_to_xml(open(content_blob.filepath))
+        xml = spreadsheet_to_xml(open(content_blob.filepath), '2048M')
         File.open(cached_spreadsheet_path, "w") {|f| f.write(xml)}
         return xml
       end
