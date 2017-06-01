@@ -340,6 +340,7 @@ class DataFilesController < ApplicationController
       compound_ids = params[:ids].collect{ |id| Seek::Data::DataMatch.standardize_compound_name(id)}
       # collect all compound attributes for all compound ids given
       @compounds_hash = Seek::Data::CompoundsExtraction.get_compounds_hash.keep_if { |key,value| compound_ids.include? key}
+      @header = Hash.new
       @compounds_hash.each do |compound_id,datafile|
         datafile.each do |datafile_id,attributes|
         attributes.each do |name, value|
